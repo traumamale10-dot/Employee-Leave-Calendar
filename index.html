@@ -842,6 +842,168 @@
   .toast.success { border-left-color: #27ae60; }
   .toast.error { border-left-color: #e74c3c; }
 
+
+  /* LOGIN SCREEN */
+  .login-screen {
+    position: fixed; inset: 0;
+    background: var(--teal-dark);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .login-screen::before {
+    content: '';
+    position: absolute; top: -100px; right: -80px;
+    width: 400px; height: 400px;
+    background: var(--gold); border-radius: 50%;
+    opacity: 0.07;
+  }
+
+  .login-screen::after {
+    content: '';
+    position: absolute; bottom: -120px; left: -60px;
+    width: 340px; height: 340px;
+    background: var(--teal-light); border-radius: 50%;
+    opacity: 0.12;
+  }
+
+  .login-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 400px;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .login-logo .logo-icon {
+    width: 64px; height: 64px;
+    background: var(--gold);
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+
+  .login-logo h2 {
+    font-family: 'Kanit', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.4;
+  }
+
+  .login-logo p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 4px;
+  }
+
+  .login-input-wrap { position: relative; margin-bottom: 14px; }
+
+  .login-input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .login-input::placeholder { color: rgba(255,255,255,0.3); }
+  .login-input:focus { border-color: var(--gold); }
+
+  .login-input-icon {
+    position: absolute; left: 13px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px; opacity: 0.5;
+  }
+
+  .login-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 14px;
+    appearance: none;
+  }
+
+  .login-select option { background: #1e3a35; color: #fff; }
+  .login-select:focus { border-color: var(--gold); }
+
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    background: var(--gold);
+    color: var(--teal-dark);
+    font-family: 'Kanit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 6px;
+  }
+
+  .login-btn:hover { background: var(--gold-light); }
+  .login-btn:active { transform: scale(0.98); }
+
+  .login-error {
+    background: rgba(231,76,60,0.15);
+    border: 1px solid rgba(231,76,60,0.3);
+    color: #f1948a;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .login-hint {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.25);
+    margin-top: 18px;
+    line-height: 1.6;
+  }
+
+  /* CANCEL/RESCHEDULE MODAL */
+  .danger-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: none;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel-req { background: rgba(231,76,60,0.1); color: #b83c2d; }
+  .btn-cancel-req:hover { background: rgba(231,76,60,0.2); }
+  .btn-reschedule { background: rgba(201,162,39,0.15); color: #8a6b10; }
+  .btn-reschedule:hover { background: rgba(201,162,39,0.25); }
+
+  .app-wrapper { display: flex; width: 100%; height: 100vh; }
+
   /* SCROLLBAR */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -904,6 +1066,43 @@
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">🏥</div>
+      <h2>ระบบจัดการวันหยุด<br>หน่วยการพยาบาล</h2>
+      <p>Nursing Leave Management System</p>
+    </div>
+
+    <div class="login-error" id="loginError"></div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;color:rgba(255,255,255,0.5);display:block;margin-bottom:6px;">เลือกชื่อผู้ใช้</label>
+      <select class="login-select" id="loginStaff">
+        <option value="">-- เลือกชื่อ-สกุล --</option>
+        <option value="admin">👑 ผู้ดูแลระบบ (Admin)</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;color:rgba(255,255,255,0.5);display:block;margin-bottom:6px;">รหัสผ่าน</label>
+      <div class="login-input-wrap">
+        <span class="login-input-icon">🔒</span>
+        <input class="login-input" type="password" id="loginPassword" placeholder="รหัสผ่าน 4 หลัก" maxlength="4" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+
+    <div class="login-hint">
+      รหัสผ่านบุคลากรทั่วไป: <strong style="color:rgba(255,255,255,0.5);">1234</strong><br>
+      รหัสผ่าน Admin: <strong style="color:rgba(255,255,255,0.5);">0000</strong>
+    </div>
+  </div>
+</div>
+
+<div class="app-wrapper" id="appWrapper" style="display:none;">
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
@@ -1045,37 +1244,8 @@
             <div class="card-title">สัดส่วนการหยุด</div>
             <div class="card-sub">แยกตามประเภท</div>
             <div class="donut-wrap">
-              <svg width="150" height="150" viewBox="0 0 150 150">
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#e8f0ee" stroke-width="22"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#2980b9" stroke-width="22"
-                  stroke-dasharray="138 207" stroke-dashoffset="-51" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#c9a227" stroke-width="22"
-                  stroke-dasharray="69 276" stroke-dashoffset="-189" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#8e44ad" stroke-width="22"
-                  stroke-dasharray="52 293" stroke-dashoffset="-258" transform="rotate(-90 75 75)"/>
-                <circle cx="75" cy="75" r="55" fill="none" stroke="#e74c3c" stroke-width="22"
-                  stroke-dasharray="34 311" stroke-dashoffset="-310" transform="rotate(-90 75 75)"/>
-                <text x="75" y="72" text-anchor="middle" font-family="Kanit" font-size="20" font-weight="600" fill="#1e3a35">293</text>
-                <text x="75" y="88" text-anchor="middle" font-family="Sarabun" font-size="10" fill="#8aaba3">วัน</text>
-              </svg>
-              <div class="donut-legend" style="width:100%;">
-                <div class="legend-item">
-                  <div class="legend-left"><div class="legend-dot" style="background:#2980b9;"></div>ลาหยุด</div>
-                  <span style="font-weight:600;color:var(--text-dark);">47%</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-left"><div class="legend-dot" style="background:#c9a227;"></div>พักร้อน</div>
-                  <span style="font-weight:600;color:var(--text-dark);">24%</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-left"><div class="legend-dot" style="background:#8e44ad;"></div>อบรม</div>
-                  <span style="font-weight:600;color:var(--text-dark);">18%</span>
-                </div>
-                <div class="legend-item">
-                  <div class="legend-left"><div class="legend-dot" style="background:#e74c3c;"></div>วันเกิด</div>
-                  <span style="font-weight:600;color:var(--text-dark);">11%</span>
-                </div>
-              </div>
+              <div id="donutChart" style="display:flex;justify-content:center;"></div>
+              <div class="donut-legend" id="donutLegend" style="width:100%;"></div>
             </div>
           </div>
 
@@ -1172,10 +1342,11 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>ชื่อ-สกุล</th>
+              <th style="width:40px;">#</th>
+              <th>ชื่อ-สกุล / เวลาที่ขอ</th>
               <th>ตำแหน่ง</th>
               <th>ประเภท</th>
-              <th>วันที่ขอ</th>
+              <th>วันที่หยุด</th>
               <th>สถานะ</th>
               <th>จัดการ</th>
             </tr>
@@ -1313,6 +1484,58 @@
   </div>
 </div>
 
+
+<!-- CANCEL/RESCHEDULE MODAL -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header">
+      <div class="modal-title" id="cancelModalTitle">จัดการคำขอ</div>
+      <button class="modal-close" onclick="closeCancelModal()">✕</button>
+    </div>
+
+    <div id="cancelReqInfo" style="background:var(--bg-main);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;line-height:1.8;"></div>
+
+    <div id="rescheduleSection" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">เลือกวันใหม่</label>
+        <div class="mini-cal">
+          <div class="mini-cal-header">
+            <button class="cal-nav-btn" onclick="changeRescheduleMonth(-1)">‹</button>
+            <span id="rescheduleMonthLabel"></span>
+            <button class="cal-nav-btn" onclick="changeRescheduleMonth(1)">›</button>
+          </div>
+          <div class="mini-cal-grid" id="rescheduleCalGrid"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันที่เลือกใหม่</label>
+        <div class="selected-dates" id="rescheduleDatesDisplay"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">เหตุผลที่เลื่อน</label>
+        <textarea class="form-textarea" id="rescheduleNote" placeholder="ระบุเหตุผล..."></textarea>
+      </div>
+    </div>
+
+    <div id="cancelSection">
+      <div class="form-group">
+        <label class="form-label">เหตุผลที่ยกเลิก</label>
+        <textarea class="form-textarea" id="cancelNote" placeholder="ระบุเหตุผลที่ยกเลิก..."></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+      <button class="btn btn-outline" onclick="closeCancelModal()">ปิด</button>
+      <button id="confirmCancelBtn" class="btn" style="background:rgba(231,76,60,0.15);color:#b83c2d;border:1.5px solid rgba(231,76,60,0.3);" onclick="confirmCancel()">
+        ❌ ยืนยันยกเลิก
+      </button>
+      <button id="confirmRescheduleBtn" class="btn btn-teal" onclick="confirmReschedule()" style="display:none;">
+        📅 ยืนยันเลื่อน
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">
   <span id="toast-icon">✅</span>
@@ -1320,6 +1543,94 @@
 </div>
 
 <script>
+// ===== AUTH =====
+const ADMIN_PASSWORD = '0000';
+const STAFF_PASSWORD = '1234';
+
+let currentUser = null; // { staffId, name, role, isAdmin }
+
+function initLoginDropdown() {
+  const sel = document.getElementById('loginStaff');
+  // Admin option already in HTML
+  STAFF.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name + ' (' + s.roleLabel + ')';
+    sel.appendChild(opt);
+  });
+}
+
+function doLogin() {
+  const staffVal = document.getElementById('loginStaff').value;
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+
+  if (!staffVal) { showLoginError('กรุณาเลือกชื่อผู้ใช้'); return; }
+  if (!password) { showLoginError('กรุณากรอกรหัสผ่าน'); return; }
+
+  if (staffVal === 'admin') {
+    if (password !== ADMIN_PASSWORD) { showLoginError('รหัสผ่าน Admin ไม่ถูกต้อง'); return; }
+    currentUser = { staffId: null, name: 'ผู้ดูแลระบบ', roleLabel: 'Administrator', isAdmin: true, abbr: 'Ad', color: '#c9a227' };
+  } else {
+    if (password !== STAFF_PASSWORD) { showLoginError('รหัสผ่านไม่ถูกต้อง (ใช้ 1234)'); return; }
+    const staff = getStaff(parseInt(staffVal));
+    if (!staff) { showLoginError('ไม่พบข้อมูลผู้ใช้'); return; }
+    currentUser = { ...staff, isAdmin: false };
+  }
+
+  errEl.style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appWrapper').style.display = 'flex';
+  updateSidebarUser();
+  updateNavForRole();
+  renderDashboard();
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginPassword').focus();
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appWrapper').style.display = 'none';
+  document.getElementById('loginStaff').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  showPage('dashboard');
+}
+
+function updateSidebarUser() {
+  if (!currentUser) return;
+  document.getElementById('sidebarAvatar').textContent = currentUser.abbr || currentUser.name.slice(0,2);
+  document.getElementById('sidebarAvatar').style.background = currentUser.isAdmin ? 'var(--gold)' : (currentUser.color + '44');
+  document.getElementById('sidebarAvatar').style.color = currentUser.isAdmin ? 'var(--teal-dark)' : currentUser.color;
+  document.getElementById('sidebarName').textContent = currentUser.name;
+  document.getElementById('sidebarRole').textContent = currentUser.roleLabel;
+  const badge = document.getElementById('sidebarBadge');
+  if (currentUser.isAdmin) {
+    badge.className = 'role-badge admin';
+    badge.textContent = 'ADMIN';
+  } else {
+    badge.className = 'role-badge nurse';
+    badge.textContent = currentUser.role === 'nurse' ? 'RN' : 'Staff';
+  }
+}
+
+function updateNavForRole() {
+  const adminItems = document.querySelectorAll('.admin-only');
+  adminItems.forEach(el => {
+    el.style.display = currentUser?.isAdmin ? 'flex' : 'none';
+  });
+  // Hide role switch - login controls it now
+  const roleSwitch = document.querySelector('.role-switch');
+  if (roleSwitch) roleSwitch.style.display = 'none';
+}
+
 // ===== DATA =====
 const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const DAYS_TH = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
@@ -1399,32 +1710,17 @@ function showToast(msg, type='success') {
 
 // ===== ROLE =====
 function switchRole(role) {
-  currentRole = role;
-  document.querySelectorAll('.role-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.includes(role==='admin'?'Admin':'พยาบาล'));
-  });
-  const adminItems = document.querySelectorAll('.admin-only');
-  adminItems.forEach(el => {
-    el.style.display = role==='admin' ? 'flex' : 'none';
-  });
-  if(role==='nurse') {
-    document.getElementById('sidebarAvatar').textContent='ส';
-    document.getElementById('sidebarName').textContent='น.ส.สมหญิง ดีใจ';
-    document.getElementById('sidebarRole').textContent='พยาบาล';
-    document.getElementById('sidebarBadge').className='role-badge nurse';
-    document.getElementById('sidebarBadge').textContent='RN';
-  } else {
-    document.getElementById('sidebarAvatar').textContent='Ad';
-    document.getElementById('sidebarName').textContent='ผู้ดูแลระบบ';
-    document.getElementById('sidebarRole').textContent='Administrator';
-    document.getElementById('sidebarBadge').className='role-badge admin';
-    document.getElementById('sidebarBadge').textContent='ADMIN';
-  }
-  showPage('dashboard');
+  // Deprecated - now handled by login system
+  // Kept for backward compat only
 }
 
 // ===== NAVIGATION =====
 function showPage(page) {
+  // Block admin-only pages for non-admin
+  if ((page === 'admin' || page === 'stats') && !currentUser?.isAdmin) {
+    showToast('เฉพาะ Admin เท่านั้น', 'error');
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -1447,48 +1743,121 @@ function showPage(page) {
 // ===== DASHBOARD =====
 function renderDashboard() {
   const now = new Date();
-  const thisMonth = requests.filter(r => r.dates.some(d => d.startsWith('2025-04')));
+  const yy = now.getFullYear();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const monthPrefix = `${yy}-${mm}`;
+
+  // Active requests only (not cancelled)
+  const active = requests.filter(r => r.status !== 'cancelled');
+
+  // ── Stat cards ───────────────────────────────────────────────────────────
+  const thisMonth = active.filter(r => r.dates.some(d => d.startsWith(monthPrefix)));
   document.getElementById('stat-total').textContent = thisMonth.length;
-  document.getElementById('stat-pending').textContent = requests.filter(r=>r.status==='pending').length;
-  document.getElementById('stat-approved').textContent = requests.filter(r=>r.status==='approved').length;
-  document.getElementById('stat-training').textContent = requests.filter(r=>r.type==='training'&&r.status==='approved').length;
+  document.getElementById('stat-pending').textContent = active.filter(r=>r.status==='pending').length;
+  document.getElementById('stat-approved').textContent = active.filter(r=>r.status==='approved').length;
+  document.getElementById('stat-training').textContent = active.filter(r=>r.type==='training'&&r.status==='approved').length;
 
-  // Dashboard table
+  // ── Recent requests table ────────────────────────────────────────────────
   const tbody = document.getElementById('dashboardTable');
-  const recent = [...requests].sort((a,b)=>b.id-a.id).slice(0,6);
-  tbody.innerHTML = recent.map(r => {
-    const s = getStaff(r.staffId);
-    return `<tr>
-      <td><div class="person-cell">
-        <div class="mini-avatar ${ROLE_CLASS[s.role]}" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
-        <span>${s.name}</span>
-      </div></td>
-      <td><span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span></td>
-      <td style="font-size:12px;color:var(--text-mid);">${formatDate(r.dates[0])}</td>
-      <td><span class="badge ${STATUS_BADGE[r.status]}">${STATUS_LABEL[r.status]}</span></td>
-    </tr>`;
-  }).join('');
+  const recent = [...requests].sort((a,b) => (b.submittedAt||b.id) - (a.submittedAt||a.id)).slice(0,6);
+  if (recent.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state" style="padding:20px;"><div class="empty-icon">📋</div>ยังไม่มีคำขอ</div></td></tr>`;
+  } else {
+    tbody.innerHTML = recent.map(r => {
+      const s = getStaff(r.staffId);
+      const stLabel = r.status==='cancelled' ? 'ยกเลิกแล้ว' : STATUS_LABEL[r.status];
+      const stBadge = r.status==='cancelled' ? 'badge-rejected' : STATUS_BADGE[r.status];
+      return `<tr>
+        <td><div class="person-cell">
+          <div class="mini-avatar ${ROLE_CLASS[s.role]}" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
+          <span>${s.name}</span>
+        </div></td>
+        <td><span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span></td>
+        <td style="font-size:12px;color:var(--text-mid);">${formatDate(r.dates[0])}</td>
+        <td><span class="badge ${stBadge}">${stLabel}</span></td>
+      </tr>`;
+    }).join('');
+  }
 
-  // Chart
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.'];
-  const leaveData = [3,5,4,7,2,6];
-  const trainingData = [1,2,3,3,1,2];
-  const maxV = 8;
+  // ── Monthly bar chart — last 6 months from real data ────────────────────
+  const monthLabels = [];
+  const leaveData   = [];
+  const trainingData = [];
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(yy, now.getMonth() - i, 1);
+    const prefix = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const monthReqs = active.filter(r => r.dates.some(dt => dt.startsWith(prefix)));
+    const leaveCount    = monthReqs.filter(r => r.type==='leave'||r.type==='vacation').length;
+    const trainingCount = monthReqs.filter(r => r.type==='training'||r.type==='birthday').length;
+    monthLabels.push(MONTHS_TH[d.getMonth()].substring(0,3)+'.');
+    leaveData.push(leaveCount);
+    trainingData.push(trainingCount);
+  }
+
+  const maxV = Math.max(...leaveData, ...trainingData, 1);
   const chart = document.getElementById('monthlyChart');
-  chart.innerHTML = months.map((m,i) => `
+  chart.innerHTML = monthLabels.map((m,i) => `
     <div class="bar-group">
       <div class="bar-wrap">
-        <div class="bar teal" style="height:${(leaveData[i]/maxV)*100}px;" title="${leaveData[i]} หยุด"></div>
-        <div class="bar gold" style="height:${(trainingData[i]/maxV)*100}px;" title="${trainingData[i]} อบรม"></div>
+        <div class="bar teal" style="height:${Math.round((leaveData[i]/maxV)*100)}px;"
+          title="${leaveData[i]} หยุด/พักร้อน"></div>
+        <div class="bar gold" style="height:${Math.round((trainingData[i]/maxV)*100)}px;"
+          title="${trainingData[i]} อบรม/วันเกิด"></div>
       </div>
       <div class="bar-label">${m}</div>
     </div>
   `).join('');
 
-  // Quota
+  // ── Donut chart — from real data ─────────────────────────────────────────
+  const approvedReqs = active.filter(r => r.status === 'approved');
+  const typeDays = { leave:0, vacation:0, training:0, birthday:0 };
+  approvedReqs.forEach(r => { typeDays[r.type] = (typeDays[r.type]||0) + r.dates.length; });
+  const totalDays = Object.values(typeDays).reduce((a,b)=>a+b,0);
+
+  const CIRC = 2 * Math.PI * 55; // circumference
+  const COLORS = { leave:'#2980b9', vacation:'#c9a227', training:'#8e44ad', birthday:'#e74c3c' };
+  const LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
+  const typeOrder = ['leave','vacation','training','birthday'];
+
+  let offset = 0;
+  const circles = typeOrder.map(type => {
+    const days = typeDays[type] || 0;
+    const frac = totalDays > 0 ? days / totalDays : 0;
+    const dash = frac * CIRC;
+    const gap  = CIRC - dash;
+    const circ = `<circle cx="75" cy="75" r="55" fill="none" stroke="${COLORS[type]}" stroke-width="22"
+      stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}"
+      stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 75 75)"/>`;
+    offset += dash;
+    return circ;
+  }).join('');
+
+  const legend = typeOrder.map(type => {
+    const days = typeDays[type] || 0;
+    const pct  = totalDays > 0 ? Math.round((days/totalDays)*100) : 0;
+    return `<div class="legend-item">
+      <div class="legend-left"><div class="legend-dot" style="background:${COLORS[type]};"></div>${LABELS[type]}</div>
+      <span style="font-weight:600;color:var(--text-dark);">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('donutChart').innerHTML = `
+    <svg width="150" height="150" viewBox="0 0 150 150">
+      <circle cx="75" cy="75" r="55" fill="none" stroke="#e8f0ee" stroke-width="22"/>
+      ${totalDays > 0 ? circles : '<circle cx="75" cy="75" r="55" fill="none" stroke="#dde8e5" stroke-width="22"/>'}
+      <text x="75" y="72" text-anchor="middle" font-family="Kanit" font-size="20" font-weight="600" fill="#1e3a35">${totalDays}</text>
+      <text x="75" y="88" text-anchor="middle" font-family="Sarabun" font-size="10" fill="#8aaba3">วัน</text>
+    </svg>
+  `;
+  document.getElementById('donutLegend').innerHTML = totalDays > 0
+    ? legend
+    : `<div style="text-align:center;color:var(--text-light);font-size:13px;padding:16px;">ยังไม่มีข้อมูล</div>`;
+
+  // ── Quota bar ────────────────────────────────────────────────────────────
   const today = todayStr();
   document.getElementById('todayQuotaDate').textContent = formatDate(today);
-  const todayReqs = requests.filter(r => r.dates.includes(today) && r.status==='approved');
+  const todayReqs = active.filter(r => r.dates.includes(today) && r.status==='approved');
   const nurseCount = todayReqs.filter(r => getStaff(r.staffId)?.role==='nurse').length;
   const otherCount = todayReqs.filter(r => getStaff(r.staffId)?.role!=='nurse').length;
   document.getElementById('nurse-quota-text').textContent = `${nurseCount}/4`;
@@ -1678,6 +2047,7 @@ function checkQuota() {
 
 // ===== MODAL =====
 function openRequestModal(dateStr) {
+  if (!currentUser) { showToast('กรุณาเข้าสู่ระบบก่อน', 'error'); return; }
   selectedDates = dateStr ? [dateStr] : [];
   formCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
@@ -1756,25 +2126,39 @@ function renderAdminTable() {
     return (!typeFilter || r.type===typeFilter)
       && (!statusFilter || r.status===statusFilter)
       && (!roleFilter || s.role===roleFilter);
-  }).sort((a,b)=>b.id-a.id);
+  }).sort((a,b) => (a.submittedAt||a.id) - (b.submittedAt||b.id));
 
   const tbody = document.getElementById('adminTable');
   if(filtered.length===0) {
     tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div>ไม่พบรายการ</div></td></tr>';
     return;
   }
-  tbody.innerHTML = filtered.map(r => {
+  tbody.innerHTML = filtered.map((r, idx) => {
     const s = getStaff(r.staffId);
     const dateStr = r.dates.length>1 ? `${formatDate(r.dates[0])} - ${formatDate(r.dates[r.dates.length-1])}` : formatDate(r.dates[0]);
-    const actions = r.status==='pending' ? `
+    const submittedStr = r.submittedAt
+      ? new Date(r.submittedAt).toLocaleString('th-TH', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : '-';
+    const actions = r.status === 'pending' ? `
       <button class="action-btn btn-approve" onclick="updateStatus(${r.id},'approved')">✓ อนุมัติ</button>
       <button class="action-btn btn-reject" onclick="updateStatus(${r.id},'rejected')">✕ ปฏิเสธ</button>
-    ` : `<span class="badge ${STATUS_BADGE[r.status]}">${STATUS_LABEL[r.status]}</span>`;
+      <button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')" style="font-size:11px;">📅</button>
+      <button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')" style="font-size:11px;">🗑</button>
+    ` : r.status === 'approved' ? `
+      <span class="badge badge-approved">อนุมัติแล้ว</span>
+      <button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')" style="font-size:11px;">📅</button>
+      <button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')" style="font-size:11px;">🗑</button>
+    ` : `<span class="badge ${STATUS_BADGE[r.status]}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]}</span>`;
 
     return `<tr>
+      <td style="text-align:center;font-weight:700;font-size:14px;color:var(--teal-mid);">${idx+1}</td>
       <td><div class="person-cell">
         <div class="mini-avatar" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
-        <div><div style="font-size:13px;font-weight:500;">${s.name}</div>${r.note?`<div style="font-size:11px;color:var(--text-light);">${r.note}</div>`:''}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;">${s.name}</div>
+          <div style="font-size:10px;color:var(--text-light);">ขอเมื่อ: ${submittedStr}</div>
+          ${r.note?`<div style="font-size:11px;color:var(--text-light);">${r.note}</div>`:''}
+        </div>
       </div></td>
       <td style="font-size:12px;">${s.roleLabel}</td>
       <td><span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span></td>
@@ -1824,25 +2208,40 @@ function renderTraining() {
 
 // ===== MY REQUESTS =====
 function renderMyRequests() {
-  const myReqs = requests.filter(r=>r.staffId===1).sort((a,b)=>b.id-a.id);
+  if (!currentUser) return;
+  // Admin sees all; staff sees own
+  const myReqs = currentUser.isAdmin
+    ? [...requests].sort((a,b) => (a.submittedAt||a.id) - (b.submittedAt||b.id))
+    : requests.filter(r=>r.staffId===currentUser.staffId).sort((a,b) => (a.submittedAt||a.id) - (b.submittedAt||b.id));
+
   const list = document.getElementById('myRequestsList');
   if(myReqs.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่มีคำขอ</div>';
     return;
   }
   list.innerHTML = myReqs.map(r => {
+    const s = getStaff(r.staffId);
     const dateStr = r.dates.map(d=>formatDate(d)).join(', ');
-    return `<div class="card" style="margin-bottom:12px;">
+    const canManage = currentUser.isAdmin || (currentUser.staffId === r.staffId);
+    const canCancel = canManage && r.status !== 'cancelled';
+    const canReschedule = canManage && (r.status === 'pending' || r.status === 'approved');
+    return `<div class="card" style="margin-bottom:12px;border-left:4px solid ${r.status==='cancelled'?'#e74c3c':r.status==='approved'?'#27ae60':'var(--border)'}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="display:flex;gap:10px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          ${currentUser.isAdmin?`<div class="person-cell" style="gap:6px;"><div class="mini-avatar" style="width:24px;height:24px;font-size:10px;background:${s?.color||'#888'}22;color:${s?.color||'#888'}">${s?.abbr||'?'}</div><span style="font-size:12px;font-weight:500;">${s?.name||'?'}</span></div>`:''}
           <span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span>
-          <span class="badge ${STATUS_BADGE[r.status]}">${STATUS_LABEL[r.status]}</span>
+          <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]}</span>
         </div>
-        <span style="font-size:12px;color:var(--text-light);">${r.dates.length} วัน</span>
+        <div style="display:flex;gap:6px;">
+          ${canReschedule?`<button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')">📅 เลื่อน</button>`:''}
+          ${canCancel?`<button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')">❌ ยกเลิก</button>`:''}
+        </div>
       </div>
       <div style="font-size:13px;color:var(--text-mid);">📅 ${dateStr}</div>
-      ${r.note?`<div style="font-size:12px;color:var(--text-light);margin-top:4px;">💬 ${r.note}</div>`:''}
-      ${r.trainingPlace?`<div style="font-size:12px;color:#8e44ad;margin-top:4px;">📍 ${r.trainingPlace}</div>`:''}
+      ${r.note?`<div style="font-size:12px;color:var(--text-light);margin-top:3px;">💬 ${r.note}</div>`:''}
+      ${r.trainingPlace?`<div style="font-size:12px;color:#8e44ad;margin-top:3px;">📍 ${r.trainingPlace}</div>`:''}
+      ${r.cancelNote?`<div style="font-size:12px;color:#c0392b;margin-top:3px;">🗑 ยกเลิก: ${r.cancelNote}</div>`:''}
+      ${r.rescheduledFrom?`<div style="font-size:11px;color:var(--text-light);margin-top:3px;">📌 เลื่อนจาก: ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -2060,9 +2459,204 @@ async function saveToGSheet(action, data) {
   }
 }
 
+// ===== CANCEL / RESCHEDULE =====
+let cancelTargetId = null;
+let cancelMode = 'cancel'; // 'cancel' | 'reschedule'
+let rescheduleDates = [];
+let rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+function openCancelModal(reqId, mode) {
+  // Permission check
+  const req = requests.find(r => r.id === reqId);
+  if (!req) return;
+  const isOwner = currentUser?.staffId === req.staffId;
+  const isAdmin = currentUser?.isAdmin;
+  if (!isOwner && !isAdmin) {
+    showToast('คุณไม่มีสิทธิ์จัดการคำขอนี้', 'error');
+    return;
+  }
+  if (req.status === 'cancelled') {
+    showToast('คำขอนี้ถูกยกเลิกแล้ว', 'error');
+    return;
+  }
+
+  cancelTargetId = reqId;
+  cancelMode = mode;
+  rescheduleDates = [];
+
+  const s = getStaff(req.staffId);
+  const dateStr = req.dates.map(d => formatDate(d)).join(', ');
+
+  document.getElementById('cancelReqInfo').innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+      <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${s.color}22;color:${s.color};">${s.abbr}</div>
+      <div>
+        <div style="font-weight:600;">${s.name}</div>
+        <div style="font-size:12px;color:var(--text-light);">${s.roleLabel}</div>
+      </div>
+      <span class="badge ${TYPE_BADGE[req.type]}" style="margin-left:auto;">${TYPE_LABELS[req.type]}</span>
+      <span class="badge ${STATUS_BADGE[req.status]}">${STATUS_LABEL[req.status]}</span>
+    </div>
+    <div style="font-size:13px;">📅 ${dateStr}</div>
+    ${req.trainingPlace ? `<div style="font-size:12px;color:#8e44ad;margin-top:2px;">📍 ${req.trainingPlace}</div>` : ''}
+  `;
+
+  if (mode === 'reschedule') {
+    document.getElementById('cancelModalTitle').textContent = '📅 เลื่อนวันหยุด';
+    document.getElementById('rescheduleSection').style.display = 'block';
+    document.getElementById('cancelSection').style.display = 'none';
+    document.getElementById('confirmCancelBtn').style.display = 'none';
+    document.getElementById('confirmRescheduleBtn').style.display = 'inline-flex';
+    rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderRescheduleCal();
+    renderRescheduleDates();
+  } else {
+    document.getElementById('cancelModalTitle').textContent = '❌ ยกเลิกคำขอ';
+    document.getElementById('rescheduleSection').style.display = 'none';
+    document.getElementById('cancelSection').style.display = 'block';
+    document.getElementById('confirmCancelBtn').style.display = 'inline-flex';
+    document.getElementById('confirmRescheduleBtn').style.display = 'none';
+    document.getElementById('cancelNote').value = '';
+  }
+
+  document.getElementById('cancelModal').classList.add('open');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancelModal').classList.remove('open');
+  cancelTargetId = null;
+  rescheduleDates = [];
+}
+
+function confirmCancel() {
+  const req = requests.find(r => r.id === cancelTargetId);
+  if (!req) return;
+  req.status = 'cancelled';
+  req.cancelNote = document.getElementById('cancelNote').value || 'ไม่ระบุ';
+  req.cancelledBy = currentUser?.name;
+  req.cancelledAt = Date.now();
+  closeCancelModal();
+  showToast('ยกเลิกคำขอเรียบร้อยแล้ว');
+  renderDashboard();
+  renderMyRequests();
+  renderAdminTable();
+  saveToGSheet('UPDATE_STATUS', { id: req.id, status: 'cancelled', statusLabel: 'ยกเลิกแล้ว' });
+}
+
+function confirmReschedule() {
+  if (rescheduleDates.length === 0) {
+    showToast('กรุณาเลือกวันที่ใหม่', 'error');
+    return;
+  }
+  const req = requests.find(r => r.id === cancelTargetId);
+  if (!req) return;
+
+  // Quota check for new dates
+  const person = getStaff(req.staffId);
+  const violations = submitLock.checkAndReserve(rescheduleDates, person.role);
+  // Exclude current req from count
+  const realViolations = violations.filter(v => {
+    const dayReqsExcluding = requests.filter(r2 =>
+      r2.id !== req.id && r2.dates.includes(v.date) && r2.status !== 'rejected' && r2.status !== 'cancelled'
+    );
+    const count = person.role === 'nurse'
+      ? dayReqsExcluding.filter(r2 => getStaff(r2.staffId)?.role === 'nurse').length
+      : dayReqsExcluding.filter(r2 => getStaff(r2.staffId)?.role !== 'nurse').length;
+    const limit = person.role === 'nurse' ? 4 : 3;
+    return count >= limit;
+  });
+
+  if (realViolations.length > 0) {
+    showToast('วันที่เลือกโควต้าเต็ม', 'error');
+    return;
+  }
+
+  req.rescheduledFrom = [...req.dates];
+  req.dates = [...rescheduleDates];
+  req.rescheduleNote = document.getElementById('rescheduleNote').value;
+  req.rescheduledBy = currentUser?.name;
+  req.rescheduledAt = Date.now();
+  if (req.status === 'approved') req.status = 'pending'; // ต้องอนุมัติใหม่
+
+  closeCancelModal();
+  showToast('เลื่อนวันหยุดเรียบร้อย รอการอนุมัติใหม่');
+  renderDashboard();
+  renderCalendar();
+  renderMyRequests();
+  renderAdminTable();
+  saveToGSheet('UPDATE_STATUS', { id: req.id, status: 'rescheduled', statusLabel: 'เลื่อนวันแล้ว' });
+}
+
+// Mini calendar for reschedule
+function changeRescheduleMonth(dir) {
+  rescheduleCalDate.setMonth(rescheduleCalDate.getMonth() + dir);
+  renderRescheduleCal();
+}
+
+function renderRescheduleCal() {
+  const y = rescheduleCalDate.getFullYear();
+  const m = rescheduleCalDate.getMonth();
+  document.getElementById('rescheduleMonthLabel').textContent = `${MONTHS_TH[m]} ${y+543}`;
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m+1, 0).getDate();
+  const today = new Date();
+  let html = '<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
+  for (let i = 0; i < first; i++) html += '<div class="mini-cal-cell empty"></div>';
+  for (let d = 1; d <= days; d++) {
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
+    const isSel = rescheduleDates.includes(ds);
+    let cls = 'mini-cal-cell';
+    if (isToday) cls += ' today-mini';
+    if (isSel) cls += ' selected';
+    html += `<div class="${cls}" onclick="toggleRescheduleDate('${ds}')">${d}</div>`;
+  }
+  document.getElementById('rescheduleCalGrid').innerHTML = html;
+}
+
+function toggleRescheduleDate(ds) {
+  const idx = rescheduleDates.indexOf(ds);
+  if (idx >= 0) rescheduleDates.splice(idx, 1);
+  else rescheduleDates.push(ds);
+  rescheduleDates.sort();
+  renderRescheduleCal();
+  renderRescheduleDates();
+}
+
+function renderRescheduleDates() {
+  const el = document.getElementById('rescheduleDatesDisplay');
+  if (rescheduleDates.length === 0) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>';
+    return;
+  }
+  el.innerHTML = rescheduleDates.map(d =>
+    `<div class="date-chip">${formatDate(d)}<button onclick="toggleRescheduleDate('${d}')">×</button></div>`
+  ).join('');
+}
+
+// ── Update openRequestModal to check login ──
+const _origOpenReqModal = openRequestModal;
+
+// ── Add logout button to sidebar bottom ──
+function addLogoutBtn() {
+  const gsheetDiv = document.querySelector('#gsheetBtn')?.parentElement;
+  if (gsheetDiv && !document.getElementById('logoutBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'logoutBtn';
+    btn.innerHTML = '🚪 ออกจากระบบ';
+    btn.style.cssText = 'width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid rgba(255,100,100,0.2);background:rgba(231,76,60,0.08);color:rgba(255,150,150,0.8);font-family:Sarabun,sans-serif;font-size:12px;cursor:pointer;';
+    btn.onclick = logout;
+    gsheetDiv.appendChild(btn);
+  }
+}
+
 // ===== INIT =====
 updateGSheetIndicator();
-renderDashboard();
+initLoginDropdown();
+addLogoutBtn();
+// Don't render dashboard yet - wait for login
+
 </script>
+</div><!-- /app-wrapper -->
 </body>
 </html>
