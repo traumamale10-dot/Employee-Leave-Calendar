@@ -1872,6 +1872,7 @@ function doLogin() {
   document.getElementById('appWrapper').style.display = 'flex';
   updateSidebarUser();
   updateNavForRole();
+  if (gsConfig.url) startAutoSync(); // sync ปฏิทินทันทีหลัง login
   renderDashboard();
 }
 
@@ -2179,7 +2180,7 @@ function renderCalendar() {
   const days = new Date(y, m+1, 0).getDate();
   const today = new Date();
 
-  // Build event map
+  // Build event map — รวมทั้ง local requests และ sheet requests
   const eventMap = {};
   requests.forEach(r => {
     r.dates.forEach(d => {
@@ -2189,6 +2190,25 @@ function renderCalendar() {
     });
   });
 
+  // ── helper สำหรับดึง abbr/color ทั้ง local และ sheet ──
+  function getReqDisplay(r) {
+    if (r.fromSheet) {
+      return { abbr: (r.staffName||'?').substring(0,2), color: '#2d5a50', name: r.staffName||'', roleLabel: r.roleLabel||'' };
+    }
+    const s = getStaff(r.staffId);
+    return s ? { abbr: s.abbr, color: s.color, name: s.name, roleLabel: s.roleLabel } : { abbr:'?', color:'#999', name:'ไม่ทราบ', roleLabel:'' };
+  }
+
+  // ── count quota — รวม local + sheet ──
+  function countRole(evts, isNurse) {
+    return evts.filter(e => {
+      if (e.status !== 'approved') return false;
+      if (e.fromSheet) return isNurse ? e.roleLabel==='พยาบาล' : e.roleLabel!=='พยาบาล';
+      const s = getStaff(e.staffId);
+      return s ? (isNurse ? s.role==='nurse' : s.role!=='nurse') : false;
+    }).length;
+  }
+
   let html = '';
   for(let i=0;i<first;i++) html += '<div class="cal-cell empty"></div>';
 
@@ -2196,17 +2216,17 @@ function renderCalendar() {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
     const evts = eventMap[ds] || [];
-    const nurseCount = evts.filter(e=>getStaff(e.staffId)?.role==='nurse'&&e.status==='approved').length;
-    const otherCount = evts.filter(e=>getStaff(e.staffId)?.role!=='nurse'&&e.status==='approved').length;
+    const nurseCount = countRole(evts, true);
+    const otherCount = countRole(evts, false);
 
     let cls = 'cal-cell';
     if(isToday) cls += ' today';
     if(evts.length) cls += ' has-leave';
 
     const evtDots = evts.slice(0,2).map(e => {
-      const s = getStaff(e.staffId);
+      const disp = getReqDisplay(e);
       const cls2 = `evt-${e.type}`;
-      return `<div class="cal-event-dot ${cls2}">${s.abbr} ${TYPE_LABELS[e.type]}</div>`;
+      return `<div class="cal-event-dot ${cls2}">${disp.abbr} ${TYPE_LABELS[e.type]}</div>`;
     }).join('');
 
     const moreBadge = evts.length > 2 ? `<div class="cal-event-dot" style="background:rgba(0,0,0,0.06);color:var(--text-light);">+${evts.length-2}</div>` : '';
@@ -2236,16 +2256,16 @@ function renderCalendar() {
     return;
   }
   list.innerHTML = allEvts.map(e => {
-    const s = getStaff(e.staffId);
+    const disp = getReqDisplay(e);
     return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
-      <div class="mini-avatar" style="width:36px;height:36px;font-size:13px;background:${s.color}22;color:${s.color};">${s.abbr}</div>
+      <div class="mini-avatar" style="width:36px;height:36px;font-size:13px;background:${disp.color}22;color:${disp.color};">${disp.abbr}</div>
       <div style="flex:1;">
-        <div style="font-size:14px;font-weight:500;">${s.name}</div>
-        <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} &nbsp;·&nbsp; ${s.roleLabel}</div>
+        <div style="font-size:14px;font-weight:500;">${disp.name}</div>
+        <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} &nbsp;·&nbsp; ${disp.roleLabel}</div>
         ${e.trainingPlace?`<div style="font-size:12px;color:#8e44ad;margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
       </div>
       <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
-      <span class="badge ${STATUS_BADGE[e.status]}">${STATUS_LABEL[e.status]}</span>
+      <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
     </div>`;
   }).join('');
 }
@@ -2613,7 +2633,9 @@ function refreshCalendar() {
     btn.style.transition = 'transform 0.6s ease';
     btn.disabled = true;
   }
-  setTimeout(() => {
+  // ถ้าเชื่อม Sheets ให้ดึงข้อมูลใหม่จาก Sheets ด้วย
+  const syncPromise = gsConfig.url ? fetchRequestsFromSheet() : Promise.resolve();
+  syncPromise.finally(() => {
     renderCalendar();
     renderDashboard();
     if (btn) {
@@ -2622,60 +2644,242 @@ function refreshCalendar() {
       btn.disabled = false;
     }
     isRefreshing = false;
-    showToast('รีเฟรชปฏิทินแล้ว ✓');
-  }, 600);
+    showToast(gsConfig.url ? '🔄 ซิงค์จาก Sheets แล้ว ✓' : 'รีเฟรชปฏิทินแล้ว ✓');
+  });
 }
 
 // ===== GOOGLE SHEETS =====
-const APPS_SCRIPT_CODE = `function doPost(e) {
-  const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SHEET_ID'));
-  const data = JSON.parse(e.postData.contents);
-  const action = data.action;
-  
-  if (action === 'ADD') {
-    const sheet = ss.getSheetByName('คำขอหยุด') || ss.insertSheet('คำขอหยุด');
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(['ID','ชื่อ','ตำแหน่ง','ประเภท','วันที่','สถานที่อบรม','หมายเหตุ','สถานะ','วันที่บันทึก']);
-      sheet.getRange(1,1,1,9).setFontWeight('bold').setBackground('#1e3a35').setFontColor('white');
+const APPS_SCRIPT_CODE = `// ============================================================
+//  Google Apps Script — ระบบขอวันหยุด หน่วยการพยาบาล
+//  วิธีใช้:
+//  1. เปิด Google Sheets → Extensions → Apps Script
+//  2. วางโค้ดนี้ทั้งหมด แล้ว Save
+//  3. Project Settings → Script Properties → Add property
+//     Key: SHEET_ID  |  Value: ID ของ Google Sheets
+//     (ดู ID ใน URL: docs.google.com/spreadsheets/d/<<ID>>/edit)
+//  4. Deploy → New deployment → Web App
+//     Execute as: Me  |  Who can access: Anyone
+//  5. คัดลอก Web App URL ไปวางในเว็บ
+// ============================================================
+
+function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.openById(
+      PropertiesService.getScriptProperties().getProperty('SHEET_ID')
+    );
+    const data = JSON.parse(e.postData.contents);
+    const action = data.action;
+
+    if (action === 'ADD') {
+      const sheet = getOrCreateSheet(ss, 'คำขอหยุด');
+      ensureHeader(sheet);
+      const staff = data.staff;
+      data.dates.forEach(date => {
+        sheet.appendRow([
+          data.id, staff.name, staff.roleLabel, data.typeLabel,
+          date, data.trainingPlace || '', data.note || '',
+          'รออนุมัติ',
+          Utilities.formatDate(new Date(), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm')
+        ]);
+      });
+      updateSummarySheet(ss, data);
     }
-    const staff = data.staff;
-    data.dates.forEach(date => {
-      sheet.appendRow([data.id, staff.name, staff.roleLabel, data.typeLabel, date, data.trainingPlace, data.note, 'รออนุมัติ', new Date().toLocaleDateString('th-TH')]);
-    });
-  }
-  
-  if (action === 'UPDATE_STATUS') {
-    const sheet = ss.getSheetByName('คำขอหยุด');
-    if (!sheet) return ContentService.createTextOutput(JSON.stringify({ok:false})).setMimeType(ContentService.MimeType.JSON);
-    const lastRow = sheet.getLastRow();
-    for (let i = 2; i <= lastRow; i++) {
-      if (sheet.getRange(i, 1).getValue() == data.id) {
-        sheet.getRange(i, 8).setValue(data.statusLabel);
-        const color = data.status === 'approved' ? '#d4efdf' : '#fadbd8';
-        sheet.getRange(i, 1, 1, 9).setBackground(color);
+
+    if (action === 'UPDATE_STATUS') {
+      const sheet = ss.getSheetByName('คำขอหยุด');
+      if (!sheet) return jsonResponse({ ok: false, msg: 'ไม่พบ sheet' });
+      const lastRow = sheet.getLastRow();
+      const statusLabel = data.statusLabel || data.status;
+      const bgColor = data.status === 'approved' ? '#d4efdf'
+                    : data.status === 'rejected'  ? '#fadbd8'
+                    : data.status === 'cancelled' ? '#f5f5f5' : '#fff9e6';
+      for (let i = 2; i <= lastRow; i++) {
+        if (sheet.getRange(i, 1).getValue() == data.id) {
+          sheet.getRange(i, 8).setValue(statusLabel);
+          sheet.getRange(i, 1, 1, 9).setBackground(bgColor);
+        }
       }
     }
+
+    return jsonResponse({ ok: true });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.toString() });
   }
-  
-  return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
 }
 
+// GET — ทดสอบการเชื่อมต่อ หรือดึงข้อมูลทั้งหมด
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'พร้อมใช้งาน'})).setMimeType(ContentService.MimeType.JSON);
+  try {
+    if (!e.parameter.action) {
+      return jsonResponse({ ok: true, msg: 'พร้อมใช้งาน' });
+    }
+
+    if (e.parameter.action === 'GET_REQUESTS') {
+      const ss = SpreadsheetApp.openById(
+        PropertiesService.getScriptProperties().getProperty('SHEET_ID')
+      );
+      const sheet = ss.getSheetByName('คำขอหยุด');
+      if (!sheet || sheet.getLastRow() < 2) {
+        return jsonResponse({ ok: true, data: [] });
+      }
+      const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues();
+      const data = rows
+        .filter(r => r[0] !== '')
+        .map(r => ({
+          id:        String(r[0]),
+          name:      r[1],
+          roleLabel: r[2],
+          typeLabel: r[3],
+          date:      r[4],
+          place:     r[5],
+          note:      r[6],
+          status:    r[7],
+          createdAt: r[8]
+        }));
+      return jsonResponse({ ok: true, data });
+    }
+
+    return jsonResponse({ ok: false, msg: 'unknown action' });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.toString() });
+  }
+}
+
+function getOrCreateSheet(ss, name) {
+  return ss.getSheetByName(name) || ss.insertSheet(name);
+}
+
+function ensureHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    const headers = ['ID','ชื่อ-สกุล','ตำแหน่ง','ประเภทการลา','วันที่','สถานที่อบรม','หมายเหตุ','สถานะ','วันที่บันทึก'];
+    sheet.appendRow(headers);
+    const hr = sheet.getRange(1, 1, 1, headers.length);
+    hr.setFontWeight('bold').setBackground('#1e3a35').setFontColor('#ffffff').setHorizontalAlignment('center');
+    [50,180,160,100,100,220,160,100,140].forEach((w,i) => sheet.setColumnWidth(i+1, w));
+    sheet.setFrozenRows(1);
+  }
+}
+
+function updateSummarySheet(ss, data) {
+  const sheet = getOrCreateSheet(ss, 'สรุปรายเดือน');
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['เดือน','ลาหยุด','พักร้อน','อบรม','วันเกิด','รวม']);
+    sheet.getRange(1,1,1,6).setFontWeight('bold').setBackground('#2d5a50').setFontColor('#ffffff').setHorizontalAlignment('center');
+    sheet.setFrozenRows(1);
+  }
+  const monthKey = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'MM/yyyy');
+  let targetRow = -1;
+  for (let i = 2; i <= sheet.getLastRow(); i++) {
+    if (sheet.getRange(i, 1).getValue() === monthKey) { targetRow = i; break; }
+  }
+  if (targetRow === -1) { sheet.appendRow([monthKey,0,0,0,0,0]); targetRow = sheet.getLastRow(); }
+  const colMap = { 'ลาหยุด':2, 'พักร้อน':3, 'อบรม':4, 'วันเกิด':5 };
+  const col = colMap[data.typeLabel];
+  if (col) {
+    const cell = sheet.getRange(targetRow, col);
+    cell.setValue((cell.getValue()||0) + data.dates.length);
+    const row = sheet.getRange(targetRow, 2, 1, 4).getValues()[0];
+    sheet.getRange(targetRow, 6).setValue(row.reduce((a,b)=>a+b,0));
+  }
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }`;
 
 let gsConfig = JSON.parse(localStorage.getItem('gsConfig') || '{}');
+let sheetRequests = []; // ข้อมูลที่ดึงมาจาก Sheets (ของทุกคน)
+let syncInterval = null;
 
-function updateGSheetIndicator() {
+// ── แปลง label กลับเป็น key ──────────────────────────────
+function typeLabelToKey(label) {
+  return { 'ลาหยุด':'leave','พักร้อน':'vacation','อบรม':'training','วันเกิด':'birthday' }[label] || 'leave';
+}
+function statusLabelToKey(label) {
+  return { 'อนุมัติแล้ว':'approved','ปฏิเสธ':'rejected','รออนุมัติ':'pending','ยกเลิกแล้ว':'cancelled','เลื่อนวันแล้ว':'pending' }[label] || 'pending';
+}
+
+// ── ดึงข้อมูลทั้งหมดจาก Sheets เพื่อแสดงในปฏิทิน ─────────
+async function fetchRequestsFromSheet() {
+  if (!gsConfig.url) return;
+  try {
+    // ใช้ no-cors ไม่ได้กับ GET ที่ต้องอ่าน response — ต้องใช้ JSONP หรือ cors proxy
+    // Apps Script ที่ deploy แบบ "Anyone" รองรับ CORS อยู่แล้วสำหรับ GET
+    const res = await fetch(gsConfig.url + '?action=GET_REQUESTS', {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    const json = await res.json();
+    if (!json.ok || !json.data) return;
+
+    // จัดกลุ่มแถวที่มี id เดียวกันให้เป็น request เดียว (หลายวัน)
+    const grouped = {};
+    json.data.forEach(row => {
+      const id = String(row.id);
+      if (!grouped[id]) {
+        grouped[id] = {
+          id,
+          staffName:  row.name,
+          roleLabel:  row.roleLabel,
+          type:       typeLabelToKey(row.typeLabel),
+          dates:      [],
+          trainingPlace: row.place || '',
+          note:       row.note || '',
+          status:     statusLabelToKey(row.status),
+          fromSheet:  true
+        };
+      }
+      if (row.date) grouped[id].dates.push(String(row.date));
+    });
+
+    sheetRequests = Object.values(grouped);
+
+    // อัพเดท requests ในหน่วยความจำ — เพิ่มเฉพาะที่ไม่มีใน local
+    const localIds = new Set(requests.filter(r=>!r.fromSheet).map(r=>String(r.id)));
+    // ลบ sheetRequests เก่าออกก่อน แล้วเพิ่มใหม่
+    requests = requests.filter(r => !r.fromSheet);
+    sheetRequests.forEach(sr => {
+      if (!localIds.has(sr.id)) requests.push(sr);
+    });
+
+    // รีเฟรช UI
+    renderCalendar();
+    renderDashboard();
+    updateSyncStatus('ok');
+  } catch(err) {
+    console.warn('fetchRequestsFromSheet error:', err);
+    updateSyncStatus('err');
+  }
+}
+
+function updateSyncStatus(state) {
   const dot = document.getElementById('gsheetDot');
   const label = document.getElementById('gsheetBtnLabel');
-  if(gsConfig.url) {
+  if (state === 'ok') {
     dot.style.background = '#27ae60';
-    label.textContent = 'เชื่อม Sheets แล้ว ✓';
+    label.textContent = 'Sheets sync ✓';
+  } else if (state === 'err') {
+    dot.style.background = '#e67e22';
+    label.textContent = 'Sync error ⚠';
   } else {
     dot.style.background = '#e74c3c';
     label.textContent = 'ตั้งค่า Google Sheets';
   }
+}
+
+function updateGSheetIndicator() {
+  if (gsConfig.url) {
+    updateSyncStatus('ok');
+  } else {
+    updateSyncStatus('none');
+  }
+}
+
+// เริ่ม sync อัตโนมัติทุก 30 วินาที
+function startAutoSync() {
+  if (syncInterval) clearInterval(syncInterval);
+  fetchRequestsFromSheet(); // ดึงครั้งแรกทันที
+  syncInterval = setInterval(fetchRequestsFromSheet, 30000);
 }
 
 function showGSheetModal() {
@@ -2703,6 +2907,7 @@ function saveGSheetSettings() {
   updateGSheetIndicator();
   closeGSheetModal();
   showToast('บันทึกการตั้งค่าแล้ว ✓');
+  startAutoSync(); // เริ่ม sync ทันทีหลังตั้งค่า
 }
 
 async function testGSheet() {
@@ -2714,10 +2919,15 @@ async function testGSheet() {
   res.style.color = 'var(--text-mid)';
   res.textContent = '⏳ กำลังทดสอบ...';
   try {
-    const r = await fetch(url, { method:'GET', mode:'no-cors' });
-    res.style.background = 'rgba(39,174,96,0.1)';
-    res.style.color = '#1d8b50';
-    res.textContent = '✅ เชื่อมต่อสำเร็จ! URL ถูกต้อง';
+    const r = await fetch(url, { method:'GET', redirect:'follow' });
+    const json = await r.json();
+    if (json.ok) {
+      res.style.background = 'rgba(39,174,96,0.1)';
+      res.style.color = '#1d8b50';
+      res.textContent = '✅ เชื่อมต่อสำเร็จ! พร้อมใช้งาน';
+    } else {
+      throw new Error(json.msg || 'response not ok');
+    }
   } catch(e) {
     res.style.background = 'rgba(231,76,60,0.1)';
     res.style.color = '#b83c2d';
@@ -2728,7 +2938,7 @@ async function testGSheet() {
 async function saveToGSheet(action, data) {
   if(!gsConfig.url) return;
   const TYPE_LABELS_MAP = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
-  const STATUS_LABELS_MAP = { approved:'อนุมัติแล้ว', rejected:'ปฏิเสธ' };
+  const STATUS_LABELS_MAP = { approved:'อนุมัติแล้ว', rejected:'ปฏิเสธ', cancelled:'ยกเลิกแล้ว', rescheduled:'เลื่อนวันแล้ว' };
   try {
     const payload = action === 'ADD' ? {
       action, id: data.id,
@@ -2748,6 +2958,8 @@ async function saveToGSheet(action, data) {
       body: JSON.stringify(payload)
     });
     showToast(action==='ADD' ? '📊 บันทึกลง Google Sheets แล้ว' : '📊 อัพเดท Sheets แล้ว');
+    // ดึงข้อมูลใหม่หลังบันทึก เพื่อให้ทุกคนเห็นทันที
+    setTimeout(fetchRequestsFromSheet, 1500);
   } catch(e) {
     console.warn('Google Sheets error:', e);
   }
@@ -2963,6 +3175,8 @@ function closeSidebar() {
 updateGSheetIndicator();
 initLoginDropdown();
 addLogoutBtn();
+// เริ่ม sync ถ้ามี URL อยู่แล้ว (จาก localStorage)
+if (gsConfig.url) startAutoSync();
 // Don't render dashboard yet - wait for login
 
 </script>
