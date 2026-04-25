@@ -1062,6 +1062,259 @@
   }
 
   .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* ============================================
+     MOBILE RESPONSIVE - ปรับสำหรับมือถือ
+     ============================================ */
+
+  /* Hamburger button */
+  .hamburger-btn {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* Mobile sidebar overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+  }
+  .sidebar-overlay.open { display: block; }
+
+  /* Bottom nav for mobile */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    z-index: 900;
+    padding: 6px 0 env(safe-area-inset-bottom, 6px);
+    box-shadow: 0 -4px 20px rgba(30,58,53,0.1);
+  }
+
+  .bottom-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .bottom-nav-item {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 3px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s;
+    min-width: 56px;
+    color: var(--text-light);
+    font-size: 10px;
+    font-weight: 500;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+
+  .bottom-nav-item.active {
+    color: var(--teal-mid);
+  }
+
+  .bottom-nav-item.active .bn-icon {
+    transform: scale(1.15);
+  }
+
+  /* Table scroll wrapper */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @media (max-width: 768px) {
+    /* Body layout */
+    body {
+      overflow: auto;
+      height: auto;
+    }
+
+    .app-wrapper {
+      height: auto;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    /* Show hamburger + bottom nav */
+    .hamburger-btn { display: flex; }
+    .bottom-nav { display: block; }
+
+    /* Sidebar - slide in/out */
+    .sidebar {
+      position: fixed;
+      top: 0; left: -260px;
+      width: 260px;
+      height: 100vh;
+      z-index: 999;
+      transition: left 0.3s ease;
+      box-shadow: none;
+    }
+
+    .sidebar.open {
+      left: 0;
+      box-shadow: 4px 0 30px rgba(0,0,0,0.3);
+    }
+
+    /* Main takes full width */
+    .main {
+      width: 100%;
+      height: auto;
+      min-height: 100vh;
+      overflow-y: visible;
+    }
+
+    /* Topbar adjustments */
+    .topbar {
+      padding: 12px 16px;
+      position: sticky;
+      top: 0; z-index: 100;
+    }
+
+    .topbar h1 { font-size: 15px; }
+
+    .topbar-actions .btn-outline { display: none; } /* hide calendar btn - use bottom nav */
+    .topbar-actions .btn-gold {
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+
+    /* Content padding */
+    .content {
+      padding: 16px;
+      padding-bottom: 80px; /* space for bottom nav */
+    }
+
+    /* Stat cards - 2x2 on mobile */
+    .stat-cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-number { font-size: 26px; }
+    .stat-card { padding: 14px; }
+
+    /* Dashboard grid - stack vertically */
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    /* Two/three col layouts */
+    .two-col, .three-col {
+      grid-template-columns: 1fr;
+    }
+
+    /* Tables - scrollable */
+    .card { padding: 14px; overflow: hidden; }
+
+    .data-table {
+      min-width: 560px; /* force scroll for wide tables */
+    }
+
+    /* Admin table needs more space */
+    #page-admin .card {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #page-admin .card .table-scroll {
+      padding: 14px;
+    }
+
+    /* Calendar */
+    .cal-cell {
+      min-height: 48px;
+      padding: 4px;
+    }
+
+    .cal-date { font-size: 11px; }
+
+    .cal-event-dot {
+      font-size: 8px;
+      padding: 1px 3px;
+    }
+
+    /* Modal - full screen on mobile */
+    .modal-overlay {
+      align-items: flex-end;
+      padding: 0;
+    }
+
+    .modal {
+      width: 100% !important;
+      max-width: 100%;
+      border-radius: 20px 20px 0 0;
+      max-height: 92vh;
+      padding: 20px 20px 30px;
+    }
+
+    /* Login box */
+    .login-box {
+      width: calc(100% - 32px);
+      padding: 28px 24px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      gap: 8px;
+    }
+
+    .filter-select {
+      font-size: 12px;
+      padding: 7px 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Toast position */
+    .toast {
+      bottom: 80px;
+      right: 12px;
+      left: 12px;
+      max-width: 100%;
+    }
+
+    /* Training cards */
+    .training-card {
+      gap: 10px;
+    }
+
+    /* GSheet button responsive */
+    #gsheetBtn { font-size: 11px; }
+
+    /* Wrap topbar actions nicely */
+    .topbar-actions { gap: 8px; }
+  }
+
+  @media (max-width: 480px) {
+    .stat-cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-number { font-size: 22px; }
+    .stat-label { font-size: 11px; }
+
+    .cal-cell { min-height: 40px; }
+
+    .content { padding: 12px; padding-bottom: 80px; }
+  }
 </style>
 </head>
 <body>
@@ -1166,10 +1419,42 @@
   </div>
 </aside>
 
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Bottom Nav for mobile -->
+<div class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-items">
+    <div class="bottom-nav-item active" id="bn-dashboard" onclick="showPage('dashboard');closeSidebar()">
+      <span class="bn-icon">📊</span>
+      <span>หน้าหลัก</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-calendar" onclick="showPage('calendar');closeSidebar()">
+      <span class="bn-icon">📅</span>
+      <span>ปฏิทิน</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-request" onclick="showPage('request');closeSidebar()">
+      <span class="bn-icon">📝</span>
+      <span>คำขอ</span>
+    </div>
+    <div class="bottom-nav-item" id="bn-training" onclick="showPage('training');closeSidebar()">
+      <span class="bn-icon">🎓</span>
+      <span>อบรม</span>
+    </div>
+    <div class="bottom-nav-item" onclick="openRequestModal();closeSidebar()">
+      <span class="bn-icon">➕</span>
+      <span>ขอหยุด</span>
+    </div>
+  </div>
+</div>
+
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h1 id="pageTitle">แดชบอร์ด</h1>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+      <h1 id="pageTitle">แดชบอร์ด</h1>
+    </div>
     <div class="topbar-actions">
       <button class="btn btn-outline" onclick="showPage('calendar')">📅 ปฏิทิน</button>
       <button class="btn btn-gold" onclick="openRequestModal()">+ ขอวันหยุด</button>
@@ -1213,6 +1498,7 @@
           <div class="card" style="margin-bottom: 20px;">
             <div class="card-title">คำขอล่าสุด</div>
             <div class="card-sub">ภาพรวมคำขอวันหยุดของบุคลากร</div>
+            <div class="table-scroll">
             <table class="data-table">
               <thead>
                 <tr>
@@ -1225,6 +1511,7 @@
               <tbody id="dashboardTable">
               </tbody>
             </table>
+            </div>
           </div>
 
           <div class="card">
@@ -1339,6 +1626,7 @@
       </div>
 
       <div class="card">
+        <div class="table-scroll">
         <table class="data-table">
           <thead>
             <tr>
@@ -1353,6 +1641,7 @@
           </thead>
           <tbody id="adminTable"></tbody>
         </table>
+        </div>
       </div>
     </div>
 
@@ -1731,6 +2020,11 @@ function showPage(page) {
   const navMap = { dashboard:0, calendar:1, request:2, admin:3, training:4, stats:5 };
   const navItems = document.querySelectorAll('.nav-item');
   if(navMap[page] !== undefined) navItems[navMap[page]]?.classList.add('active');
+
+  // Sync bottom nav
+  document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+  const bnEl = document.getElementById('bn-'+page);
+  if(bnEl) bnEl.classList.add('active');
 
   if(page==='dashboard') renderDashboard();
   if(page==='calendar') renderCalendar();
@@ -2648,6 +2942,21 @@ function addLogoutBtn() {
     btn.onclick = logout;
     gsheetDiv.appendChild(btn);
   }
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
 }
 
 // ===== INIT =====
