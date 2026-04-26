@@ -1399,23 +1399,23 @@
 
   <nav>
     <div class="nav-section">เมนูหลัก</div>
-    <div class="nav-item active" onclick="showPage('dashboard')">
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
       <span class="nav-icon">📊</span> แดชบอร์ด
     </div>
-    <div class="nav-item" onclick="showPage('calendar')">
+    <div class="nav-item" data-page="calendar" onclick="showPage('calendar')">
       <span class="nav-icon">📅</span> ปฏิทิน
     </div>
-    <div class="nav-item" onclick="showPage('request')">
+    <div class="nav-item" data-page="request" onclick="showPage('request')">
       <span class="nav-icon">📝</span> ขอวันหยุด
     </div>
     <div class="nav-section">จัดการ</div>
-    <div class="nav-item admin-only" onclick="showPage('admin')">
+    <div class="nav-item admin-only" data-page="admin" onclick="showPage('admin')">
       <span class="nav-icon">✅</span> อนุมัติคำขอ
     </div>
-    <div class="nav-item" onclick="showPage('training')">
+    <div class="nav-item" data-page="training" onclick="showPage('training')">
       <span class="nav-icon">🎓</span> การอบรม
     </div>
-    <div class="nav-item admin-only" onclick="showPage('stats')">
+    <div class="nav-item admin-only" data-page="stats" onclick="showPage('stats')">
       <span class="nav-icon">📈</span> สถิติ
     </div>
   </nav>
@@ -2039,9 +2039,8 @@ function showPage(page) {
   const titles = { dashboard:'แดชบอร์ด', calendar:'ปฏิทิน', request:'คำขอของฉัน', admin:'อนุมัติคำขอ', training:'การอบรม', stats:'สถิติ' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
 
-  const navMap = { dashboard:0, calendar:1, request:2, admin:3, training:4, stats:5 };
-  const navItems = document.querySelectorAll('.nav-item');
-  if(navMap[page] !== undefined) navItems[navMap[page]]?.classList.add('active');
+  const navItems = document.querySelectorAll('.nav-item[data-page]');
+  navItems.forEach(n => { if(n.dataset.page === page) n.classList.add('active'); });
 
   // Sync bottom nav
   document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
@@ -2510,7 +2509,7 @@ function renderAdminTable() {
 
   const tbody = document.getElementById('adminTable');
   if(filtered.length===0) {
-    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div>ไม่พบรายการ</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>ไม่พบรายการ</div></td></tr>';
     return;
   }
   tbody.innerHTML = filtered.map((r, idx) => {
@@ -2521,7 +2520,9 @@ function renderAdminTable() {
     const displayColor = s ? s.color : '#7b52a8';
     const displayRole = s ? s.roleLabel : (r.roleLabel || '?');
 
-    const dateStr = r.dates.length>1 ? `${formatDate(r.dates[0])} - ${formatDate(r.dates[r.dates.length-1])}` : formatDate(r.dates[0]);
+    const dateStr = (r.dates && r.dates.length > 0)
+      ? (r.dates.length>1 ? `${formatDate(r.dates[0])} - ${formatDate(r.dates[r.dates.length-1])}` : formatDate(r.dates[0]))
+      : (r.date ? formatDate(r.date) : '-');
     const submittedStr = r.submittedAt
       ? new Date(r.submittedAt).toLocaleString('th-TH', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
       : r.createdAt
