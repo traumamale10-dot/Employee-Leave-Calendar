@@ -2039,9 +2039,13 @@ function renderCalendar() {
   });
 
   function getReqDisplay(r) {
-    if (r.fromSheet) return { abbr:(r.staffName||'?').substring(0,2), color:'#A855F7', name:r.staffName||'', roleLabel:r.roleLabel||'' };
+    if (r.fromSheet) {
+      const name = r.staffName || '?';
+      return { abbr: name.substring(0,2), color:'#A855F7', name, roleLabel:r.roleLabel||'' };
+    }
     const s = getStaff(r.staffId);
-    return s ? { abbr:s.abbr, color:s.color, name:s.name, roleLabel:s.roleLabel } : { abbr:'?', color:'#999', name:'ไม่ทราบ', roleLabel:'' };
+    return s ? { abbr:s.abbr, color:s.color, name:s.name, roleLabel:s.roleLabel }
+             : { abbr:'?', color:'#999', name:'ไม่ทราบ', roleLabel:'' };
   }
 
   function countRole(evts, isNurse) {
@@ -2056,7 +2060,12 @@ function renderCalendar() {
   for (let d=1;d<=days;d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
-    const evts = eventMap[ds]||[];
+    // เรียง: pending ขอก่อนขึ้นก่อน, approved ตามหลัง
+    const evts = (eventMap[ds]||[]).slice().sort((a,b)=>{
+      if(a.status==='pending'&&b.status!=='pending') return -1;
+      if(a.status!=='pending'&&b.status==='pending') return 1;
+      return (a.submittedAt||0)-(b.submittedAt||0);
+    });
     const nurseCount = countRole(evts,true);
     const otherCount = countRole(evts,false);
     const isOverQuota = nurseCount>=3||otherCount>=3;
@@ -2064,12 +2073,14 @@ function renderCalendar() {
     if (isToday) cls += ' today';
     if (evts.length) cls += ' has-leave';
     if (isOverQuota) cls += ' over-quota';
+    // แสดงแค่ชื่อ (ไม่มี abbr prefix), สูงสุด 3 รายการ
     const evtDots = evts.slice(0,3).map(e => {
       const disp = getReqDisplay(e);
-      const firstName = disp.name.split(' ')[0]||disp.abbr;
-      return `<div class="cal-event-dot evt-${e.type}" title="${disp.name}">${disp.abbr} ${firstName.substring(0,5)}</div>`;
+      return `<div class="cal-event-dot evt-${e.type}">${disp.name}</div>`;
     }).join('');
-    const moreBadge = evts.length>3 ? `<div class="cal-event-dot" style="background:var(--bg);color:var(--text-light);">+${evts.length-3}</div>` : '';
+    const moreBadge = evts.length>3
+      ? `<div class="cal-event-dot" style="background:var(--bg);color:var(--text-light);cursor:pointer;" onclick="showDayPopup('${ds}')">+${evts.length-3} คน</div>`
+      : '';
     const quotaWarn = isOverQuota ? `<div class="cal-quota-warn">⚠️</div>` : '';
     html += `<div class="${cls}" onclick="calDayClick('${ds}')">
       ${quotaWarn}
@@ -2083,21 +2094,32 @@ function renderCalendar() {
   }
   document.getElementById('calGrid').innerHTML = html;
 
+  // กิจกรรมในเดือน — เรียง pending ก่อน แล้วเรียง submittedAt
   const allEvts = [];
   Object.entries(eventMap).forEach(([date,evts]) => evts.forEach(e=>allEvts.push({date,...e})));
-  allEvts.sort((a,b)=>a.date.localeCompare(b.date));
+  allEvts.sort((a,b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    if (a.status==='pending'&&b.status!=='pending') return -1;
+    if (a.status!=='pending'&&b.status==='pending') return 1;
+    return (a.submittedAt||0)-(b.submittedAt||0);
+  });
   const list = document.getElementById('calEventList');
   if (allEvts.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div>ไม่มีกิจกรรมในเดือนนี้</div>';
     return;
   }
-  list.innerHTML = allEvts.map(e => {
+  list.innerHTML = allEvts.map((e,idx) => {
     const disp = getReqDisplay(e);
+    const submittedStr = e.submittedAt
+      ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : e.submittedAtStr || '';
     return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
       <div class="mini-avatar" style="width:38px;height:38px;font-size:13px;background:${disp.color}22;color:${disp.color};">${disp.abbr}</div>
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:600;">${disp.name}</div>
         <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} · ${disp.roleLabel}</div>
+        ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
         ${e.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
       </div>
       <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
@@ -2107,7 +2129,81 @@ function renderCalendar() {
 }
 
 function calDayClick(dateStr) {
-  document.getElementById('calEventList').scrollIntoView({behavior:'smooth',block:'start'});
+  showDayPopup(dateStr);
+}
+
+// popup รายชื่อผู้ขอในวันที่เลือก
+function showDayPopup(dateStr) {
+  const evts = requests.filter(r =>
+    r.dates && r.dates.includes(dateStr) &&
+    r.status !== 'cancelled' && r.status !== 'rejected'
+  ).sort((a,b) => {
+    if(a.status==='pending'&&b.status!=='pending') return -1;
+    if(a.status!=='pending'&&b.status==='pending') return 1;
+    return (a.submittedAt||0)-(b.submittedAt||0);
+  });
+
+  // ถ้าไม่มีกิจกรรม scroll ไปที่รายการแทน
+  if (evts.length === 0) {
+    document.getElementById('calEventList').scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+
+  // สร้าง popup
+  let popup = document.getElementById('dayPopup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'dayPopup';
+    popup.className = 'modal-overlay';
+    popup.innerHTML = `<div class="modal" style="width:420px;max-height:80vh;">
+      <div class="modal-header">
+        <div class="modal-title" id="dayPopupTitle">📅 วันที่ —</div>
+        <button class="modal-close" onclick="document.getElementById('dayPopup').classList.remove('open')">✕</button>
+      </div>
+      <div id="dayPopupBody"></div>
+    </div>`;
+    popup.addEventListener('click', function(e){ if(e.target===popup) popup.classList.remove('open'); });
+    document.body.appendChild(popup);
+  }
+
+  document.getElementById('dayPopupTitle').textContent = `📅 ${formatDate(dateStr)}`;
+
+  const nurseEvts  = evts.filter(e => isNurseRole(e));
+  const otherEvts  = evts.filter(e => !isNurseRole(e));
+
+  function renderPopupGroup(label, color, list) {
+    if (!list.length) return '';
+    const rows = list.map((e,idx) => {
+      const s = e.fromSheet ? null : getStaff(e.staffId);
+      const name  = s ? s.name  : (e.staffName || '?');
+      const abbr  = s ? s.abbr  : (e.staffName||'??').substring(0,2);
+      const col   = s ? s.color : '#A855F7';
+      const submittedStr = e.submittedAt
+        ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+        : e.submittedAtStr || '';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
+        <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${col}22;color:${col};">${abbr}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${name}</div>
+          ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+        </div>
+        <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
+        <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.06em;padding:6px 0 4px;">${label} (${list.length} คน)</div>
+      ${rows}
+    </div>`;
+  }
+
+  document.getElementById('dayPopupBody').innerHTML =
+    renderPopupGroup('👩‍⚕️ พยาบาล', 'var(--blue)', nurseEvts) +
+    renderPopupGroup('🧑‍💼 ผช./พนักงาน', 'var(--accent)', otherEvts) ||
+    '<div style="text-align:center;color:var(--text-light);padding:20px;">ไม่มีรายการ</div>';
+
+  popup.classList.add('open');
 }
 
 // ===== FORM CALENDAR =====
@@ -2394,9 +2490,18 @@ function renderTraining() {
 // ===== MY REQUESTS =====
 function renderMyRequests() {
   if (!currentUser) return;
+
+  // ฟังก์ชัน match ชื่อ — รองรับทั้งชื่อสั้น (ใหม่) และชื่อเต็ม (sheet เก่า)
+  function nameMatch(r) {
+    if (!r.fromSheet) return r.staffId === currentUser.staffId;
+    const sn = r.staffName || '';
+    // ตรงทั้งหมด หรือ ชื่อเต็มใน sheet มีชื่อสั้นของ currentUser อยู่
+    return sn === currentUser.name || sn.includes(currentUser.name);
+  }
+
   const myReqs = currentUser.isAdmin
     ? [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id))
-    : requests.filter(r=>!r.fromSheet?r.staffId===currentUser.staffId:r.staffName===currentUser.name)
+    : requests.filter(nameMatch)
               .sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id));
   const list = document.getElementById('myRequestsList');
   if (myReqs.length===0) {
