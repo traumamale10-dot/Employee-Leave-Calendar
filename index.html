@@ -2955,17 +2955,19 @@ function jsonResponse(obj) {
 }`;
 
 const DEFAULT_GS_CONFIG = {
-  url: 'https://script.google.com/macros/s/AKfycbw7HkPZV7tW4RRF8jjIa-2e4S8IFSDSRld_GhA9fNV71ISz_U3uSiHlvheGU9clAi22/exec',
+  url: 'https://script.google.com/macros/s/AKfycbwoplvKFA_SPaF_7-bQw4XpXaGSJyq4bdoPGBxSlkpC20laW8Y6H0wjv9sCo9eT1ww1/exec',
   sheetId: '12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'
 };
-// อ่านจาก localStorage ก่อน ถ้าไม่มีค่อยใช้ default
+// อ่านจาก localStorage ก่อน ถ้าไม่มีหรือ URL ว่างค่อยใช้ default
 let gsConfig = (()=>{
   try {
     const saved = JSON.parse(localStorage.getItem('gsConfig')||'null');
-    if (saved && saved.url) return saved;
+    if (saved && saved.url && saved.url.startsWith('https://')) return saved;
   } catch(e) {}
   return Object.assign({}, DEFAULT_GS_CONFIG);
 })();
+// ล้าง localStorage เก่าที่อาจมี URL ผิด แล้วบันทึก config ปัจจุบัน
+localStorage.setItem('gsConfig', JSON.stringify(gsConfig));
 let sheetRequests = [];
 let syncInterval = null;
 
@@ -3111,22 +3113,18 @@ async function saveToGSheet(action, data){
   try {
     const fmtSubmitted = (ts) => {
       if (!ts) return '';
-      const d = new Date(ts);
-      return d.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      return new Date(ts).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
     };
 
     let payload;
     if (action === 'ADD') {
-      // หาข้อมูล staff — ถ้าไม่เจอใช้ข้อมูลที่ส่งมาโดยตรง
       const staffObj = getStaff(data.staffId);
       payload = {
         action,
-        id: data.id,
-        staff: {
-          name:      staffObj ? staffObj.name      : (data.staffName || 'ไม่ทราบ'),
-          roleLabel: staffObj ? staffObj.roleLabel : (data.roleLabel  || 'พยาบาล')
-        },
-        dates:         data.dates,
+        id: String(data.id),
+        staffName:     staffObj ? staffObj.name      : (data.staffName || 'ไม่ทราบ'),
+        staffRole:     staffObj ? staffObj.roleLabel : (data.roleLabel  || 'พยาบาล'),
+        dates:         JSON.stringify(data.dates),
         typeLabel:     TYPE_LABELS_MAP[data.type] || data.type,
         trainingPlace: data.trainingPlace || '',
         note:          data.note || '',
@@ -3134,24 +3132,30 @@ async function saveToGSheet(action, data){
       };
     } else {
       payload = {
-        action, id: data.id,
+        action,
+        id:          String(data.id),
         status:      data.status,
         statusLabel: STATUS_LABELS_MAP[data.status] || data.status
       };
     }
 
+    // ส่งเป็น form-encoded — ทำงานได้กับ no-cors + Apps Script doPost
+    const formBody = Object.entries(payload)
+      .map(([k,v]) => encodeURIComponent(k)+'='+encodeURIComponent(v))
+      .join('&');
+
     await fetch(gsConfig.url, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formBody
     });
 
     showToast(action==='ADD' ? '📊 ส่งข้อมูลไป Sheets แล้ว' : '📊 อัพเดท Sheets แล้ว');
-    setTimeout(fetchRequestsFromSheet, 2000);
+    setTimeout(fetchRequestsFromSheet, 2500);
   } catch(e) {
     console.warn('GSheet save error:', e);
-    showToast('⚠️ ส่งข้อมูลไม่ได้ ตรวจสอบการเชื่อมต่อ', 'error');
+    showToast('⚠️ ส่งข้อมูลไม่ได้', 'error');
   }
 }
 
