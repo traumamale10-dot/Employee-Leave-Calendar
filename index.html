@@ -2465,16 +2465,18 @@ function renderAdminTable() {
     const dateStr = r.dates.length>1 ? `${formatDate(r.dates[0])} - ${formatDate(r.dates[r.dates.length-1])}` : formatDate(r.dates[0]);
     const submittedStr = r.submittedAt
       ? new Date(r.submittedAt).toLocaleString('th-TH', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
-      : (r.createdAt || '-');
+      : r.createdAt
+        ? String(r.createdAt)
+        : '-';
     const actions = r.status === 'pending' ? `
-      <button class="action-btn btn-approve" onclick="updateStatus(${r.id},'approved')">✓ อนุมัติ</button>
-      <button class="action-btn btn-reject" onclick="updateStatus(${r.id},'rejected')">✕ ปฏิเสธ</button>
-      <button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')" style="font-size:11px;">📅</button>
-      <button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')" style="font-size:11px;">🗑</button>
+      <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved')">✓ อนุมัติ</button>
+      <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected')">✕ ปฏิเสธ</button>
+      <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
+      <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
     ` : r.status === 'approved' ? `
       <span class="badge badge-approved">อนุมัติแล้ว</span>
-      <button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')" style="font-size:11px;">📅</button>
-      <button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')" style="font-size:11px;">🗑</button>
+      <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
+      <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
     ` : `<span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>`;
 
     return `<tr>
@@ -2497,12 +2499,14 @@ function renderAdminTable() {
 }
 
 function updateStatus(id, status) {
-  const req = requests.find(r=>r.id===id);
-  if(req) {
+  const req = requests.find(r => String(r.id) === String(id));
+  if (req) {
     req.status = status;
     showToast(status==='approved' ? '✅ อนุมัติคำขอแล้ว' : '❌ ปฏิเสธคำขอแล้ว', status==='approved'?'success':'error');
     renderAdminTable();
-    saveToGSheet('UPDATE_STATUS', { id, status });
+    renderMyRequests();
+    renderCalendar();
+    saveToGSheet('UPDATE_STATUS', { id: req.id, status });
   }
 }
 
@@ -2579,8 +2583,8 @@ function renderMyRequests() {
           <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
         </div>
         <div style="display:flex;gap:6px;">
-          ${canReschedule ? `<button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')">📅 เลื่อน</button>` : ''}
-          ${canCancel     ? `<button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')">❌ ยกเลิก</button>` : ''}
+          ${canReschedule ? `<button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')">📅 เลื่อน</button>` : ''}
+          ${canCancel     ? `<button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')">❌ ยกเลิก</button>` : ''}
         </div>
       </div>
       <div style="font-size:14px;color:var(--text-mid);">📅 ${dateStr}</div>
@@ -3011,9 +3015,9 @@ let rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth()
 
 function openCancelModal(reqId, mode) {
   // Permission check
-  const req = requests.find(r => r.id === reqId);
+  const req = requests.find(r => String(r.id) === String(reqId));
   if (!req) return;
-  const isOwner = currentUser?.staffId === req.staffId;
+  const isOwner = (!req.fromSheet && currentUser?.staffId === req.staffId) || (req.fromSheet && req.staffName === currentUser?.name);
   const isAdmin = currentUser?.isAdmin;
   if (!isOwner && !isAdmin) {
     showToast('คุณไม่มีสิทธิ์จัดการคำขอนี้', 'error');
@@ -3073,7 +3077,7 @@ function closeCancelModal() {
 }
 
 function confirmCancel() {
-  const req = requests.find(r => r.id === cancelTargetId);
+  const req = requests.find(r => String(r.id) === String(cancelTargetId));
   if (!req) return;
   req.status = 'cancelled';
   req.cancelNote = document.getElementById('cancelNote').value || 'ไม่ระบุ';
@@ -3092,7 +3096,7 @@ function confirmReschedule() {
     showToast('กรุณาเลือกวันที่ใหม่', 'error');
     return;
   }
-  const req = requests.find(r => r.id === cancelTargetId);
+  const req = requests.find(r => String(r.id) === String(cancelTargetId));
   if (!req) return;
 
   // Quota check for new dates
