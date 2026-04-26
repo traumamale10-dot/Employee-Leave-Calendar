@@ -526,7 +526,7 @@
 
   .cal-cell {
     position: relative;
-    min-height: 68px;
+    min-height: 80px;
     border-radius: 8px;
     padding: 6px;
     cursor: pointer;
@@ -562,12 +562,29 @@
   .cal-events { display: flex; flex-direction: column; gap: 2px; }
 
   .cal-event-dot {
-    font-size: 12px;
-    padding: 1px 5px;
+    font-size: 10px;
+    padding: 2px 5px;
     border-radius: 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+
+  .cal-cell.over-quota {
+    border-color: #e74c3c !important;
+    background: rgba(231,76,60,0.05);
+  }
+
+  .cal-cell.over-quota .cal-date {
+    color: #e74c3c;
+  }
+
+  .cal-quota-warn {
+    position: absolute;
+    top: 4px; right: 4px;
+    font-size: 11px;
+    line-height: 1;
   }
 
   .evt-leave { background: rgba(41,128,185,0.15); color: #1660a0; }
@@ -2206,10 +2223,8 @@ function renderCalendar() {
   // ── count quota — รวม local + sheet ──
   function countRole(evts, isNurse) {
     return evts.filter(e => {
-      if (e.status !== 'approved') return false;
-      if (e.fromSheet) return isNurse ? e.roleLabel==='พยาบาล' : e.roleLabel!=='พยาบาล';
-      const s = getStaff(e.staffId);
-      return s ? (isNurse ? s.role==='nurse' : s.role!=='nurse') : false;
+      if (e.status === 'rejected' || e.status === 'cancelled') return false;
+      return isNurse ? isNurseRole(e) : !isNurseRole(e);
     }).length;
   }
 
@@ -2222,20 +2237,34 @@ function renderCalendar() {
     const evts = eventMap[ds] || [];
     const nurseCount = countRole(evts, true);
     const otherCount = countRole(evts, false);
+    const totalApproved = nurseCount + otherCount;
+    const isOverQuota = nurseCount >= 3 || otherCount >= 3;
 
     let cls = 'cal-cell';
     if(isToday) cls += ' today';
     if(evts.length) cls += ' has-leave';
+    if(isOverQuota) cls += ' over-quota';
 
-    const evtDots = evts.slice(0,3).map(e => {
+    // แสดงชื่อย่อ + ชื่อจริงตัวเล็ก สูงสุด 4 คน
+    const evtDots = evts.slice(0,4).map(e => {
       const disp = getReqDisplay(e);
       const cls2 = `evt-${e.type}`;
-      return `<div class="cal-event-dot ${cls2}" title="${disp.name}">${disp.abbr}</div>`;
+      // แสดง "นา สมศรี" (abbr + ชื่อต้น)
+      const firstName = disp.name.split(' ')[0] || disp.abbr;
+      const shortName = firstName.length > 6 ? firstName.substring(0,6) : firstName;
+      return `<div class="cal-event-dot ${cls2}" title="${disp.name} (${TYPE_LABELS[e.type]})">${disp.abbr} ${shortName}</div>`;
     }).join('');
 
-    const moreBadge = evts.length > 3 ? `<div class="cal-event-dot" style="background:rgba(0,0,0,0.06);color:var(--text-light);">+${evts.length-3}</div>` : '';
+    const moreBadge = evts.length > 4
+      ? `<div class="cal-event-dot" style="background:rgba(0,0,0,0.06);color:var(--text-light);">+${evts.length-4} คน</div>`
+      : '';
+
+    const quotaWarn = isOverQuota
+      ? `<div class="cal-quota-warn" title="เกิน 3 คน">⚠️</div>`
+      : '';
 
     html += `<div class="${cls}" onclick="calDayClick('${ds}')">
+      ${quotaWarn}
       <div class="cal-date">${d}</div>
       <div class="cal-events">${evtDots}${moreBadge}</div>
       ${evts.length>0?`<div class="cal-count-bar">
@@ -2338,30 +2367,56 @@ function removeDate(d) {
   checkQuota();
 }
 
+function isNurseRole(r) {
+  if (r.fromSheet) return r.roleLabel === 'พยาบาล';
+  return getStaff(r.staffId)?.role === 'nurse';
+}
+
 function checkQuota() {
   const personId = parseInt(document.getElementById('req-person').value);
-  if(!personId || selectedDates.length===0) {
-    document.getElementById('quota-warning').style.display='none';
+  if (!personId || selectedDates.length === 0) {
+    document.getElementById('quota-warning').style.display = 'none';
     return;
   }
   const person = getStaff(personId);
+  if (!person) return;
+  const isNurse = person.role === 'nurse';
   const warnings = [];
+
   selectedDates.forEach(d => {
-    const dayReqs = requests.filter(r => r.dates.includes(d) && r.status!=='rejected');
-    if(person.role==='nurse') {
-      const nurseCount = dayReqs.filter(r=>getStaff(r.staffId)?.role==='nurse').length;
-      if(nurseCount>=4) warnings.push(`วันที่ ${formatDate(d)} พยาบาลครบ 4 คนแล้ว`);
+    const dayReqs = requests.filter(r =>
+      r.dates.includes(d) && r.status !== 'rejected' && r.status !== 'cancelled'
+    );
+
+    if (isNurse) {
+      // กลุ่มพยาบาล — เตือนเมื่อ >= 3
+      const count = dayReqs.filter(r => isNurseRole(r)).length;
+      if (count >= 3) {
+        warnings.push({ date: d, count, limit: 3, group: 'พยาบาล', over: true });
+      } else if (count === 2) {
+        warnings.push({ date: d, count, limit: 3, group: 'พยาบาล', over: false });
+      }
     } else {
-      const otherCount = dayReqs.filter(r=>getStaff(r.staffId)?.role!=='nurse').length;
-      if(otherCount>=3) warnings.push(`วันที่ ${formatDate(d)} บุคลากรอื่นครบ 3 คนแล้ว`);
+      // กลุ่มผู้ช่วย+พนักงาน — เตือนเมื่อ >= 3
+      const count = dayReqs.filter(r => !isNurseRole(r)).length;
+      if (count >= 3) {
+        warnings.push({ date: d, count, limit: 3, group: 'ผู้ช่วยพยาบาล/พนักงาน', over: true });
+      } else if (count === 2) {
+        warnings.push({ date: d, count, limit: 3, group: 'ผู้ช่วยพยาบาล/พนักงาน', over: false });
+      }
     }
   });
+
   const warn = document.getElementById('quota-warning');
-  if(warnings.length>0) {
-    warn.style.display='block';
-    warn.innerHTML = '⚠️ ' + warnings.join('<br>');
+  if (warnings.length > 0) {
+    warn.style.display = 'block';
+    warn.innerHTML = warnings.map(w =>
+      w.over
+        ? `<span style="color:#c0392b;">⚠️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count} คนแล้ว (เกินโควต้า ${w.limit} คน)</span>`
+        : `<span style="color:#e67e22;">ℹ️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count}/${w.limit} คน (ใกล้เต็ม)</span>`
+    ).join('<br>');
   } else {
-    warn.style.display='none';
+    warn.style.display = 'none';
   }
 }
 
@@ -2417,11 +2472,12 @@ async function submitRequest() {
   try {
     const violations = submitLock.checkAndReserve(selectedDates, person.role);
     if (violations.length > 0) {
-      const msgs = violations.map(v => `วันที่ ${formatDate(v.date)}: ${v.group} ครบ ${v.limit} คนแล้ว (มี ${v.count} คน)`);
+      // เตือนเท่านั้น — ไม่บล็อก ยังส่งได้
       const warn = document.getElementById('quota-warning');
       warn.style.display = 'block';
-      warn.innerHTML = '⚠️ ' + msgs.join('<br>');
-      return;
+      warn.innerHTML = violations.map(v =>
+        `<span style="color:#c0392b;">⚠️ วันที่ ${formatDate(v.date)}: ${v.group} มี ${v.count} คนแล้ว (เกินโควต้า ${v.limit} คน) — ส่งคำขอแล้ว รอ Admin อนุมัติ</span>`
+      ).join('<br>');
     }
     const newReq = { id: nextId++, staffId: personId, type, dates: [...selectedDates], note, status: 'pending', trainingPlace, submittedAt: Date.now() };
     requests.push(newReq);
@@ -2641,19 +2697,19 @@ const submitLock = {
     return () => { this._locked = false; };
   },
 
-  // ตรวจโควต้าพร้อม timestamp เพื่อป้องกัน race condition
+  // ตรวจโควต้า — เตือนเท่านั้น ไม่บล็อก
   checkAndReserve(dates, personRole) {
     const violations = [];
     dates.forEach(d => {
-      const dayApproved = requests.filter(r =>
-        r.dates.includes(d) && r.status !== 'rejected'
+      const dayReqs = requests.filter(r =>
+        r.dates.includes(d) && r.status !== 'rejected' && r.status !== 'cancelled'
       );
       if (personRole === 'nurse') {
-        const count = dayApproved.filter(r => getStaff(r.staffId)?.role === 'nurse').length;
-        if (count >= 4) violations.push({ date: d, count, limit: 4, group: 'พยาบาล' });
+        const count = dayReqs.filter(r => isNurseRole(r)).length;
+        if (count >= 3) violations.push({ date: d, count, limit: 3, group: 'พยาบาล' });
       } else {
-        const count = dayApproved.filter(r => getStaff(r.staffId)?.role !== 'nurse').length;
-        if (count >= 3) violations.push({ date: d, count, limit: 3, group: 'บุคลากรอื่น' });
+        const count = dayReqs.filter(r => !isNurseRole(r)).length;
+        if (count >= 3) violations.push({ date: d, count, limit: 3, group: 'ผู้ช่วยพยาบาล/พนักงาน' });
       }
     });
     return violations;
