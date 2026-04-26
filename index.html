@@ -4,195 +4,215 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ระบบจัดการวันหยุด หอผู้ป่วย ศอช.ชั้น10</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --teal-dark: #4a2d6b;
-    --teal-mid: #7b52a8;
-    --teal-light: #9d78c8;
-    --gold: #c084fc;
-    --gold-light: #d8a4ff;
-    --gold-pale: #f3e8ff;
-    --bg-main: #f5f0ff;
-    --bg-card: #ffffff;
-    --bg-sidebar: #3b1f6b;
-    --text-dark: #2d1a4a;
-    --text-mid: #6b4d8a;
-    --text-light: #b09abf;
-    --border: #ddd0f0;
-    --blue-accent: #2980b9;
-    --status-pending: #e67e22;
-    --status-approved: #27ae60;
-    --status-rejected: #e74c3c;
-    --shadow: 0 4px 20px rgba(74,45,107,0.12);
-    --shadow-lg: 0 8px 40px rgba(74,45,107,0.18);
+    --primary: #FF6B6B;
+    --primary-light: #FF8E8E;
+    --primary-pale: #FFF0F0;
+    --accent: #4ECDC4;
+    --accent-light: #7EDDD6;
+    --accent-pale: #EDFAFA;
+    --purple: #A855F7;
+    --purple-light: #C084FC;
+    --purple-pale: #F5F0FF;
+    --yellow: #FBBF24;
+    --yellow-pale: #FFFBEB;
+    --green: #10B981;
+    --green-pale: #ECFDF5;
+    --blue: #3B82F6;
+    --blue-pale: #EFF6FF;
+    --orange: #F97316;
+    --bg: #F8F9FE;
+    --bg-card: #FFFFFF;
+    --sidebar-bg: #FFFFFF;
+    --text-dark: #1A1A2E;
+    --text-mid: #64748B;
+    --text-light: #94A3B8;
+    --border: #E2E8F0;
+    --shadow-sm: 0 1px 8px rgba(0,0,0,0.06);
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
+
   body {
     font-family: 'Sarabun', sans-serif;
-    font-size: 17px;
-    background: var(--bg-main);
+    font-size: 16px;
+    background: var(--bg);
     color: var(--text-dark);
     height: 100vh;
     display: flex;
     overflow: hidden;
   }
 
-  /* SIDEBAR */
+  /* ─── SIDEBAR ─────────────────────────────── */
   .sidebar {
-    width: 220px;
+    width: 230px;
     height: 100vh;
-    background: var(--bg-sidebar);
+    background: var(--sidebar-bg);
     display: flex;
     flex-direction: column;
-    padding: 0;
     flex-shrink: 0;
+    border-right: 1px solid var(--border);
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  .sidebar::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -40px;
-    width: 160px; height: 160px;
-    background: var(--gold);
-    border-radius: 50%;
-    opacity: 0.15;
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
   }
 
-  .sidebar-logo {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+  .logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
   }
 
   .sidebar-logo h2 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 16px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
     font-weight: 600;
-    color: var(--gold-light);
+    color: var(--text-dark);
     line-height: 1.4;
   }
 
   .sidebar-logo p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    color: var(--text-light);
     margin-top: 2px;
   }
 
   .user-profile {
-    padding: 20px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: 0;
   }
 
   .avatar {
-    width: 42px; height: 42px;
+    width: 40px; height: 40px;
     border-radius: 50%;
-    background: var(--gold);
+    background: var(--primary);
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Kanit', sans-serif;
-    font-weight: 600; font-size: 16px;
-    color: var(--teal-dark);
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700; font-size: 15px;
+    color: #fff;
     flex-shrink: 0;
   }
 
   .user-info .name {
-    font-size: 15px; font-weight: 600;
-    color: #fff;
+    font-size: 14px; font-weight: 600;
+    color: var(--text-dark);
   }
 
   .user-info .role {
-    font-size: 13px;
-    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    color: var(--text-light);
   }
 
   .role-badge {
     display: inline-block;
     padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 3px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 2px;
+    font-family: 'Prompt', sans-serif;
   }
 
-  .role-badge.admin { background: var(--gold); color: var(--teal-dark); }
-  .role-badge.nurse { background: rgba(41,128,185,0.3); color: #74b9e0; }
+  .role-badge.admin { background: var(--primary); color: #fff; }
+  .role-badge.nurse { background: var(--blue-pale); color: var(--blue); }
 
-  nav { flex: 1; padding: 16px 0; }
+  nav { flex: 1; padding: 12px 12px; }
 
   .nav-section {
-    padding: 6px 20px 4px;
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.3);
+    padding: 8px 10px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-light);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .nav-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 20px;
+    padding: 10px 12px;
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 15px;
-    color: rgba(255,255,255,0.6);
-    position: relative;
+    transition: all 0.18s;
+    font-size: 14px;
+    color: var(--text-mid);
+    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
+    font-weight: 500;
   }
 
-  .nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.05); }
+  .nav-item:hover { color: var(--text-dark); background: var(--bg); }
 
   .nav-item.active {
-    color: var(--gold-light);
-    background: rgba(192,132,252,0.12);
-  }
-
-  .nav-item.active::before {
-    content: '';
-    position: absolute; left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--gold);
-    border-radius: 0 2px 2px 0;
+    color: var(--primary);
+    background: var(--primary-pale);
+    font-weight: 600;
   }
 
   .nav-icon {
-    width: 18px; height: 18px;
+    width: 32px; height: 32px;
     display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 16px;
+    background: var(--bg);
     flex-shrink: 0;
+    transition: background 0.18s;
+  }
+
+  .nav-item.active .nav-icon {
+    background: var(--primary);
+    font-size: 15px;
   }
 
   .active-users {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
   }
 
   .active-users p {
-    font-size: 12px;
-    color: rgba(255,255,255,0.3);
+    font-size: 11px;
+    color: var(--text-light);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    font-weight: 700;
   }
 
-  .avatar-stack {
-    display: flex;
-  }
+  .avatar-stack { display: flex; }
 
   .avatar-sm {
-    width: 28px; height: 28px;
+    width: 26px; height: 26px;
     border-radius: 50%;
-    border: 2px solid var(--bg-sidebar);
+    border: 2px solid #fff;
     display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 600;
-    margin-right: -8px;
+    font-size: 10px; font-weight: 700;
+    margin-right: -6px;
   }
 
-  /* MAIN CONTENT */
+  /* ─── MAIN CONTENT ────────────────────────── */
   .main {
     flex: 1;
     height: 100vh;
@@ -207,214 +227,207 @@
     padding: 14px 28px;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: sticky; top: 0; z-index: 100;
   }
 
   .topbar h1 {
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Prompt', sans-serif;
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-dark);
   }
 
   .topbar-actions {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 10px;
   }
 
   .btn {
-    padding: 8px 18px;
-    border-radius: 8px;
+    padding: 9px 18px;
+    border-radius: 50px;
     border: none;
     cursor: pointer;
     font-family: 'Sarabun', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     transition: all 0.2s;
   }
 
-  .btn-gold {
-    background: var(--gold);
-    color: var(--teal-dark);
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255,107,107,0.35);
   }
-
-  .btn-gold:hover { background: var(--gold-light); }
+  .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
 
   .btn-outline {
-    background: transparent;
+    background: var(--bg-card);
     border: 1.5px solid var(--border);
     color: var(--text-mid);
   }
-
-  .btn-outline:hover { border-color: var(--teal-light); color: var(--teal-dark); }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
   .btn-teal {
-    background: var(--teal-mid);
+    background: var(--accent);
     color: #fff;
+    box-shadow: 0 4px 12px rgba(78,205,196,0.3);
   }
-
-  .btn-teal:hover { background: var(--teal-dark); }
+  .btn-teal:hover { background: var(--accent-light); }
 
   .content { padding: 24px 28px; flex: 1; }
 
-  /* PAGES */
+  /* ─── PAGES ─────────────────────────────────── */
   .page { display: none; }
   .page.active { display: block; }
 
-  /* DASHBOARD */
+  /* ─── STAT CARDS ─────────────────────────────── */
   .stat-cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    gap: 14px;
     margin-bottom: 24px;
   }
 
   .stat-card {
     background: var(--bg-card);
-    border-radius: 14px;
+    border-radius: var(--radius);
     padding: 20px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
     position: relative;
     overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
 
-  .stat-card::after {
-    content: '';
-    position: absolute;
-    top: -20px; right: -20px;
-    width: 80px; height: 80px;
-    border-radius: 50%;
-    opacity: 0.08;
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+  .stat-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 12px;
   }
 
-  .stat-card.gold::after { background: var(--gold); }
-  .stat-card.teal::after { background: var(--teal-mid); }
-  .stat-card.blue::after { background: var(--blue-accent); }
-  .stat-card.green::after { background: #27ae60; }
+  .icon-red { background: var(--primary-pale); }
+  .icon-teal { background: var(--accent-pale); }
+  .icon-purple { background: var(--purple-pale); }
+  .icon-green { background: var(--green-pale); }
+  .icon-yellow { background: var(--yellow-pale); }
+  .icon-blue { background: var(--blue-pale); }
 
   .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-light);
     font-weight: 500;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .stat-number {
-    font-family: 'Kanit', sans-serif;
-    font-size: 34px;
-    font-weight: 600;
+    font-family: 'Prompt', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
     color: var(--text-dark);
     line-height: 1;
   }
 
   .stat-sub {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-light);
     margin-top: 4px;
   }
 
-  .stat-icon {
-    position: absolute;
-    top: 18px; right: 18px;
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-
-  .icon-gold { background: rgba(192,132,252,0.15); }
-  .icon-teal { background: rgba(123,82,168,0.12); }
-  .icon-blue { background: rgba(41,128,185,0.12); }
-  .icon-green { background: rgba(39,174,96,0.12); }
-
+  /* ─── CARDS ─────────────────────────────────── */
   .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 20px;
-    margin-bottom: 20px;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    margin-bottom: 16px;
   }
 
   .card {
     background: var(--bg-card);
-    border-radius: 14px;
+    border-radius: var(--radius);
     padding: 20px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
   }
 
   .card-title {
-    font-family: 'Kanit', sans-serif;
-    font-size: 17px;
-    font-weight: 500;
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
     color: var(--text-dark);
     margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
   }
 
   .card-sub {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-light);
     margin-bottom: 16px;
   }
 
-  /* TABLE */
+  /* ─── TABLE ─────────────────────────────────── */
   .data-table { width: 100%; border-collapse: collapse; }
 
   .data-table th {
     text-align: left;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: var(--text-light);
-    padding: 8px 12px;
+    padding: 8px 14px;
     border-bottom: 1px solid var(--border);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    background: var(--bg);
   }
 
   .data-table td {
-    padding: 10px 12px;
-    font-size: 15px;
+    padding: 12px 14px;
+    font-size: 14px;
     border-bottom: 1px solid rgba(0,0,0,0.04);
     vertical-align: middle;
   }
 
-  .data-table tr:hover td { background: rgba(74,45,107,0.03); }
+  .data-table tr:hover td { background: var(--bg); }
+  .data-table tr:last-child td { border-bottom: none; }
 
+  /* ─── BADGES ─────────────────────────────────── */
   .badge {
     display: inline-flex; align-items: center;
-    padding: 3px 10px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Prompt', sans-serif;
   }
 
-  .badge-pending { background: rgba(230,126,34,0.12); color: #c0641a; }
-  .badge-approved { background: rgba(39,174,96,0.12); color: #1d8b50; }
-  .badge-rejected { background: rgba(231,76,60,0.12); color: #b83c2d; }
-  .badge-leave { background: rgba(41,128,185,0.12); color: #1660a0; }
-  .badge-vacation { background: rgba(192,132,252,0.15); color: #7c3aed; }
-  .badge-training { background: rgba(142,68,173,0.12); color: #6c2fa0; }
-  .badge-birthday { background: rgba(231,76,60,0.1); color: #c0392b; }
+  .badge-pending { background: #FEF3C7; color: #92400E; }
+  .badge-approved { background: var(--green-pale); color: #065F46; }
+  .badge-rejected { background: var(--primary-pale); color: #991B1B; }
+  .badge-leave { background: var(--blue-pale); color: #1E40AF; }
+  .badge-vacation { background: var(--purple-pale); color: #6D28D9; }
+  .badge-training { background: #FDF4FF; color: #7E22CE; }
+  .badge-birthday { background: #FFF1F2; color: #9F1239; }
 
+  /* ─── PERSON CELL ─────────────────────────────── */
   .person-cell {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 10px;
   }
 
   .mini-avatar {
-    width: 28px; height: 28px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 600;
+    font-size: 12px; font-weight: 700;
     flex-shrink: 0;
+    font-family: 'Prompt', sans-serif;
   }
 
-  .mini-avatar.nurse { background: rgba(41,128,185,0.18); color: #1660a0; }
-  .mini-avatar.assistant { background: rgba(39,174,96,0.15); color: #1d8b50; }
-  .mini-avatar.helper { background: rgba(142,68,173,0.12); color: #6c2fa0; }
-
-  /* CHART BARS */
+  /* ─── CHART BARS ─────────────────────────────── */
   .chart-bars {
     display: flex; align-items: flex-end;
-    gap: 6px;
-    height: 120px;
-    padding-top: 10px;
+    gap: 6px; height: 120px; padding-top: 10px;
   }
 
   .bar-group {
@@ -426,94 +439,83 @@
 
   .bar {
     width: 12px;
-    border-radius: 3px 3px 0 0;
+    border-radius: 4px 4px 0 0;
     min-height: 4px;
     transition: opacity 0.2s;
   }
 
-  .bar:hover { opacity: 0.75; }
-  .bar.teal { background: var(--teal-mid); }
-  .bar.gold { background: var(--gold); }
+  .bar:hover { opacity: 0.7; }
+  .bar.teal { background: var(--accent); }
+  .bar.red { background: var(--primary); }
+  .bar-label { font-size: 12px; color: var(--text-light); }
 
-  .bar-label {
-    font-size: 13px;
-    color: var(--text-light);
-  }
-
-  /* DONUT CHART */
-  .donut-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 16px;
-  }
-
+  /* ─── DONUT ─────────────────────────────────── */
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
   .donut-legend { width: 100%; }
 
   .legend-item {
     display: flex; align-items: center; gap: 8px;
     padding: 6px 0;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-mid);
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
     justify-content: space-between;
   }
 
-  .legend-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .legend-left { display: flex; align-items: center; gap: 8px; }
 
-  /* CALENDAR */
+  /* ─── CALENDAR ─────────────────────────────── */
   .calendar-wrap {
     background: var(--bg-card);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
     overflow: hidden;
   }
 
   .cal-header {
-    background: var(--teal-dark);
+    background: var(--primary);
     padding: 16px 20px;
     display: flex; align-items: center; justify-content: space-between;
   }
 
   .cal-header h3 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--gold-light);
+    font-family: 'Prompt', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
   }
 
   .cal-nav { display: flex; gap: 8px; }
 
   .cal-nav-btn {
     width: 32px; height: 32px;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
     border: none;
-    color: rgba(255,255,255,0.8);
+    color: #fff;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 16px;
     transition: background 0.2s;
   }
 
-  .cal-nav-btn:hover { background: rgba(255,255,255,0.2); }
+  .cal-nav-btn:hover { background: rgba(255,255,255,0.35); }
 
   .cal-grid-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: var(--teal-mid);
+    background: #FFF5F5;
+    border-bottom: 1px solid var(--border);
   }
 
   .cal-day-name {
     text-align: center;
-    padding: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.6);
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
     letter-spacing: 0.04em;
   }
 
@@ -521,42 +523,40 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     padding: 8px;
-    gap: 4px;
+    gap: 3px;
   }
 
   .cal-cell {
     position: relative;
-    min-height: 80px;
-    border-radius: 8px;
+    min-height: 76px;
+    border-radius: 10px;
     padding: 6px;
     cursor: pointer;
     transition: background 0.15s;
     border: 1.5px solid transparent;
   }
 
-  .cal-cell:hover { background: rgba(74,45,107,0.06); }
-
+  .cal-cell:hover { background: var(--bg); }
   .cal-cell.empty { cursor: default; }
   .cal-cell.empty:hover { background: transparent; }
-
-  .cal-cell.today { background: rgba(192,132,252,0.1); border-color: var(--gold); }
-  .cal-cell.selected { background: rgba(123,82,168,0.12); border-color: var(--teal-mid); }
-  .cal-cell.has-leave { }
+  .cal-cell.today { background: var(--primary-pale); border-color: var(--primary); }
+  .cal-cell.selected { background: var(--accent-pale); border-color: var(--accent); }
 
   .cal-date {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     color: var(--text-dark);
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    font-family: 'Prompt', sans-serif;
   }
 
   .cal-cell.today .cal-date {
-    background: var(--gold);
-    color: var(--teal-dark);
+    background: var(--primary);
+    color: #fff;
     width: 22px; height: 22px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .cal-events { display: flex; flex-direction: column; gap: 2px; }
@@ -564,70 +564,54 @@
   .cal-event-dot {
     font-size: 10px;
     padding: 2px 5px;
-    border-radius: 3px;
+    border-radius: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.4;
   }
 
-  .cal-cell.over-quota {
-    border-color: #e74c3c !important;
-    background: rgba(231,76,60,0.05);
-  }
+  .cal-cell.over-quota { border-color: var(--primary) !important; background: rgba(255,107,107,0.04); }
+  .cal-cell.over-quota .cal-date { color: var(--primary); }
 
-  .cal-cell.over-quota .cal-date {
-    color: #e74c3c;
-  }
+  .cal-quota-warn { position: absolute; top: 4px; right: 4px; font-size: 11px; }
 
-  .cal-quota-warn {
-    position: absolute;
-    top: 4px; right: 4px;
-    font-size: 11px;
-    line-height: 1;
-  }
-
-  .evt-leave { background: rgba(41,128,185,0.15); color: #1660a0; }
-  .evt-vacation { background: rgba(192,132,252,0.2); color: #7c3aed; }
-  .evt-training { background: rgba(142,68,173,0.12); color: #6c2fa0; }
-  .evt-birthday { background: rgba(231,76,60,0.12); color: #c0392b; }
+  .evt-leave { background: var(--blue-pale); color: #1E40AF; }
+  .evt-vacation { background: var(--purple-pale); color: #6D28D9; }
+  .evt-training { background: #FDF4FF; color: #7E22CE; }
+  .evt-birthday { background: #FFF1F2; color: #9F1239; }
 
   .cal-count-bar {
-    position: absolute;
-    bottom: 4px; left: 6px; right: 6px;
+    position: absolute; bottom: 3px; left: 6px; right: 6px;
     display: flex; gap: 2px;
   }
 
-  .count-pill {
-    flex: 1;
-    height: 3px;
-    border-radius: 2px;
-    background: var(--border);
-  }
+  .count-pill { flex: 1; height: 3px; border-radius: 2px; background: var(--border); }
+  .count-pill.used-nurse { background: var(--blue); }
+  .count-pill.used-other { background: var(--accent); }
 
-  .count-pill.used-nurse { background: var(--blue-accent); }
-  .count-pill.used-other { background: var(--gold); }
-
-  /* FORM MODAL */
+  /* ─── MODAL ─────────────────────────────────── */
   .modal-overlay {
     display: none;
     position: fixed; inset: 0;
-    background: rgba(15,30,28,0.6);
+    background: rgba(26,26,46,0.5);
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(4px);
   }
 
   .modal-overlay.open { display: flex; }
 
   .modal {
     background: var(--bg-card);
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 28px;
     width: 520px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
   }
 
   .modal-header {
@@ -636,50 +620,54 @@
   }
 
   .modal-title {
-    font-family: 'Kanit', sans-serif;
-    font-size: 20px;
-    font-weight: 500;
+    font-family: 'Prompt', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
     color: var(--text-dark);
   }
 
   .modal-close {
     width: 32px; height: 32px;
-    border-radius: 8px;
+    border-radius: 50%;
     border: none;
-    background: var(--bg-main);
+    background: var(--bg);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     color: var(--text-mid);
     display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
   }
 
-  .modal-close:hover { background: var(--border); }
+  .modal-close:hover { background: var(--primary-pale); color: var(--primary); }
 
-  .form-group { margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
 
   .form-label {
     display: block;
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     color: var(--text-mid);
     margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .form-input, .form-select, .form-textarea {
     width: 100%;
     padding: 10px 14px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     border: 1.5px solid var(--border);
     font-family: 'Sarabun', sans-serif;
     font-size: 15px;
     color: var(--text-dark);
     background: #fff;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
     outline: none;
   }
 
   .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--teal-mid);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.1);
   }
 
   .form-textarea { min-height: 80px; resize: vertical; }
@@ -687,43 +675,47 @@
   .selected-dates {
     display: flex; flex-wrap: wrap; gap: 6px;
     padding: 10px;
-    background: var(--bg-main);
-    border-radius: 8px;
-    min-height: 40px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    min-height: 44px;
+    border: 1.5px dashed var(--border);
   }
 
   .date-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 4px 10px;
-    background: var(--teal-mid);
+    background: var(--primary);
     color: #fff;
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
   }
 
   .date-chip button {
     background: none; border: none;
-    color: rgba(255,255,255,0.7);
-    cursor: pointer;
-    padding: 0;
-    font-size: 16px;
-    line-height: 1;
+    color: rgba(255,255,255,0.75);
+    cursor: pointer; padding: 0;
+    font-size: 15px; line-height: 1;
   }
 
-  /* MINI CALENDAR IN FORM */
-  .mini-cal { border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+  /* ─── MINI CAL IN FORM ────────────────────── */
+  .mini-cal {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
 
   .mini-cal-header {
-    background: var(--teal-dark);
+    background: var(--primary);
     padding: 10px 14px;
     display: flex; align-items: center; justify-content: space-between;
   }
 
   .mini-cal-header span {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--gold-light);
-    font-family: 'Kanit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    font-family: 'Prompt', sans-serif;
   }
 
   .mini-cal-grid {
@@ -735,8 +727,8 @@
 
   .mini-cal-day-name {
     text-align: center;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-light);
     padding: 4px;
   }
@@ -744,370 +736,372 @@
   .mini-cal-cell {
     text-align: center;
     padding: 5px 2px;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     border-radius: 6px;
     color: var(--text-dark);
     transition: background 0.15s;
+    font-weight: 500;
   }
 
-  .mini-cal-cell:hover { background: rgba(123,82,168,0.1); }
+  .mini-cal-cell:hover { background: var(--primary-pale); color: var(--primary); }
   .mini-cal-cell.empty { cursor: default; }
   .mini-cal-cell.empty:hover { background: none; }
-  .mini-cal-cell.selected { background: var(--teal-mid); color: #fff; }
-  .mini-cal-cell.today-mini { font-weight: 700; color: var(--gold); }
+  .mini-cal-cell.selected { background: var(--primary); color: #fff; }
+  .mini-cal-cell.today-mini { font-weight: 800; color: var(--primary); }
   .mini-cal-cell.past { color: var(--text-light); pointer-events: none; }
 
-  /* SECTION LAYOUT */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  /* ─── LAYOUT HELPERS ─────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 
-  /* ADMIN PANEL */
+  /* ─── FILTER BAR ─────────────────────────── */
   .filter-bar {
-    display: flex; gap: 10px; align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 16px; flex-wrap: wrap;
   }
 
   .filter-select {
     padding: 8px 12px;
-    border-radius: 8px;
+    border-radius: 50px;
     border: 1.5px solid var(--border);
     font-family: 'Sarabun', sans-serif;
-    font-size: 15px;
+    font-size: 13px;
     color: var(--text-dark);
-    background: #fff;
+    background: var(--bg-card);
     outline: none;
     cursor: pointer;
+    font-weight: 500;
   }
 
-  .filter-select:focus { border-color: var(--teal-mid); }
+  .filter-select:focus { border-color: var(--primary); }
 
+  /* ─── ACTION BUTTONS ─────────────────────── */
   .action-btn {
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius: 20px;
     border: none;
     font-family: 'Sarabun', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
   }
 
-  .btn-approve { background: rgba(39,174,96,0.1); color: #1d8b50; }
-  .btn-approve:hover { background: rgba(39,174,96,0.2); }
-  .btn-reject { background: rgba(231,76,60,0.1); color: #b83c2d; }
-  .btn-reject:hover { background: rgba(231,76,60,0.2); }
+  .btn-approve { background: var(--green-pale); color: #065F46; }
+  .btn-approve:hover { background: #D1FAE5; }
+  .btn-reject { background: var(--primary-pale); color: #991B1B; }
+  .btn-reject:hover { background: #FFE4E6; }
 
-  /* TRAINING PAGE */
+  /* ─── TRAINING CARD ──────────────────────── */
   .training-card {
     background: var(--bg-card);
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
     display: flex; align-items: flex-start; gap: 14px;
-    margin-bottom: 12px;
-    border-left: 4px solid var(--gold);
+    margin-bottom: 10px;
     transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid var(--purple);
   }
 
-  .training-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+  .training-card:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
 
   .training-icon {
-    width: 44px; height: 44px;
+    width: 42px; height: 42px;
     border-radius: 10px;
-    background: rgba(142,68,173,0.12);
+    background: var(--purple-pale);
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
+    font-size: 20px; flex-shrink: 0;
   }
 
   .training-info h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-dark);
-    margin-bottom: 4px;
+    font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px;
+    font-family: 'Prompt', sans-serif;
   }
 
-  .training-meta {
-    display: flex; gap: 12px; flex-wrap: wrap;
-  }
+  .training-meta { display: flex; gap: 10px; flex-wrap: wrap; }
 
   .training-meta span {
-    font-size: 14px;
-    color: var(--text-light);
-    display: flex; align-items: center; gap: 4px;
+    font-size: 13px; color: var(--text-light);
+    display: flex; align-items: center; gap: 3px;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 20px;
   }
 
-  /* TOAST */
+  /* ─── TOAST ──────────────────────────────── */
   .toast {
     position: fixed;
     bottom: 24px; right: 24px;
-    background: var(--teal-dark);
+    background: var(--text-dark);
     color: #fff;
     padding: 14px 20px;
-    border-radius: 10px;
+    border-radius: 14px;
     box-shadow: var(--shadow-lg);
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 500;
     z-index: 9999;
     display: none;
     align-items: center; gap: 10px;
     max-width: 320px;
-    border-left: 4px solid var(--gold);
   }
 
   .toast.show { display: flex; }
-  .toast.success { border-left-color: #27ae60; }
-  .toast.error { border-left-color: #e74c3c; }
+  .toast.success { background: #065F46; }
+  .toast.error { background: #991B1B; }
 
-
-  /* LOGIN SCREEN */
+  /* ─── LOGIN SCREEN ───────────────────────── */
   .login-screen {
     position: fixed; inset: 0;
-    background: var(--teal-dark);
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FF6B6B 100%);
     display: flex; align-items: center; justify-content: center;
-    z-index: 9999;
-    overflow: hidden;
+    z-index: 9999; overflow: hidden;
   }
 
   .login-screen::before {
     content: '';
-    position: absolute; top: -100px; right: -80px;
-    width: 400px; height: 400px;
-    background: var(--gold); border-radius: 50%;
-    opacity: 0.07;
+    position: absolute; top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: rgba(255,255,255,0.15); border-radius: 50%;
   }
 
   .login-screen::after {
     content: '';
-    position: absolute; bottom: -120px; left: -60px;
-    width: 340px; height: 340px;
-    background: var(--teal-light); border-radius: 50%;
-    opacity: 0.12;
+    position: absolute; bottom: -100px; left: -60px;
+    width: 280px; height: 280px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
+  }
+
+  .login-deco-circle {
+    position: absolute; top: 30%; right: 8%;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
   }
 
   .login-box {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #fff;
     border-radius: 24px;
     padding: 40px 36px;
-    width: 400px;
+    width: 420px;
     z-index: 1;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.2);
   }
 
-  .login-logo {
-    text-align: center;
-    margin-bottom: 30px;
-  }
+  .login-logo { text-align: center; margin-bottom: 28px; }
 
   .login-logo .logo-icon {
     width: 64px; height: 64px;
-    background: var(--gold);
+    background: var(--primary);
     border-radius: 18px;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 30px;
+    font-size: 28px;
     margin-bottom: 14px;
+    box-shadow: 0 8px 20px rgba(255,107,107,0.4);
   }
 
   .login-logo h2 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 20px;
-    font-weight: 500;
-    color: #fff;
-    line-height: 1.4;
+    font-family: 'Prompt', sans-serif;
+    font-size: 20px; font-weight: 700;
+    color: var(--text-dark); line-height: 1.4;
   }
 
-  .login-logo p {
-    font-size: 14px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 4px;
-  }
+  .login-logo p { font-size: 13px; color: var(--text-light); margin-top: 4px; }
 
-  .login-input-wrap { position: relative; margin-bottom: 14px; }
+  .login-input-wrap { position: relative; }
 
   .login-input {
     width: 100%;
-    padding: 12px 16px 12px 42px;
-    border-radius: 10px;
-    border: 1.5px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.06);
-    color: #fff;
+    padding: 12px 16px 12px 44px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dark);
     font-family: 'Sarabun', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
 
-  .login-input::placeholder { color: rgba(255,255,255,0.3); }
-  .login-input:focus { border-color: var(--gold); }
+  .login-input::placeholder { color: var(--text-light); }
+  .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,107,0.15); background: #fff; }
 
-  .login-input-icon {
-    position: absolute; left: 13px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px; opacity: 0.5;
-  }
+  .login-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 17px; }
 
   .login-select {
     width: 100%;
     padding: 12px 16px;
-    border-radius: 10px;
-    border: 1.5px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.06);
-    color: #fff;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dark);
     font-family: 'Sarabun', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
     cursor: pointer;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     appearance: none;
+    transition: border-color 0.2s;
   }
 
-  .login-select option { background: #3b1f6b; color: #fff; }
-  .login-select:focus { border-color: var(--gold); }
+  .login-select:focus { border-color: var(--primary); background: #fff; }
 
   .login-btn {
     width: 100%;
-    padding: 13px;
-    border-radius: 10px;
+    padding: 14px;
+    border-radius: var(--radius-sm);
     border: none;
-    background: var(--gold);
-    color: var(--teal-dark);
-    font-family: 'Kanit', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
+    background: var(--primary);
+    color: #fff;
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    margin-top: 6px;
+    transition: all 0.2s;
+    margin-top: 4px;
+    box-shadow: 0 6px 16px rgba(255,107,107,0.35);
   }
 
-  .login-btn:hover { background: var(--gold-light); }
+  .login-btn:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,107,107,0.4); }
   .login-btn:active { transform: scale(0.98); }
 
   .login-error {
-    background: rgba(231,76,60,0.15);
-    border: 1px solid rgba(231,76,60,0.3);
-    color: #f1948a;
+    background: #FFF1F2;
+    border: 1px solid #FECDD3;
+    color: #991B1B;
     padding: 10px 14px;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
     margin-bottom: 12px;
     display: none;
   }
 
   .login-hint {
     text-align: center;
-    font-size: 13px;
-    color: rgba(255,255,255,0.25);
+    font-size: 12px;
+    color: var(--text-light);
     margin-top: 18px;
     line-height: 1.6;
+    background: var(--bg);
+    padding: 10px;
+    border-radius: 8px;
   }
 
-  /* CANCEL/RESCHEDULE MODAL */
+  /* ─── CANCEL/RESCHEDULE ──────────────────── */
   .danger-btn {
     padding: 5px 12px;
-    border-radius: 6px;
+    border-radius: 20px;
     border: none;
     font-family: 'Sarabun', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
   }
 
-  .btn-cancel-req { background: rgba(231,76,60,0.1); color: #b83c2d; }
-  .btn-cancel-req:hover { background: rgba(231,76,60,0.2); }
-  .btn-reschedule { background: rgba(192,132,252,0.15); color: #7c3aed; }
-  .btn-reschedule:hover { background: rgba(192,132,252,0.25); }
+  .btn-cancel-req { background: var(--primary-pale); color: #991B1B; }
+  .btn-cancel-req:hover { background: #FFE4E6; }
+  .btn-reschedule { background: var(--purple-pale); color: #6D28D9; }
+  .btn-reschedule:hover { background: #EDE9FE; }
 
   .app-wrapper { display: flex; width: 100%; height: 100vh; }
 
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  /* ─── SCROLLBAR ─────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-  /* ROLE SWITCH */
+  /* ─── ROLE SWITCH ────────────────────────── */
   .role-switch {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 4px;
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg);
+    border-radius: 50px;
+    padding: 3px;
+    margin: 0 12px 8px;
   }
 
   .role-btn {
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: none;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    padding: 4px 12px;
+    border-radius: 50px;
+    border: none; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
     font-family: 'Sarabun', sans-serif;
-    color: rgba(255,255,255,0.5);
+    color: var(--text-light);
     background: transparent;
   }
 
-  .role-btn.active {
-    background: var(--gold);
-    color: var(--teal-dark);
-  }
+  .role-btn.active { background: #fff; color: var(--primary); box-shadow: var(--shadow-sm); }
 
+  /* ─── SECTION TITLE ──────────────────────── */
   .section-title {
-    font-family: 'Kanit', sans-serif;
-    font-size: 18px;
-    font-weight: 500;
+    font-family: 'Prompt', sans-serif;
+    font-size: 17px; font-weight: 600;
     color: var(--text-dark);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
   }
 
-  /* QUOTA BAR */
-  .quota-bar-wrap { margin-bottom: 12px; }
-  .quota-label { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-mid); margin-bottom: 4px; }
-  .quota-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .quota-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
-  .quota-fill.nurse { background: var(--blue-accent); }
-  .quota-fill.other { background: var(--gold); }
-  .quota-fill.full { background: var(--status-rejected); }
+  /* ─── QUOTA BAR ──────────────────────────── */
+  .quota-bar-wrap { margin-bottom: 10px; }
+  .quota-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-mid); margin-bottom: 4px; font-weight: 500; }
+  .quota-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .quota-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .quota-fill.nurse { background: var(--blue); }
+  .quota-fill.other { background: var(--accent); }
+  .quota-fill.full { background: var(--primary); }
 
+  /* ─── EMPTY STATE ────────────────────────── */
   .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-light);
-    font-size: 16px;
+    text-align: center; padding: 48px;
+    color: var(--text-light); font-size: 15px;
   }
 
-  .empty-state .empty-icon { font-size: 38px; margin-bottom: 12px; }
+  .empty-state .empty-icon { font-size: 42px; margin-bottom: 10px; }
 
-  /* ============================================
-     MOBILE RESPONSIVE - ปรับสำหรับมือถือ
-     ============================================ */
+  /* ─── GSHEET BTN ─────────────────────────── */
+  #gsheetBtn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    color: var(--text-mid);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
 
-  /* Hamburger button */
+  #gsheetBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+  #gsheetDot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+  }
+
+  /* ─── MOBILE ──────────────────────────────── */
   .hamburger-btn {
     display: none;
     align-items: center; justify-content: center;
     width: 38px; height: 38px;
-    border-radius: 10px;
+    border-radius: var(--radius-sm);
     border: 1.5px solid var(--border);
     background: var(--bg-card);
-    cursor: pointer;
-    font-size: 20px;
-    flex-shrink: 0;
+    cursor: pointer; font-size: 20px; flex-shrink: 0;
   }
 
-  /* Mobile sidebar overlay */
   .sidebar-overlay {
     display: none;
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.45);
     z-index: 998;
   }
   .sidebar-overlay.open { display: block; }
 
-  /* Bottom nav for mobile */
   .bottom-nav {
     display: none;
     position: fixed;
@@ -1116,248 +1110,133 @@
     border-top: 1px solid var(--border);
     z-index: 900;
     padding: 6px 0 env(safe-area-inset-bottom, 6px);
-    box-shadow: 0 -4px 20px rgba(74,45,107,0.1);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
   }
 
-  .bottom-nav-items {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-  }
+  .bottom-nav-items { display: flex; justify-content: space-around; align-items: center; }
 
   .bottom-nav-item {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 3px;
-    padding: 6px 12px;
-    cursor: pointer;
-    border-radius: 10px;
-    transition: all 0.2s;
-    min-width: 56px;
-    color: var(--text-light);
-    font-size: 12px;
-    font-weight: 500;
+    gap: 2px; padding: 6px 10px;
+    cursor: pointer; border-radius: 10px;
+    transition: all 0.2s; min-width: 52px;
+    color: var(--text-light); font-size: 11px; font-weight: 600;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .bottom-nav-item .bn-icon { font-size: 22px; line-height: 1; }
+  .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-item.active { color: var(--primary); }
+  .bottom-nav-item.active .bn-icon { transform: scale(1.1); }
 
-  .bottom-nav-item.active {
-    color: var(--teal-mid);
-  }
-
-  .bottom-nav-item.active .bn-icon {
-    transform: scale(1.15);
-  }
-
-  /* Table scroll wrapper */
-  .table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   @media (max-width: 768px) {
-    /* Body layout */
-    body {
-      overflow: auto;
-      height: auto;
-    }
-
-    .app-wrapper {
-      height: auto;
-      min-height: 100vh;
-      flex-direction: column;
-    }
-
-    /* Show hamburger + bottom nav */
+    body { overflow: auto; height: auto; }
+    .app-wrapper { height: auto; min-height: 100vh; flex-direction: column; }
     .hamburger-btn { display: flex; }
     .bottom-nav { display: block; }
-
-    /* Sidebar - slide in/out */
     .sidebar {
-      position: fixed;
-      top: 0; left: -260px;
-      width: 260px;
-      height: 100vh;
-      z-index: 999;
-      transition: left 0.3s ease;
-      box-shadow: none;
+      position: fixed; top: 0; left: -260px;
+      width: 260px; height: 100vh;
+      z-index: 999; transition: left 0.3s ease; box-shadow: none;
     }
-
-    .sidebar.open {
-      left: 0;
-      box-shadow: 4px 0 30px rgba(0,0,0,0.3);
-    }
-
-    /* Main takes full width */
-    .main {
-      width: 100%;
-      height: auto;
-      min-height: 100vh;
-      overflow-y: visible;
-    }
-
-    /* Topbar adjustments */
-    .topbar {
-      padding: 12px 16px;
-      position: sticky;
-      top: 0; z-index: 100;
-    }
-
-    .topbar h1 { font-size: 17px; }
-
-    .topbar-actions .btn-outline { display: none; } /* hide calendar btn - use bottom nav */
-    .topbar-actions .btn-gold {
-      padding: 8px 14px;
-      font-size: 15px;
-    }
-
-    /* Content padding */
-    .content {
-      padding: 16px;
-      padding-bottom: 80px; /* space for bottom nav */
-    }
-
-    /* Stat cards - 2x2 on mobile */
-    .stat-cards {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .stat-number { font-size: 28px; }
+    .sidebar.open { left: 0; box-shadow: 8px 0 40px rgba(0,0,0,0.2); }
+    .main { width: 100%; height: auto; min-height: 100vh; overflow-y: visible; }
+    .topbar { padding: 12px 16px; position: sticky; top: 0; z-index: 100; }
+    .topbar h1 { font-size: 16px; }
+    .topbar-actions .btn-outline { display: none; }
+    .content { padding: 16px; padding-bottom: 80px; }
+    .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-number { font-size: 26px; }
     .stat-card { padding: 14px; }
-
-    /* Dashboard grid - stack vertically */
-    .dashboard-grid {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    /* Two/three col layouts */
-    .two-col, .three-col {
-      grid-template-columns: 1fr;
-    }
-
-    /* Tables - scrollable */
+    .dashboard-grid { grid-template-columns: 1fr; gap: 14px; }
+    .two-col, .three-col { grid-template-columns: 1fr; }
     .card { padding: 14px; overflow: hidden; }
-
-    .data-table {
-      min-width: 560px; /* force scroll for wide tables */
-    }
-
-    /* Admin table needs more space */
-    #page-admin .card {
-      padding: 0;
-      overflow: hidden;
-    }
-
-    #page-admin .card .table-scroll {
-      padding: 14px;
-    }
-
-    /* Calendar */
-    .cal-cell {
-      min-height: 48px;
-      padding: 4px;
-    }
-
-    .cal-date { font-size: 13px; }
-
-    .cal-event-dot {
-      font-size: 10px;
-      padding: 1px 3px;
-    }
-
-    /* Modal - full screen on mobile */
-    .modal-overlay {
-      align-items: flex-end;
-      padding: 0;
-    }
-
-    .modal {
-      width: 100% !important;
-      max-width: 100%;
-      border-radius: 20px 20px 0 0;
-      max-height: 92vh;
-      padding: 20px 20px 30px;
-    }
-
-    /* Login box */
-    .login-box {
-      width: calc(100% - 32px);
-      padding: 28px 24px;
-    }
-
-    /* Filter bar */
-    .filter-bar {
-      gap: 8px;
-    }
-
-    .filter-select {
-      font-size: 14px;
-      padding: 7px 10px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    /* Toast position */
-    .toast {
-      bottom: 80px;
-      right: 12px;
-      left: 12px;
-      max-width: 100%;
-    }
-
-    /* Training cards */
-    .training-card {
-      gap: 10px;
-    }
-
-    /* GSheet button responsive */
-    #gsheetBtn { font-size: 13px; }
-
-    /* Wrap topbar actions nicely */
-    .topbar-actions { gap: 8px; }
+    .data-table { min-width: 540px; }
+    .cal-cell { min-height: 48px; padding: 4px; }
+    .cal-date { font-size: 12px; }
+    .cal-event-dot { font-size: 9px; padding: 1px 3px; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal { width: 100% !important; max-width: 100%; border-radius: 20px 20px 0 0; max-height: 92vh; padding: 20px 20px 30px; }
+    .login-box { width: calc(100% - 32px); padding: 28px 20px; }
+    .filter-bar { gap: 6px; }
+    .filter-select { font-size: 13px; padding: 7px 10px; flex: 1; min-width: 0; }
+    .toast { bottom: 80px; right: 12px; left: 12px; max-width: 100%; }
   }
 
   @media (max-width: 480px) {
-    .stat-cards {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .stat-number { font-size: 24px; }
-    .stat-label { font-size: 13px; }
-
-    .cal-cell { min-height: 40px; }
-
+    .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-number { font-size: 22px; }
+    .cal-cell { min-height: 38px; }
     .content { padding: 12px; padding-bottom: 80px; }
   }
+
+  /* Promo banner style (like -50% off in Eatland) */
+  .promo-banner {
+    background: linear-gradient(135deg, var(--primary), #FF8E53);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    color: #fff;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(255,107,107,0.3);
+    position: relative; overflow: hidden;
+  }
+
+  .promo-banner::before {
+    content: '';
+    position: absolute; right: -30px; top: -30px;
+    width: 140px; height: 140px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+  }
+
+  .promo-badge {
+    background: #fff;
+    color: var(--primary);
+    font-family: 'Prompt', sans-serif;
+    font-size: 20px; font-weight: 800;
+    padding: 10px 14px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .promo-text h3 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px; font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .promo-text p { font-size: 13px; opacity: 0.85; }
 </style>
 </head>
 <body>
 
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="loginScreen">
+  <div class="login-deco-circle"></div>
   <div class="login-box">
     <div class="login-logo">
       <div class="logo-icon">🏥</div>
-      <h2>ระบบจัดการวันหยุด<br>หอผู้ป่วย ศอช.ชั้น10</h2>
+      <h2>ระบบจัดการวันหยุด<br>หอผู้ป่วย ศอช. ชั้น 10</h2>
       <p>Ward Leave Management System</p>
     </div>
 
     <div class="login-error" id="loginError"></div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;color:rgba(255,255,255,0.5);display:block;margin-bottom:6px;">เลือกชื่อผู้ใช้</label>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">เลือกชื่อผู้ใช้</label>
       <select class="login-select" id="loginStaff">
         <option value="">-- เลือกชื่อ-สกุล --</option>
         <option value="admin">👑 ผู้ดูแลระบบ (Admin)</option>
       </select>
     </div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;color:rgba(255,255,255,0.5);display:block;margin-bottom:6px;">รหัสผ่าน</label>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">รหัสผ่าน</label>
       <div class="login-input-wrap">
         <span class="login-input-icon">🔒</span>
         <input class="login-input" type="password" id="loginPassword" placeholder="รหัสผ่าน 4 หลัก" maxlength="4" onkeydown="if(event.key==='Enter')doLogin()">
@@ -1367,17 +1246,18 @@
     <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
 
     <div class="login-hint">
-      รหัสผ่านบุคลากรทั่วไป: <strong style="color:rgba(255,255,255,0.5);">1234</strong><br>
-      รหัสผ่าน Admin: <strong style="color:rgba(255,255,255,0.5);">0000</strong>
+      รหัสบุคลากรทั่วไป: <strong>1234</strong> &nbsp;|&nbsp; รหัส Admin: <strong>0000</strong>
     </div>
   </div>
 </div>
 
 <div class="app-wrapper" id="appWrapper" style="display:none;">
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <h2>ระบบจัดการวันหยุด<br>หอผู้ป่วย ศอช.ชั้น10</h2>
+    <div class="logo-pill">🏥 ศอช. ชั้น 10</div>
+    <h2>ระบบจัดการวันหยุด</h2>
     <p>Nursing Leave Management</p>
   </div>
 
@@ -1390,7 +1270,7 @@
     </div>
   </div>
 
-  <div style="padding: 10px 14px 6px;">
+  <div style="padding: 8px 12px 4px;">
     <div class="role-switch">
       <button class="role-btn" onclick="switchRole('nurse')">พยาบาล</button>
       <button class="role-btn active" onclick="switchRole('admin')">Admin</button>
@@ -1420,167 +1300,144 @@
     </div>
   </nav>
 
-  <div class="active-users">
-    <p>ผู้ใช้งาน</p>
-    <div class="avatar-stack">
-      <div class="avatar-sm" style="background:#2980b9;color:#fff;">คำ</div>
-      <div class="avatar-sm" style="background:#27ae60;color:#fff;">สด</div>
-      <div class="avatar-sm" style="background:#8e44ad;color:#fff;">พก</div>
-      <div class="avatar-sm" style="background:var(--gold);color:var(--teal-dark);">+30</div>
-    </div>
-  </div>
-  <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);">
-    <button onclick="showGSheetModal()" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);font-family:Sarabun,sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;" id="gsheetBtn">
-      <span id="gsheetDot" style="width:7px;height:7px;border-radius:50%;background:#e74c3c;display:inline-block;"></span>
+  <div style="padding: 10px 16px; border-top: 1px solid var(--border);">
+    <button id="gsheetBtn" onclick="showGSheetModal()">
+      <div id="gsheetDot"></div>
       <span id="gsheetBtnLabel">ตั้งค่า Google Sheets</span>
     </button>
   </div>
-</aside>
 
-<!-- Sidebar overlay for mobile -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- Bottom Nav for mobile -->
-<div class="bottom-nav" id="bottomNav">
-  <div class="bottom-nav-items">
-    <div class="bottom-nav-item active" id="bn-dashboard" onclick="showPage('dashboard');closeSidebar()">
-      <span class="bn-icon">📊</span>
-      <span>หน้าหลัก</span>
-    </div>
-    <div class="bottom-nav-item" id="bn-calendar" onclick="showPage('calendar');closeSidebar()">
-      <span class="bn-icon">📅</span>
-      <span>ปฏิทิน</span>
-    </div>
-    <div class="bottom-nav-item" id="bn-request" onclick="showPage('request');closeSidebar()">
-      <span class="bn-icon">📝</span>
-      <span>คำขอ</span>
-    </div>
-    <div class="bottom-nav-item" id="bn-training" onclick="showPage('training');closeSidebar()">
-      <span class="bn-icon">🎓</span>
-      <span>อบรม</span>
-    </div>
-    <div class="bottom-nav-item" onclick="openRequestModal();closeSidebar()">
-      <span class="bn-icon">➕</span>
-      <span>ขอหยุด</span>
+  <div class="active-users">
+    <p>ผู้ใช้งาน</p>
+    <div class="avatar-stack">
+      <div class="avatar-sm" style="background:#3B82F6;color:#fff;">คำ</div>
+      <div class="avatar-sm" style="background:#10B981;color:#fff;">สด</div>
+      <div class="avatar-sm" style="background:#A855F7;color:#fff;">พก</div>
+      <div class="avatar-sm" style="background:var(--primary);color:#fff;">+30</div>
     </div>
   </div>
-</div>
+</aside>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()">☰</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
       <h1 id="pageTitle">แดชบอร์ด</h1>
     </div>
     <div class="topbar-actions">
       <button class="btn btn-outline" onclick="showPage('calendar')">📅 ปฏิทิน</button>
-      <button class="btn btn-gold" onclick="openRequestModal()">+ ขอวันหยุด</button>
+      <button class="btn btn-primary" onclick="openRequestModal()">+ ขอวันหยุด</button>
     </div>
   </div>
 
   <div class="content">
 
-    <!-- DASHBOARD PAGE -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
+      <!-- Promo banner -->
+      <div class="promo-banner" id="promoBanner">
+        <div class="promo-badge">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.05em;">วันนี้</div>
+          <div id="todayQuotaShort">0/4</div>
+        </div>
+        <div class="promo-text">
+          <h3>โควต้าวันหยุดวันนี้</h3>
+          <p id="todayQuotaDate">—</p>
+        </div>
+        <div style="margin-left:auto;text-align:right;z-index:1;">
+          <div style="font-size:26px;">👩‍⚕️</div>
+        </div>
+      </div>
+
       <div class="stat-cards">
-        <div class="stat-card gold">
-          <div class="stat-label">คำขอเดือนนี้</div>
-          <div class="stat-number" id="stat-total">12</div>
-          <div class="stat-sub">เมษายน 2568</div>
-          <div class="stat-icon icon-gold">📋</div>
+        <div class="stat-card">
+          <div class="stat-icon icon-red">📋</div>
+          <div class="stat-label">คำขอทั้งหมด</div>
+          <div class="stat-number" id="stat-total">0</div>
+          <div class="stat-sub">ทุกประเภท</div>
         </div>
-        <div class="stat-card teal">
+        <div class="stat-card">
+          <div class="stat-icon icon-yellow">⏳</div>
           <div class="stat-label">รออนุมัติ</div>
-          <div class="stat-number" id="stat-pending">4</div>
-          <div class="stat-sub">คำขอที่ยังไม่ได้อนุมัติ</div>
-          <div class="stat-icon icon-teal">⏳</div>
+          <div class="stat-number" id="stat-pending">0</div>
+          <div class="stat-sub">รอดำเนินการ</div>
         </div>
-        <div class="stat-card blue">
+        <div class="stat-card">
+          <div class="stat-icon icon-green">✅</div>
           <div class="stat-label">อนุมัติแล้ว</div>
-          <div class="stat-number" id="stat-approved">7</div>
+          <div class="stat-number" id="stat-approved">0</div>
           <div class="stat-sub">เดือนนี้</div>
-          <div class="stat-icon icon-blue">✅</div>
         </div>
-        <div class="stat-card green">
-          <div class="stat-label">อบรม</div>
-          <div class="stat-number" id="stat-training">3</div>
-          <div class="stat-sub">คนกำลังอบรม</div>
-          <div class="stat-icon icon-green">🎓</div>
+        <div class="stat-card">
+          <div class="stat-icon icon-teal">🎓</div>
+          <div class="stat-label">การอบรม</div>
+          <div class="stat-number" id="stat-training">0</div>
+          <div class="stat-sub">ที่อนุมัติแล้ว</div>
         </div>
       </div>
 
       <div class="dashboard-grid">
-        <!-- LEFT: Recent requests + chart -->
-        <div>
-          <div class="card" style="margin-bottom: 20px;">
-            <div class="card-title">คำขอล่าสุด</div>
-            <div class="card-sub">ภาพรวมคำขอวันหยุดของบุคลากร</div>
-            <div class="table-scroll">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>ชื่อ-สกุล</th>
-                  <th>ประเภท</th>
-                  <th>วันที่</th>
-                  <th>สถานะ</th>
-                </tr>
-              </thead>
-              <tbody id="dashboardTable">
-              </tbody>
-            </table>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">สถิติการขอหยุดรายเดือน</div>
-            <div class="card-sub">จำนวนคำขอแยกตามเหตุผล</div>
-            <div class="chart-bars" id="monthlyChart"></div>
-            <div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--text-light);">
-              <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--teal-mid);margin-right:4px;"></span>หยุด/พักร้อน</span>
-              <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--gold);margin-right:4px;"></span>อบรม/วันเกิด</span>
-            </div>
+        <div class="card">
+          <div class="card-title">📊 คำขอรายเดือน</div>
+          <div class="card-sub">6 เดือนล่าสุด</div>
+          <div class="chart-bars" id="monthlyChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🍩 สัดส่วนการลา</div>
+          <div class="card-sub">เฉพาะที่อนุมัติแล้ว</div>
+          <div class="donut-wrap">
+            <div id="donutChart"></div>
+            <div class="donut-legend" id="donutLegend"></div>
           </div>
         </div>
+      </div>
 
-        <!-- RIGHT: Donut + Quota -->
-        <div>
-          <div class="card" style="margin-bottom: 20px;">
-            <div class="card-title">สัดส่วนการหยุด</div>
-            <div class="card-sub">แยกตามประเภท</div>
-            <div class="donut-wrap">
-              <div id="donutChart" style="display:flex;justify-content:center;"></div>
-              <div class="donut-legend" id="donutLegend" style="width:100%;"></div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">📋 คำขอล่าสุด</div>
+          <div class="card-sub" style="margin-bottom:12px;">รายการขอวันหยุดล่าสุด</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ชื่อ</th>
+                <th>ประเภท</th>
+                <th>วันที่</th>
+                <th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="recentRequests"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 โควต้าวันนี้</div>
+          <div class="card-sub" id="todayQuotaDateCard">—</div>
+          <div class="quota-bar-wrap">
+            <div class="quota-label">
+              <span>👩‍⚕️ พยาบาล</span>
+              <span id="nurse-quota-text">0/4</span>
+            </div>
+            <div class="quota-track">
+              <div class="quota-fill nurse" id="nurse-quota-bar" style="width:0%"></div>
             </div>
           </div>
-
-          <div class="card">
-            <div class="card-title">โควต้าวันนี้</div>
-            <div class="card-sub" id="todayQuotaDate"></div>
-            <div class="quota-bar-wrap">
-              <div class="quota-label">
-                <span>พยาบาล</span>
-                <span id="nurse-quota-text">0/4</span>
-              </div>
-              <div class="quota-track">
-                <div class="quota-fill nurse" id="nurse-quota-bar" style="width:0%"></div>
-              </div>
+          <div class="quota-bar-wrap">
+            <div class="quota-label">
+              <span>🧑‍💼 ผช./พนง.</span>
+              <span id="other-quota-text">0/3</span>
             </div>
-            <div class="quota-bar-wrap">
-              <div class="quota-label">
-                <span>ผช./พนง. (รวม)</span>
-                <span id="other-quota-text">0/3</span>
-              </div>
-              <div class="quota-track">
-                <div class="quota-fill other" id="other-quota-bar" style="width:0%"></div>
-              </div>
+            <div class="quota-track">
+              <div class="quota-fill other" id="other-quota-bar" style="width:0%"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- CALENDAR PAGE -->
+    <!-- CALENDAR -->
     <div class="page" id="page-calendar">
       <div class="calendar-wrap">
         <div class="cal-header">
@@ -1590,11 +1447,11 @@
           </div>
           <div style="text-align:center;">
             <h3 id="calMonthLabel"></h3>
-            <div id="calRealTimeClock" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;font-family:'Kanit',sans-serif;letter-spacing:0.5px;"></div>
+            <div id="calRealTimeClock" style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px;font-family:'Prompt',sans-serif;"></div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button id="refreshBtn" onclick="refreshCalendar()" style="padding:6px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);cursor:pointer;font-size:14px;transition:all 0.2s;" title="รีเฟรชปฏิทิน">🔄</button>
-            <button class="btn btn-gold" style="padding:6px 14px;font-size:13px;" onclick="openRequestModal()">+ ขอวันหยุด</button>
+            <button id="refreshBtn" onclick="refreshCalendar()" style="padding:6px 12px;border-radius:50px;border:none;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:13px;font-weight:600;" title="รีเฟรช">🔄 รีเฟรช</button>
+            <button class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:50px;" onclick="openRequestModal()">+ ขอวันหยุด</button>
           </div>
         </div>
         <div class="cal-grid-header">
@@ -1608,16 +1465,15 @@
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
-
       <div style="margin-top:20px;">
-        <div class="section-title">กิจกรรมในเดือนนี้</div>
+        <div class="section-title">📌 กิจกรรมในเดือนนี้</div>
         <div id="calEventList"></div>
       </div>
     </div>
 
     <!-- REQUEST PAGE -->
     <div class="page" id="page-request">
-      <div class="section-title">คำขอวันหยุดของฉัน</div>
+      <div class="section-title">📝 คำขอวันหยุดของฉัน</div>
       <div id="myRequestsList"></div>
     </div>
 
@@ -1645,36 +1501,36 @@
           <option value="nursing-aide">พนักงานช่วยการพยาบาล</option>
         </select>
       </div>
-
       <div class="card">
         <div class="table-scroll">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th style="width:40px;">#</th>
-              <th>ชื่อ-สกุล / เวลาที่ขอ</th>
-              <th>ตำแหน่ง</th>
-              <th>ประเภท</th>
-              <th>วันที่หยุด</th>
-              <th>สถานะ</th>
-              <th>จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="adminTable"></tbody>
-        </table>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>ชื่อ</th>
+                <th>ตำแหน่ง</th>
+                <th>ประเภท</th>
+                <th>วันที่ขอ ⏱️</th>
+                <th>วันที่หยุด</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="adminTable"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <!-- TRAINING PAGE -->
     <div class="page" id="page-training">
-      <div class="section-title">รายการอบรม</div>
+      <div class="section-title">🎓 รายการอบรม</div>
       <div id="trainingList"></div>
     </div>
 
     <!-- STATS PAGE -->
     <div class="page" id="page-stats">
-      <div class="section-title">สถิติรายบุคคล</div>
+      <div class="section-title">📈 สถิติรายบุคคล</div>
       <div class="card">
         <table class="data-table">
           <thead>
@@ -1696,36 +1552,65 @@
   </div><!-- /content -->
 </div><!-- /main -->
 
-<!-- GSHEET SETTINGS MODAL -->
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-items">
+    <div class="bottom-nav-item active" onclick="showPage('dashboard')">
+      <span class="bn-icon">📊</span><span>หน้าหลัก</span>
+    </div>
+    <div class="bottom-nav-item" onclick="showPage('calendar')">
+      <span class="bn-icon">📅</span><span>ปฏิทิน</span>
+    </div>
+    <div class="bottom-nav-item" onclick="openRequestModal()">
+      <span class="bn-icon">➕</span><span>ขอหยุด</span>
+    </div>
+    <div class="bottom-nav-item" onclick="showPage('request')">
+      <span class="bn-icon">📝</span><span>คำขอ</span>
+    </div>
+    <div class="bottom-nav-item" onclick="showPage('training')">
+      <span class="bn-icon">🎓</span><span>อบรม</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-wrapper -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- GSHEET MODAL -->
 <div class="modal-overlay" id="gsheetModal">
   <div class="modal" style="width:480px;">
     <div class="modal-header">
       <div class="modal-title">⚙️ ตั้งค่า Google Sheets</div>
       <button class="modal-close" onclick="closeGSheetModal()">✕</button>
     </div>
-    <div style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.3);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--text-mid);line-height:1.7;">
+    <div style="background:var(--accent-pale);border:1px solid var(--accent-light);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--text-mid);line-height:1.7;">
       <strong style="color:var(--text-dark);">วิธีเชื่อม Google Sheets:</strong><br>
-      1. เปิด Google Sheets แล้วไปที่ <strong>Extensions → Apps Script</strong><br>
-      2. วางโค้ด Apps Script ด้านล่าง แล้วกด Deploy → New deployment<br>
-      3. ตั้งเป็น <strong>Web App</strong>, Execute as: Me, Who can access: Anyone<br>
-      4. คัดลอก URL ที่ได้มาใส่ในช่องด้านล่าง
+      1. เปิด Google Sheets → <strong>Extensions → Apps Script</strong><br>
+      2. วางโค้ด Apps Script แล้ว Deploy → New deployment<br>
+      3. ตั้งเป็น <strong>Web App</strong>, Execute as: Me, Anyone<br>
+      4. คัดลอก URL มาใส่ด้านล่าง
     </div>
     <div class="form-group">
       <label class="form-label">Google Apps Script Web App URL</label>
       <input class="form-input" type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/xxxx/exec" style="font-size:12px;">
     </div>
     <div class="form-group">
-      <label class="form-label">Google Sheet ID (จาก URL ของ Sheet)</label>
+      <label class="form-label">Google Sheet ID</label>
       <input class="form-input" type="text" id="gsSheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" style="font-size:12px;">
     </div>
     <details style="margin-bottom:16px;">
-      <summary style="cursor:pointer;font-size:13px;font-weight:500;color:var(--teal-mid);padding:8px 0;">📋 คัดลอกโค้ด Apps Script</summary>
-      <div style="margin-top:10px;background:#f5f5f5;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.6;color:#333;white-space:pre-wrap;max-height:200px;overflow-y:auto;border:1px solid var(--border);" id="appsScriptCode"></div>
-      <button onclick="copyScript()" style="margin-top:8px;padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:#fff;font-family:Sarabun,sans-serif;font-size:12px;cursor:pointer;">📋 คัดลอก</button>
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);padding:8px 0;">📋 คัดลอกโค้ด Apps Script</summary>
+      <div style="margin-top:10px;background:#f8f9fe;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.6;color:#333;white-space:pre-wrap;max-height:200px;overflow-y:auto;border:1px solid var(--border);" id="appsScriptCode"></div>
+      <button onclick="copyScript()" style="margin-top:8px;padding:6px 16px;border-radius:50px;border:1px solid var(--border);background:#fff;font-family:Sarabun,sans-serif;font-size:12px;cursor:pointer;font-weight:600;">📋 คัดลอก</button>
     </details>
     <div style="display:flex;gap:10px;margin-bottom:12px;">
-      <button class="btn btn-outline" onclick="testGSheet()" style="flex:1;">🔗 ทดสอบการเชื่อมต่อ</button>
-      <button class="btn btn-teal" onclick="saveGSheetSettings()" style="flex:1;">💾 บันทึกการตั้งค่า</button>
+      <button class="btn btn-outline" onclick="testGSheet()" style="flex:1;">🔗 ทดสอบ</button>
+      <button class="btn btn-teal" onclick="saveGSheetSettings()" style="flex:1;">💾 บันทึก</button>
     </div>
     <div id="gsTestResult" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
   </div>
@@ -1735,7 +1620,7 @@
 <div class="modal-overlay" id="requestModal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">ขอวันหยุด</div>
+      <div class="modal-title">🗓️ ขอวันหยุด</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
 
@@ -1785,7 +1670,7 @@
       <textarea class="form-textarea" id="req-note" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
     </div>
 
-    <div id="quota-warning" style="display:none;background:rgba(231,76,60,0.1);color:#b83c2d;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;border-left:3px solid #e74c3c;"></div>
+    <div id="quota-warning" style="display:none;background:var(--primary-pale);color:#991B1B;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;border-left:3px solid var(--primary);"></div>
 
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
@@ -1794,20 +1679,25 @@
   </div>
 </div>
 
-
 <!-- CANCEL/RESCHEDULE MODAL -->
 <div class="modal-overlay" id="cancelModal">
   <div class="modal" style="width:460px;">
     <div class="modal-header">
-      <div class="modal-title" id="cancelModalTitle">จัดการคำขอ</div>
+      <div class="modal-title" id="cancelModalTitle">❌ ยกเลิกคำขอ</div>
       <button class="modal-close" onclick="closeCancelModal()">✕</button>
     </div>
+    <div id="cancelReqInfo" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid var(--border);"></div>
 
-    <div id="cancelReqInfo" style="background:var(--bg-main);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;line-height:1.8;"></div>
+    <div id="cancelSection">
+      <div class="form-group">
+        <label class="form-label">เหตุผลการยกเลิก</label>
+        <textarea class="form-textarea" id="cancelNote" placeholder="ระบุเหตุผล..." style="min-height:70px;"></textarea>
+      </div>
+    </div>
 
     <div id="rescheduleSection" style="display:none;">
       <div class="form-group">
-        <label class="form-label">เลือกวันใหม่</label>
+        <label class="form-label">เลือกวันที่ใหม่</label>
         <div class="mini-cal">
           <div class="mini-cal-header">
             <button class="cal-nav-btn" onclick="changeRescheduleMonth(-1)">‹</button>
@@ -1819,53 +1709,36 @@
       </div>
       <div class="form-group">
         <label class="form-label">วันที่เลือกใหม่</label>
-        <div class="selected-dates" id="rescheduleDatesDisplay"></div>
+        <div class="selected-dates" id="rescheduleDatesDisplay">
+          <span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label">เหตุผลที่เลื่อน</label>
-        <textarea class="form-textarea" id="rescheduleNote" placeholder="ระบุเหตุผล..."></textarea>
+        <label class="form-label">หมายเหตุ</label>
+        <textarea class="form-textarea" id="rescheduleNote" placeholder="เหตุผลการเลื่อน..." style="min-height:60px;"></textarea>
       </div>
     </div>
 
-    <div id="cancelSection">
-      <div class="form-group">
-        <label class="form-label">เหตุผลที่ยกเลิก</label>
-        <textarea class="form-textarea" id="cancelNote" placeholder="ระบุเหตุผลที่ยกเลิก..."></textarea>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button class="btn btn-outline" onclick="closeCancelModal()">ปิด</button>
-      <button id="confirmCancelBtn" class="btn" style="background:rgba(231,76,60,0.15);color:#b83c2d;border:1.5px solid rgba(231,76,60,0.3);" onclick="confirmCancel()">
-        ❌ ยืนยันยกเลิก
-      </button>
-      <button id="confirmRescheduleBtn" class="btn btn-teal" onclick="confirmReschedule()" style="display:none;">
-        📅 ยืนยันเลื่อน
-      </button>
+      <button class="btn btn-primary" id="confirmCancelBtn" onclick="confirmCancel()">ยืนยันยกเลิก</button>
+      <button class="btn btn-teal" id="confirmRescheduleBtn" onclick="confirmReschedule()" style="display:none;">ยืนยันเลื่อนวัน</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <span id="toast-icon">✅</span>
-  <span id="toast-msg"></span>
-</div>
-
 <script>
-// ===== AUTH =====
+// ===== LOGIN =====
 const ADMIN_PASSWORD = '0000';
 const STAFF_PASSWORD = '1234';
-
-let currentUser = null; // { staffId, name, role, isAdmin }
+let currentUser = null;
 
 function initLoginDropdown() {
   const sel = document.getElementById('loginStaff');
-  // Admin option already in HTML
   STAFF.forEach(s => {
     const opt = document.createElement('option');
     opt.value = s.id;
-    opt.textContent = s.name + ' (' + s.roleLabel + ')';
+    opt.textContent = `${s.name} (${s.roleLabel})`;
     sel.appendChild(opt);
   });
 }
@@ -1874,26 +1747,23 @@ function doLogin() {
   const staffVal = document.getElementById('loginStaff').value;
   const password = document.getElementById('loginPassword').value;
   const errEl = document.getElementById('loginError');
-
   if (!staffVal) { showLoginError('กรุณาเลือกชื่อผู้ใช้'); return; }
   if (!password) { showLoginError('กรุณากรอกรหัสผ่าน'); return; }
-
   if (staffVal === 'admin') {
     if (password !== ADMIN_PASSWORD) { showLoginError('รหัสผ่าน Admin ไม่ถูกต้อง'); return; }
-    currentUser = { staffId: null, name: 'ผู้ดูแลระบบ', roleLabel: 'Administrator', isAdmin: true, abbr: 'Ad', color: '#c084fc' };
+    currentUser = { staffId: null, name: 'ผู้ดูแลระบบ', roleLabel: 'Administrator', isAdmin: true, abbr: 'Ad', color: '#FF6B6B' };
   } else {
     if (password !== STAFF_PASSWORD) { showLoginError('รหัสผ่านไม่ถูกต้อง (ใช้ 1234)'); return; }
     const staff = getStaff(parseInt(staffVal));
     if (!staff) { showLoginError('ไม่พบข้อมูลผู้ใช้'); return; }
     currentUser = { ...staff, isAdmin: false };
   }
-
   errEl.style.display = 'none';
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appWrapper').style.display = 'flex';
   updateSidebarUser();
   updateNavForRole();
-  if (gsConfig.url) startAutoSync(); // sync ปฏิทินทันทีหลัง login
+  if (gsConfig.url) startAutoSync();
   renderDashboard();
 }
 
@@ -1917,9 +1787,10 @@ function logout() {
 
 function updateSidebarUser() {
   if (!currentUser) return;
-  document.getElementById('sidebarAvatar').textContent = currentUser.abbr || currentUser.name.slice(0,2);
-  document.getElementById('sidebarAvatar').style.background = currentUser.isAdmin ? 'var(--gold)' : (currentUser.color + '44');
-  document.getElementById('sidebarAvatar').style.color = currentUser.isAdmin ? 'var(--teal-dark)' : currentUser.color;
+  const av = document.getElementById('sidebarAvatar');
+  av.textContent = currentUser.abbr || currentUser.name.slice(0,2);
+  av.style.background = currentUser.isAdmin ? 'var(--primary)' : (currentUser.color || 'var(--blue)');
+  av.style.color = '#fff';
   document.getElementById('sidebarName').textContent = currentUser.name;
   document.getElementById('sidebarRole').textContent = currentUser.roleLabel;
   const badge = document.getElementById('sidebarBadge');
@@ -1934,10 +1805,7 @@ function updateSidebarUser() {
 
 function updateNavForRole() {
   const adminItems = document.querySelectorAll('.admin-only');
-  adminItems.forEach(el => {
-    el.style.display = currentUser?.isAdmin ? 'flex' : 'none';
-  });
-  // Hide role switch - login controls it now
+  adminItems.forEach(el => { el.style.display = currentUser?.isAdmin ? 'flex' : 'none'; });
   const roleSwitch = document.querySelector('.role-switch');
   if (roleSwitch) roleSwitch.style.display = 'none';
 }
@@ -1947,43 +1815,42 @@ const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มี
 const DAYS_TH = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
 
 const STAFF = [
-  { id:1,  name:'นางคำพุด โสตรุดร',        role:'nurse',        roleLabel:'พยาบาล',               abbr:'คำ', color:'#2980b9' },
-  { id:2,  name:'นางสาวเบญจมาศ รัตนารักษ์', role:'nurse',        roleLabel:'พยาบาล',               abbr:'บญ', color:'#1a6fa5' },
-  { id:3,  name:'นางสาวสาคร แสวงชู',        role:'nurse',        roleLabel:'พยาบาล',               abbr:'สค', color:'#0d5a8a' },
-  { id:4,  name:'นางสาวนวลตา พันธุ์กาง',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'นว', color:'#2374aa' },
-  { id:5,  name:'นางสาวสุรีรัตน์ พลธรรม',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'สร', color:'#1560a0' },
-  { id:6,  name:'นางสาวพิศา จันทะค่อม',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'พศ', color:'#2060a8' },
-  { id:7,  name:'นางสาวสุนันทา ผาสุกโสม',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'สน', color:'#0a4f90' },
-  { id:8,  name:'นางสาวจารุวรรณ สุทธิประภา',role:'nurse',        roleLabel:'พยาบาล',               abbr:'จร', color:'#1a70b5' },
-  { id:9,  name:'นางสาวฐิตินันท์ อินทร์ช้าง',role:'nurse',       roleLabel:'พยาบาล',               abbr:'ฐต', color:'#2575c0' },
-  { id:10, name:'นางสาวจันจิรา ศรีตะ',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'จจ', color:'#0e65a8' },
-  { id:11, name:'นางสาวอัญชลี ภักดีเกษม',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'อช', color:'#1855a0' },
-  { id:12, name:'นางสาวสรวงสุดา ตู้จันทึก', role:'nurse',        roleLabel:'พยาบาล',               abbr:'สว', color:'#2265b0' },
-  { id:13, name:'นางสาวศิริรัตน์ โพยนอก',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'ศร', color:'#0d5898' },
-  { id:14, name:'นางสาวพุทธชาติ สุมาลี',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'พธ', color:'#1a6ab0' },
-  { id:15, name:'นางสาวอรอุมา รักไร่กลาง',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'ออ', color:'#2070b8' },
-  { id:16, name:'นางสาวสุพรรณี สำลีอ่อน',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'สพ', color:'#1060a5' },
-  { id:17, name:'นางสาวอริสรา ป้องงูเหลือม', role:'nurse',       roleLabel:'พยาบาล',               abbr:'อร', color:'#1870b5' },
-  { id:18, name:'นางสาวอุ้มบุญ ชื่นนอก',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'อบ', color:'#2568a8' },
-  { id:19, name:'นางสาวชนาภา ทบสนธิ์',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'ชน', color:'#0d62a0' },
-  { id:20, name:'นางสาวกนกพร เพิกขุนทด',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'กน', color:'#1a78c0' },
-  { id:21, name:'นางสาววริศรา ย่อกลาง',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'วร', color:'#2270b5' },
-  { id:22, name:'นายภูวิศ คงทอง',           role:'nurse',        roleLabel:'พยาบาล',               abbr:'ภว', color:'#1565b0' },
-  { id:23, name:'นางสาวอริสา สุราฤทธิ์',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'อส', color:'#0e68a5' },
-  { id:24, name:'นางสาวอนัญญา พลอยเงิน',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'อน', color:'#1a5fa0' },
-  { id:25, name:'นางสาวสิตานัน ผัดหล้า',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สต', color:'#2075b8' },
-  { id:26, name:'นางสาวสุดารัตน์ เพราะผักแว่น',role:'assistant', roleLabel:'ผู้ช่วยพยาบาล',       abbr:'สด', color:'#27ae60' },
-  { id:27, name:'นางสาวกมลวรรณ กระจายกลาง', role:'assistant',    roleLabel:'ผู้ช่วยพยาบาล',       abbr:'กม', color:'#1e8b55' },
-  { id:28, name:'นางสาวพศิกา หวังรักกลาง',  role:'helper',       roleLabel:'พนง.ช่วยเหลือคนไข้',  abbr:'พก', color:'#8e44ad' },
-  { id:29, name:'นางสาววันทกาล ด่านอินถา',  role:'helper',       roleLabel:'พนง.ช่วยเหลือคนไข้',  abbr:'วก', color:'#7d3c98' },
-  { id:30, name:'นายเกียรติภูมิ บัวสันเทียะ',role:'nursing-aide',roleLabel:'พนง.ช่วยการพยาบาล',  abbr:'กต', color:'#e67e22' },
-  { id:31, name:'นายสกล ทองธานี',           role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',  abbr:'สก', color:'#ca6f1e' },
-  { id:32, name:'นายสมภพ เพ็ชรกลิ่นพะเนา',  role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',  abbr:'สภ', color:'#d4871e' },
-  { id:33, name:'นายมีชัย สำโรง',           role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',  abbr:'มช', color:'#ba6a15' },
+  { id:1,  name:'คำพุด',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'คำ', color:'#2980b9' },
+  { id:2,  name:'เบญจมาศ',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'บญ', color:'#1a6fa5' },
+  { id:3,  name:'สาคร',       role:'nurse',        roleLabel:'พยาบาล',               abbr:'สค', color:'#0d5a8a' },
+  { id:4,  name:'นวลตา',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'นว', color:'#2374aa' },
+  { id:5,  name:'สุรีรัตน์',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'สร', color:'#1560a0' },
+  { id:6,  name:'พิศา',       role:'nurse',        roleLabel:'พยาบาล',               abbr:'พศ', color:'#2060a8' },
+  { id:7,  name:'สุนันทา',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สน', color:'#0a4f90' },
+  { id:8,  name:'จารุวรรณ',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'จร', color:'#1a70b5' },
+  { id:9,  name:'ฐิตินันท์',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'ฐต', color:'#2575c0' },
+  { id:10, name:'จันจิรา',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'จจ', color:'#0e65a8' },
+  { id:11, name:'อัญชลี',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'อช', color:'#1855a0' },
+  { id:12, name:'สรวงสุดา',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'สว', color:'#2265b0' },
+  { id:13, name:'ศิริรัตน์',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'ศร', color:'#0d5898' },
+  { id:14, name:'พุทธชาติ',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'พธ', color:'#1a6ab0' },
+  { id:15, name:'อรอุมา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'ออ', color:'#2070b8' },
+  { id:16, name:'สุพรรณี',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สพ', color:'#1060a5' },
+  { id:17, name:'อริสรา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'อร', color:'#1870b5' },
+  { id:18, name:'อุ้มบุญ',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'อบ', color:'#2568a8' },
+  { id:19, name:'ชนาภา',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'ชน', color:'#0d62a0' },
+  { id:20, name:'กนกพร',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'กน', color:'#1a78c0' },
+  { id:21, name:'วริศรา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'วร', color:'#2270b5' },
+  { id:22, name:'ภูวิศ',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'ภว', color:'#1565b0' },
+  { id:23, name:'อริสา',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'อส', color:'#0e68a5' },
+  { id:24, name:'อนัญญา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'อน', color:'#1a5fa0' },
+  { id:25, name:'สิตานัน',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สต', color:'#2075b8' },
+  { id:26, name:'สุดารัตน์',  role:'assistant',    roleLabel:'ผู้ช่วยพยาบาล',       abbr:'สด', color:'#10B981' },
+  { id:27, name:'กมลวรรณ',    role:'assistant',    roleLabel:'ผู้ช่วยพยาบาล',       abbr:'กม', color:'#059669' },
+  { id:28, name:'พศิกา',      role:'helper',       roleLabel:'พนง.ช่วยเหลือคนไข้',  abbr:'พก', color:'#A855F7' },
+  { id:29, name:'วันทกาล',    role:'helper',       roleLabel:'พนง.ช่วยเหลือคนไข้',  abbr:'วก', color:'#9333EA' },
+  { id:30, name:'เกียรติภูมิ',role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'กต', color:'#F97316' },
+  { id:31, name:'สกล',        role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'สก', color:'#EA580C' },
+  { id:32, name:'สมภพ',       role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'สภ', color:'#DC6B19' },
+  { id:33, name:'มีชัย',      role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'มช', color:'#C2570D' },
 ];
 
 let requests = [];
-
 let nextId = 1;
 let currentRole = 'admin';
 let calendarDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -2011,183 +1878,147 @@ const ROLE_CLASS = { nurse:'nurse', assistant:'assistant', helper:'helper', 'nur
 
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
-  const icon = document.getElementById('toast-icon');
-  const msgEl = document.getElementById('toast-msg');
   t.className = 'toast show ' + type;
-  icon.textContent = type==='success' ? '✅' : '❌';
-  msgEl.textContent = msg;
+  document.getElementById('toast-icon').textContent = type==='success' ? '✅' : '❌';
+  document.getElementById('toast-msg').textContent = msg;
   setTimeout(()=>{ t.className='toast'; }, 3000);
-}
-
-// ===== ROLE =====
-function switchRole(role) {
-  // Deprecated - now handled by login system
-  // Kept for backward compat only
 }
 
 // ===== NAVIGATION =====
 function showPage(page) {
-  // Block admin-only pages for non-admin
-  if ((page === 'admin' || page === 'stats') && !currentUser?.isAdmin) {
-    showToast('เฉพาะ Admin เท่านั้น', 'error');
-    return;
-  }
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.remove('active'));
+  const p = document.getElementById('page-'+page);
+  if (p) p.classList.add('active');
+  const n = document.querySelector(`[data-page="${page}"]`);
+  if (n) n.classList.add('active');
+  const titles = {dashboard:'แดชบอร์ด',calendar:'ปฏิทิน',request:'คำขอวันหยุด',admin:'อนุมัติคำขอ',training:'การอบรม',stats:'สถิติ'};
+  document.getElementById('pageTitle').textContent = titles[page]||'';
+  closeSidebar();
+  if (page==='dashboard') renderDashboard();
+  else if (page==='calendar') renderCalendar();
+  else if (page==='request') renderMyRequests();
+  else if (page==='admin') renderAdminTable();
+  else if (page==='training') renderTraining();
+  else if (page==='stats') renderStats();
+}
 
-  const titles = { dashboard:'แดชบอร์ด', calendar:'ปฏิทิน', request:'คำขอของฉัน', admin:'อนุมัติคำขอ', training:'การอบรม', stats:'สถิติ' };
-  document.getElementById('pageTitle').textContent = titles[page] || page;
-
-  const navItems = document.querySelectorAll('.nav-item[data-page]');
-  navItems.forEach(n => { if(n.dataset.page === page) n.classList.add('active'); });
-
-  // Sync bottom nav
-  document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-  const bnEl = document.getElementById('bn-'+page);
-  if(bnEl) bnEl.classList.add('active');
-
-  if(page==='dashboard') renderDashboard();
-  if(page==='calendar') renderCalendar();
-  if(page==='admin') renderAdminTable();
-  if(page==='training') renderTraining();
-  if(page==='stats') renderStats();
-  if(page==='request') renderMyRequests();
+function switchRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active', b.textContent.toLowerCase().includes(role==='admin'?'admin':'พยาบาล')));
 }
 
 // ===== DASHBOARD =====
 function renderDashboard() {
-  const now = new Date();
-  const yy = now.getFullYear();
-  const mm = String(now.getMonth()+1).padStart(2,'0');
-  const monthPrefix = `${yy}-${mm}`;
-
-  // Active requests only (not cancelled)
-  const active = requests.filter(r => r.status !== 'cancelled');
-
-  // ── Stat cards ───────────────────────────────────────────────────────────
-  const thisMonth = active.filter(r => r.dates.some(d => d.startsWith(monthPrefix)));
-  document.getElementById('stat-total').textContent = thisMonth.length;
+  const active = requests.filter(r=>r.status!=='cancelled');
+  document.getElementById('stat-total').textContent = active.length;
   document.getElementById('stat-pending').textContent = active.filter(r=>r.status==='pending').length;
   document.getElementById('stat-approved').textContent = active.filter(r=>r.status==='approved').length;
   document.getElementById('stat-training').textContent = active.filter(r=>r.type==='training'&&r.status==='approved').length;
 
-  // ── Recent requests table ────────────────────────────────────────────────
-  const tbody = document.getElementById('dashboardTable');
-  const recent = [...requests].sort((a,b) => (b.submittedAt||b.id) - (a.submittedAt||a.id)).slice(0,6);
-  if (recent.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state" style="padding:20px;"><div class="empty-icon">📋</div>ยังไม่มีคำขอ</div></td></tr>`;
+  // Recent requests
+  const recent = [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id)).slice(0,6);
+  const tbody = document.getElementById('recentRequests');
+  if (recent.length===0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);padding:20px;">ยังไม่มีคำขอ</td></tr>';
   } else {
     tbody.innerHTML = recent.map(r => {
-      const s = getStaff(r.staffId);
-      const stLabel = r.status==='cancelled' ? 'ยกเลิกแล้ว' : STATUS_LABEL[r.status];
-      const stBadge = r.status==='cancelled' ? 'badge-rejected' : STATUS_BADGE[r.status];
+      const s = r.fromSheet ? null : getStaff(r.staffId);
+      const name = s ? s.name.replace(/^(นาง|นางสาว|นาย)/,'') : (r.staffName||'?');
+      const abbr = s ? s.abbr : (r.staffName||'??').substring(0,2);
+      const color = s ? s.color : '#7b52a8';
+      const dateStr = r.dates && r.dates.length ? formatDate(r.dates[0]) : '-';
       return `<tr>
         <td><div class="person-cell">
-          <div class="mini-avatar ${ROLE_CLASS[s.role]}" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
-          <span>${s.name}</span>
+          <div class="mini-avatar" style="background:${color}22;color:${color};">${abbr}</div>
+          <span style="font-size:13px;font-weight:500;">${name.substring(0,10)}</span>
         </div></td>
         <td><span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span></td>
-        <td style="font-size:12px;color:var(--text-mid);">${formatDate(r.dates[0])}</td>
-        <td><span class="badge ${stBadge}">${stLabel}</span></td>
+        <td style="font-size:12px;color:var(--text-light);">${dateStr}</td>
+        <td><span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${STATUS_LABEL[r.status]||r.status}</span></td>
       </tr>`;
     }).join('');
   }
 
-  // ── Monthly bar chart — last 6 months from real data ────────────────────
-  const monthLabels = [];
-  const leaveData   = [];
-  const trainingData = [];
-
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(yy, now.getMonth() - i, 1);
-    const prefix = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    const monthReqs = active.filter(r => r.dates.some(dt => dt.startsWith(prefix)));
-    const leaveCount    = monthReqs.filter(r => r.type==='leave'||r.type==='vacation').length;
-    const trainingCount = monthReqs.filter(r => r.type==='training'||r.type==='birthday').length;
-    monthLabels.push(MONTHS_TH[d.getMonth()].substring(0,3)+'.');
-    leaveData.push(leaveCount);
-    trainingData.push(trainingCount);
+  // Monthly chart
+  const now = new Date();
+  const months = [];
+  for (let i=5;i>=0;i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ y:d.getFullYear(), m:d.getMonth(), label:MONTHS_TH[d.getMonth()].substring(0,3) });
   }
-
-  const maxV = Math.max(...leaveData, ...trainingData, 1);
-  const chart = document.getElementById('monthlyChart');
-  chart.innerHTML = monthLabels.map((m,i) => `
-    <div class="bar-group">
+  const chartHtml = months.map(({y,m,label}) => {
+    const mStr = `${y}-${String(m+1).padStart(2,'0')}`;
+    const approved = requests.filter(r=>r.status==='approved'&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const pending = requests.filter(r=>r.status==='pending'&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const maxV = 10;
+    const ah = Math.round((approved/maxV)*100);
+    const ph = Math.round((pending/maxV)*100);
+    return `<div class="bar-group">
       <div class="bar-wrap">
-        <div class="bar teal" style="height:${Math.round((leaveData[i]/maxV)*100)}px;"
-          title="${leaveData[i]} หยุด/พักร้อน"></div>
-        <div class="bar gold" style="height:${Math.round((trainingData[i]/maxV)*100)}px;"
-          title="${trainingData[i]} อบรม/วันเกิด"></div>
+        <div class="bar teal" style="height:${Math.max(ah,3)}%;"></div>
+        <div class="bar red" style="height:${Math.max(ph,3)}%;"></div>
       </div>
-      <div class="bar-label">${m}</div>
-    </div>
-  `).join('');
-
-  // ── Donut chart — from real data ─────────────────────────────────────────
-  const approvedReqs = active.filter(r => r.status === 'approved');
-  const typeDays = { leave:0, vacation:0, training:0, birthday:0 };
-  approvedReqs.forEach(r => { typeDays[r.type] = (typeDays[r.type]||0) + r.dates.length; });
-  const totalDays = Object.values(typeDays).reduce((a,b)=>a+b,0);
-
-  const CIRC = 2 * Math.PI * 55; // circumference
-  const COLORS = { leave:'#2980b9', vacation:'#c084fc', training:'#8e44ad', birthday:'#e74c3c' };
-  const LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
-  const typeOrder = ['leave','vacation','training','birthday'];
-
-  let offset = 0;
-  const circles = typeOrder.map(type => {
-    const days = typeDays[type] || 0;
-    const frac = totalDays > 0 ? days / totalDays : 0;
-    const dash = frac * CIRC;
-    const gap  = CIRC - dash;
-    const circ = `<circle cx="75" cy="75" r="55" fill="none" stroke="${COLORS[type]}" stroke-width="22"
-      stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}"
-      stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 75 75)"/>`;
-    offset += dash;
-    return circ;
-  }).join('');
-
-  const legend = typeOrder.map(type => {
-    const days = typeDays[type] || 0;
-    const pct  = totalDays > 0 ? Math.round((days/totalDays)*100) : 0;
-    return `<div class="legend-item">
-      <div class="legend-left"><div class="legend-dot" style="background:${COLORS[type]};"></div>${LABELS[type]}</div>
-      <span style="font-weight:600;color:var(--text-dark);">${pct}%</span>
+      <div class="bar-label">${label}</div>
     </div>`;
   }).join('');
+  document.getElementById('monthlyChart').innerHTML = chartHtml;
 
-  document.getElementById('donutChart').innerHTML = `
-    <svg width="150" height="150" viewBox="0 0 150 150">
-      <circle cx="75" cy="75" r="55" fill="none" stroke="#e8f0ee" stroke-width="22"/>
-      ${totalDays > 0 ? circles : '<circle cx="75" cy="75" r="55" fill="none" stroke="#dde8e5" stroke-width="22"/>'}
-      <text x="75" y="72" text-anchor="middle" font-family="Kanit" font-size="20" font-weight="600" fill="#3b1f6b">${totalDays}</text>
-      <text x="75" y="88" text-anchor="middle" font-family="Sarabun" font-size="10" fill="#8aaba3">วัน</text>
-    </svg>
-  `;
-  document.getElementById('donutLegend').innerHTML = totalDays > 0
-    ? legend
-    : `<div style="text-align:center;color:var(--text-light);font-size:13px;padding:16px;">ยังไม่มีข้อมูล</div>`;
+  // Donut
+  const approvedReqs = requests.filter(r=>r.status==='approved');
+  const COLORS = { leave:'#3B82F6', vacation:'#A855F7', training:'#EC4899', birthday:'#EF4444' };
+  const LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
+  const typeOrder = ['leave','vacation','training','birthday'];
+  const typeDays = {};
+  approvedReqs.forEach(r => { typeDays[r.type] = (typeDays[r.type]||0) + (r.dates?.length||0); });
+  const totalDays = Object.values(typeDays).reduce((a,b)=>a+b,0);
+  let offset = 25;
+  const circles = typeOrder.map(type => {
+    const pct = totalDays>0 ? (typeDays[type]||0)/totalDays*100 : 0;
+    const dash = `${pct} ${100-pct}`;
+    const el = `<circle cx="75" cy="75" r="55" fill="none" stroke="${COLORS[type]}" stroke-width="20" stroke-dasharray="${dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 75 75)" opacity="${pct>0?1:0}"/>`;
+    offset += pct;
+    return el;
+  }).join('');
+  const legend = typeOrder.map(type => {
+    const days = typeDays[type]||0;
+    const pct = totalDays>0?Math.round((days/totalDays)*100):0;
+    return `<div class="legend-item">
+      <div class="legend-left"><div class="legend-dot" style="background:${COLORS[type]};"></div>${LABELS[type]}</div>
+      <span style="font-weight:700;color:var(--text-dark);font-family:'Prompt',sans-serif;">${pct}%</span>
+    </div>`;
+  }).join('');
+  document.getElementById('donutChart').innerHTML = `<svg width="140" height="140" viewBox="0 0 150 150">
+    <circle cx="75" cy="75" r="55" fill="none" stroke="#F1F5F9" stroke-width="20"/>
+    ${totalDays>0?circles:''}
+    <text x="75" y="71" text-anchor="middle" font-family="Prompt" font-size="22" font-weight="700" fill="#1A1A2E">${totalDays}</text>
+    <text x="75" y="87" text-anchor="middle" font-family="Sarabun" font-size="11" fill="#94A3B8">วัน</text>
+  </svg>`;
+  document.getElementById('donutLegend').innerHTML = totalDays>0 ? legend : '<div style="text-align:center;color:var(--text-light);font-size:13px;padding:16px;">ยังไม่มีข้อมูล</div>';
 
-  // ── Quota bar ────────────────────────────────────────────────────────────
+  // Quota
   const today = todayStr();
-  document.getElementById('todayQuotaDate').textContent = formatDate(today);
-  const todayReqs = active.filter(r => r.dates.includes(today) && r.status==='approved');
-  const nurseCount = todayReqs.filter(r => getStaff(r.staffId)?.role==='nurse').length;
-  const otherCount = todayReqs.filter(r => getStaff(r.staffId)?.role!=='nurse').length;
+  const todayFmt = formatDate(today);
+  document.getElementById('todayQuotaDate').textContent = todayFmt;
+  document.getElementById('todayQuotaDateCard').textContent = todayFmt;
+  const todayReqs = active.filter(r=>r.dates&&r.dates.includes(today)&&r.status==='approved');
+  const nurseCount = todayReqs.filter(r=>getStaff(r.staffId)?.role==='nurse'||(r.fromSheet&&r.roleLabel==='พยาบาล')).length;
+  const otherCount = todayReqs.length - nurseCount;
+  document.getElementById('todayQuotaShort').textContent = `${nurseCount}/4`;
   document.getElementById('nurse-quota-text').textContent = `${nurseCount}/4`;
   document.getElementById('other-quota-text').textContent = `${otherCount}/3`;
-  const nurseBar = document.getElementById('nurse-quota-bar');
-  nurseBar.style.width = `${(nurseCount/4)*100}%`;
-  nurseBar.className = `quota-fill nurse${nurseCount>=4?' full':''}`;
-  const otherBar = document.getElementById('other-quota-bar');
-  otherBar.style.width = `${(otherCount/3)*100}%`;
-  otherBar.className = `quota-fill other${otherCount>=3?' full':''}`;
+  const nb = document.getElementById('nurse-quota-bar');
+  nb.style.width = `${(nurseCount/4)*100}%`;
+  nb.className = `quota-fill nurse${nurseCount>=4?' full':''}`;
+  const ob = document.getElementById('other-quota-bar');
+  ob.style.width = `${(otherCount/3)*100}%`;
+  ob.className = `quota-fill other${otherCount>=3?' full':''}`;
 }
 
 // ===== CALENDAR =====
 function changeMonth(dir) {
-  calendarDate.setMonth(calendarDate.getMonth() + dir);
+  calendarDate.setMonth(calendarDate.getMonth()+dir);
   renderCalendar();
 }
 
@@ -2195,73 +2026,51 @@ function renderCalendar() {
   const y = calendarDate.getFullYear();
   const m = calendarDate.getMonth();
   document.getElementById('calMonthLabel').textContent = `${MONTHS_TH[m]} ${y+543}`;
-
-  const first = new Date(y, m, 1).getDay();
-  const days = new Date(y, m+1, 0).getDate();
+  const first = new Date(y,m,1).getDay();
+  const days = new Date(y,m+1,0).getDate();
   const today = new Date();
-
-  // Build event map — รวมทั้ง local requests และ sheet requests
   const eventMap = {};
   requests.forEach(r => {
-    r.dates.forEach(d => {
-      if(!d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)) return;
-      if(!eventMap[d]) eventMap[d] = [];
+    r.dates && r.dates.forEach(d => {
+      if (!d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)) return;
+      if (!eventMap[d]) eventMap[d] = [];
       eventMap[d].push(r);
     });
   });
 
-  // ── helper สำหรับดึง abbr/color ทั้ง local และ sheet ──
   function getReqDisplay(r) {
-    if (r.fromSheet) {
-      return { abbr: (r.staffName||'?').substring(0,2), color: '#7b52a8', name: r.staffName||'', roleLabel: r.roleLabel||'' };
-    }
+    if (r.fromSheet) return { abbr:(r.staffName||'?').substring(0,2), color:'#A855F7', name:r.staffName||'', roleLabel:r.roleLabel||'' };
     const s = getStaff(r.staffId);
-    return s ? { abbr: s.abbr, color: s.color, name: s.name, roleLabel: s.roleLabel } : { abbr:'?', color:'#999', name:'ไม่ทราบ', roleLabel:'' };
+    return s ? { abbr:s.abbr, color:s.color, name:s.name, roleLabel:s.roleLabel } : { abbr:'?', color:'#999', name:'ไม่ทราบ', roleLabel:'' };
   }
 
-  // ── count quota — รวม local + sheet ──
   function countRole(evts, isNurse) {
     return evts.filter(e => {
-      if (e.status === 'rejected' || e.status === 'cancelled') return false;
+      if (e.status==='rejected'||e.status==='cancelled') return false;
       return isNurse ? isNurseRole(e) : !isNurseRole(e);
     }).length;
   }
 
   let html = '';
-  for(let i=0;i<first;i++) html += '<div class="cal-cell empty"></div>';
-
-  for(let d=1;d<=days;d++) {
+  for (let i=0;i<first;i++) html += '<div class="cal-cell empty"></div>';
+  for (let d=1;d<=days;d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
-    const evts = eventMap[ds] || [];
-    const nurseCount = countRole(evts, true);
-    const otherCount = countRole(evts, false);
-    const totalApproved = nurseCount + otherCount;
-    const isOverQuota = nurseCount >= 3 || otherCount >= 3;
-
+    const evts = eventMap[ds]||[];
+    const nurseCount = countRole(evts,true);
+    const otherCount = countRole(evts,false);
+    const isOverQuota = nurseCount>=3||otherCount>=3;
     let cls = 'cal-cell';
-    if(isToday) cls += ' today';
-    if(evts.length) cls += ' has-leave';
-    if(isOverQuota) cls += ' over-quota';
-
-    // แสดงชื่อย่อ + ชื่อจริงตัวเล็ก สูงสุด 4 คน
-    const evtDots = evts.slice(0,4).map(e => {
+    if (isToday) cls += ' today';
+    if (evts.length) cls += ' has-leave';
+    if (isOverQuota) cls += ' over-quota';
+    const evtDots = evts.slice(0,3).map(e => {
       const disp = getReqDisplay(e);
-      const cls2 = `evt-${e.type}`;
-      // แสดง "นา สมศรี" (abbr + ชื่อต้น)
-      const firstName = disp.name.split(' ')[0] || disp.abbr;
-      const shortName = firstName.length > 6 ? firstName.substring(0,6) : firstName;
-      return `<div class="cal-event-dot ${cls2}" title="${disp.name} (${TYPE_LABELS[e.type]})">${disp.abbr} ${shortName}</div>`;
+      const firstName = disp.name.split(' ')[0]||disp.abbr;
+      return `<div class="cal-event-dot evt-${e.type}" title="${disp.name}">${disp.abbr} ${firstName.substring(0,5)}</div>`;
     }).join('');
-
-    const moreBadge = evts.length > 4
-      ? `<div class="cal-event-dot" style="background:rgba(0,0,0,0.06);color:var(--text-light);">+${evts.length-4} คน</div>`
-      : '';
-
-    const quotaWarn = isOverQuota
-      ? `<div class="cal-quota-warn" title="เกิน 3 คน">⚠️</div>`
-      : '';
-
+    const moreBadge = evts.length>3 ? `<div class="cal-event-dot" style="background:var(--bg);color:var(--text-light);">+${evts.length-3}</div>` : '';
+    const quotaWarn = isOverQuota ? `<div class="cal-quota-warn">⚠️</div>` : '';
     html += `<div class="${cls}" onclick="calDayClick('${ds}')">
       ${quotaWarn}
       <div class="cal-date">${d}</div>
@@ -2272,29 +2081,24 @@ function renderCalendar() {
       </div>`:''}
     </div>`;
   }
-
   document.getElementById('calGrid').innerHTML = html;
 
-  // Event list
   const allEvts = [];
-  Object.entries(eventMap).forEach(([date, evts]) => {
-    evts.forEach(e => allEvts.push({date, ...e}));
-  });
+  Object.entries(eventMap).forEach(([date,evts]) => evts.forEach(e=>allEvts.push({date,...e})));
   allEvts.sort((a,b)=>a.date.localeCompare(b.date));
-
   const list = document.getElementById('calEventList');
-  if(allEvts.length===0) {
+  if (allEvts.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div>ไม่มีกิจกรรมในเดือนนี้</div>';
     return;
   }
   list.innerHTML = allEvts.map(e => {
     const disp = getReqDisplay(e);
     return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
-      <div class="mini-avatar" style="width:36px;height:36px;font-size:13px;background:${disp.color}22;color:${disp.color};">${disp.abbr}</div>
+      <div class="mini-avatar" style="width:38px;height:38px;font-size:13px;background:${disp.color}22;color:${disp.color};">${disp.abbr}</div>
       <div style="flex:1;">
-        <div style="font-size:14px;font-weight:500;">${disp.name}</div>
-        <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} &nbsp;·&nbsp; ${disp.roleLabel}</div>
-        ${e.trainingPlace?`<div style="font-size:12px;color:#8e44ad;margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
+        <div style="font-size:14px;font-weight:600;">${disp.name}</div>
+        <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} · ${disp.roleLabel}</div>
+        ${e.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
       </div>
       <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
       <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
@@ -2303,14 +2107,12 @@ function renderCalendar() {
 }
 
 function calDayClick(dateStr) {
-  // ปฏิทินดูได้ทุกคน — คลิกวันเพื่อดูรายละเอียด ไม่เปิดฟอร์มอัตโนมัติ
-  // scroll ลงไปที่รายการกิจกรรมแทน
-  document.getElementById('calEventList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('calEventList').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 // ===== FORM CALENDAR =====
 function changeFormMonth(dir) {
-  formCalDate.setMonth(formCalDate.getMonth() + dir);
+  formCalDate.setMonth(formCalDate.getMonth()+dir);
   renderFormCal();
 }
 
@@ -2318,31 +2120,26 @@ function renderFormCal() {
   const y = formCalDate.getFullYear();
   const m = formCalDate.getMonth();
   document.getElementById('formMonthLabel').textContent = `${MONTHS_TH[m]} ${y+543}`;
-
-  const first = new Date(y, m, 1).getDay();
-  const days = new Date(y, m+1, 0).getDate();
+  const first = new Date(y,m,1).getDay();
+  const days = new Date(y,m+1,0).getDate();
   const today = new Date();
-
   let html = '<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
-
-  for(let i=0;i<first;i++) html += '<div class="mini-cal-cell empty"></div>';
-
-  for(let d=1;d<=days;d++) {
+  for (let i=0;i<first;i++) html += '<div class="mini-cal-cell empty"></div>';
+  for (let d=1;d<=days;d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
+    const isToday = today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
     const isSel = selectedDates.includes(ds);
     let cls = 'mini-cal-cell';
-    if(isToday) cls += ' today-mini';
-    if(isSel) cls += ' selected';
+    if (isToday) cls += ' today-mini';
+    if (isSel) cls += ' selected';
     html += `<div class="${cls}" onclick="toggleDate('${ds}')">${d}</div>`;
   }
-
   document.getElementById('formCalGrid').innerHTML = html;
 }
 
 function toggleDate(ds) {
   const idx = selectedDates.indexOf(ds);
-  if(idx>=0) selectedDates.splice(idx,1);
+  if (idx>=0) selectedDates.splice(idx,1);
   else selectedDates.push(ds);
   selectedDates.sort();
   renderFormCal();
@@ -2352,11 +2149,11 @@ function toggleDate(ds) {
 
 function renderSelectedDates() {
   const el = document.getElementById('selectedDatesDisplay');
-  if(selectedDates.length===0) {
+  if (selectedDates.length===0) {
     el.innerHTML = '<span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>';
     return;
   }
-  el.innerHTML = selectedDates.map(d => `<div class="date-chip">${formatDate(d)}<button onclick="removeDate('${d}')">×</button></div>`).join('');
+  el.innerHTML = selectedDates.map(d=>`<div class="date-chip">${formatDate(d)}<button onclick="removeDate('${d}')">×</button></div>`).join('');
 }
 
 function removeDate(d) {
@@ -2367,75 +2164,55 @@ function removeDate(d) {
 }
 
 function isNurseRole(r) {
-  if (r.fromSheet) return r.roleLabel === 'พยาบาล';
-  return getStaff(r.staffId)?.role === 'nurse';
+  if (r.fromSheet) return r.roleLabel==='พยาบาล';
+  return getStaff(r.staffId)?.role==='nurse';
 }
 
 function checkQuota() {
   const personId = parseInt(document.getElementById('req-person').value);
-  if (!personId || selectedDates.length === 0) {
-    document.getElementById('quota-warning').style.display = 'none';
-    return;
-  }
+  if (!personId||selectedDates.length===0) { document.getElementById('quota-warning').style.display='none'; return; }
   const person = getStaff(personId);
   if (!person) return;
-  const isNurse = person.role === 'nurse';
+  const isNurse = person.role==='nurse';
   const warnings = [];
-
   selectedDates.forEach(d => {
-    const dayReqs = requests.filter(r =>
-      r.dates.includes(d) && r.status !== 'rejected' && r.status !== 'cancelled'
-    );
-
+    const dayReqs = requests.filter(r=>r.dates&&r.dates.includes(d)&&r.status!=='rejected'&&r.status!=='cancelled');
     if (isNurse) {
-      // กลุ่มพยาบาล — เตือนเมื่อ >= 3
-      const count = dayReqs.filter(r => isNurseRole(r)).length;
-      if (count >= 3) {
-        warnings.push({ date: d, count, limit: 3, group: 'พยาบาล', over: true });
-      } else if (count === 2) {
-        warnings.push({ date: d, count, limit: 3, group: 'พยาบาล', over: false });
-      }
+      const count = dayReqs.filter(r=>isNurseRole(r)).length;
+      if (count>=3) warnings.push({date:d,count,limit:3,group:'พยาบาล',over:true});
+      else if (count===2) warnings.push({date:d,count,limit:3,group:'พยาบาล',over:false});
     } else {
-      // กลุ่มผู้ช่วย+พนักงาน — เตือนเมื่อ >= 3
-      const count = dayReqs.filter(r => !isNurseRole(r)).length;
-      if (count >= 3) {
-        warnings.push({ date: d, count, limit: 3, group: 'ผู้ช่วยพยาบาล/พนักงาน', over: true });
-      } else if (count === 2) {
-        warnings.push({ date: d, count, limit: 3, group: 'ผู้ช่วยพยาบาล/พนักงาน', over: false });
-      }
+      const count = dayReqs.filter(r=>!isNurseRole(r)).length;
+      if (count>=3) warnings.push({date:d,count,limit:3,group:'ผู้ช่วยพยาบาล/พนักงาน',over:true});
+      else if (count===2) warnings.push({date:d,count,limit:3,group:'ผู้ช่วยพยาบาล/พนักงาน',over:false});
     }
   });
-
   const warn = document.getElementById('quota-warning');
-  if (warnings.length > 0) {
-    warn.style.display = 'block';
-    warn.innerHTML = warnings.map(w =>
-      w.over
-        ? `<span style="color:#c0392b;">⚠️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count} คนแล้ว (เกินโควต้า ${w.limit} คน)</span>`
-        : `<span style="color:#e67e22;">ℹ️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count}/${w.limit} คน (ใกล้เต็ม)</span>`
+  if (warnings.length>0) {
+    warn.style.display='block';
+    warn.innerHTML = warnings.map(w=>w.over
+      ? `⚠️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count} คนแล้ว (เกินโควต้า)`
+      : `ℹ️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count}/${w.limit} คน (ใกล้เต็ม)`
     ).join('<br>');
   } else {
-    warn.style.display = 'none';
+    warn.style.display='none';
   }
 }
 
 // ===== MODAL =====
 function openRequestModal(dateStr) {
-  if (!currentUser) { showToast('กรุณาเข้าสู่ระบบก่อน', 'error'); return; }
+  if (!currentUser) { showToast('กรุณาเข้าสู่ระบบก่อน','error'); return; }
   selectedDates = dateStr ? [dateStr] : [];
-  formCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-
-  // Populate staff
+  formCalDate = new Date(new Date().getFullYear(),new Date().getMonth(),1);
   const sel = document.getElementById('req-person');
   sel.innerHTML = '<option value="">-- เลือกชื่อ --</option>' +
     STAFF.map(s=>`<option value="${s.id}">${s.name} (${s.roleLabel})</option>`).join('');
-
+  if (!currentUser.isAdmin && currentUser.staffId) sel.value = currentUser.staffId;
   document.getElementById('req-type').value='leave';
   document.getElementById('req-note').value='';
   document.getElementById('req-training-place').value='';
   document.getElementById('training-extra').style.display='none';
   document.getElementById('quota-warning').style.display='none';
-
   renderFormCal();
   renderSelectedDates();
   document.getElementById('requestModal').classList.add('open');
@@ -2447,9 +2224,8 @@ function closeModal() {
 }
 
 document.getElementById('req-type').addEventListener('change', function() {
-  document.getElementById('training-extra').style.display = this.value==='training' ? 'block' : 'none';
+  document.getElementById('training-extra').style.display = this.value==='training'?'block':'none';
 });
-
 document.getElementById('req-person').addEventListener('change', checkQuota);
 
 async function submitRequest() {
@@ -2457,116 +2233,121 @@ async function submitRequest() {
   const type = document.getElementById('req-type').value;
   const note = document.getElementById('req-note').value;
   const trainingPlace = document.getElementById('req-training-place').value;
-
-  if(!personId) { showToast('กรุณาเลือกชื่อผู้ขอ','error'); return; }
-  if(selectedDates.length===0) { showToast('กรุณาเลือกวันที่','error'); return; }
-  if(type==='training' && !trainingPlace) { showToast('กรุณาระบุสถานที่อบรม','error'); return; }
-
-  // ป้องกัน race condition: lock ก่อน ตรวจโควต้า แล้วจึง push
+  if (!personId) { showToast('กรุณาเลือกชื่อผู้ขอ','error'); return; }
+  if (selectedDates.length===0) { showToast('กรุณาเลือกวันที่','error'); return; }
+  if (type==='training'&&!trainingPlace) { showToast('กรุณาระบุสถานที่อบรม','error'); return; }
   const person = getStaff(personId);
   const submitBtn = document.querySelector('#requestModal .btn-teal');
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ กำลังตรวจสอบ...'; }
-
+  if (submitBtn) { submitBtn.disabled=true; submitBtn.textContent='⏳ กำลังส่ง...'; }
   const release = await submitLock.acquire('submit');
   try {
     const violations = submitLock.checkAndReserve(selectedDates, person.role);
-    if (violations.length > 0) {
-      // เตือนเท่านั้น — ไม่บล็อก ยังส่งได้
-      const warn = document.getElementById('quota-warning');
-      warn.style.display = 'block';
-      warn.innerHTML = violations.map(v =>
-        `<span style="color:#c0392b;">⚠️ วันที่ ${formatDate(v.date)}: ${v.group} มี ${v.count} คนแล้ว (เกินโควต้า ${v.limit} คน) — ส่งคำขอแล้ว รอ Admin อนุมัติ</span>`
-      ).join('<br>');
+    if (violations.length>0) {
+      const vDates = violations.map(v=>formatDate(v.date)).join(', ');
+      if (!confirm(`⚠️ วันที่ ${vDates} โควต้าใกล้เต็ม ยืนยันส่งคำขอต่อไปหรือไม่?`)) {
+        if (submitBtn) { submitBtn.disabled=false; submitBtn.textContent='ส่งคำขอ'; }
+        release();
+        return;
+      }
     }
-    const newReq = { id: nextId++, staffId: personId, type, dates: [...selectedDates], note, status: 'pending', trainingPlace, submittedAt: Date.now() };
-    requests.push(newReq);
+    const req = {
+      id: nextId++,
+      staffId: personId,
+      type,
+      dates: [...selectedDates],
+      note,
+      trainingPlace: type==='training'?trainingPlace:'',
+      status: 'pending',
+      submittedAt: Date.now()
+    };
+    requests.push(req);
     closeModal();
-    showToast('ส่งคำขอเรียบร้อยแล้ว รอการอนุมัติ');
+    showToast('ส่งคำขอวันหยุดแล้ว ✓');
     renderDashboard();
-    saveToGSheet('ADD', newReq);
+    renderCalendar();
+    renderMyRequests();
+    await saveToGSheet('ADD', { id:req.id, staffId:personId, dates:selectedDates, type, trainingPlace:req.trainingPlace, note, submittedAt:req.submittedAt });
   } finally {
     release();
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'ส่งคำขอ'; }
+    if (submitBtn) { submitBtn.disabled=false; submitBtn.textContent='ส่งคำขอ'; }
   }
 }
 
-// ===== ADMIN =====
+// ===== ADMIN TABLE =====
 function renderAdminTable() {
   const typeFilter = document.getElementById('adminFilterType').value;
   const statusFilter = document.getElementById('adminFilterStatus').value;
   const roleFilter = document.getElementById('adminFilterRole').value;
-
-  let filtered = requests.filter(r => {
-    const s = r.fromSheet ? null : getStaff(r.staffId);
-    const role = r.fromSheet ? r.roleLabel : s?.roleLabel;
-    const roleKey = r.fromSheet
-      ? ({'พยาบาล':'nurse','ผู้ช่วยพยาบาล':'assistant','พนง.ช่วยเหลือคนไข้':'helper','พนง.ช่วยการพยาบาล':'nursing-aide'}[r.roleLabel] || '')
-      : s?.role || '';
-    return (!typeFilter || r.type===typeFilter)
-      && (!statusFilter || r.status===statusFilter)
-      && (!roleFilter || roleKey===roleFilter);
-  }).sort((a,b) => (a.submittedAt||a.id) - (b.submittedAt||b.id));
-
+  let filtered = [...requests];
+  if (typeFilter) filtered = filtered.filter(r=>r.type===typeFilter);
+  if (statusFilter) filtered = filtered.filter(r=>r.status===statusFilter);
+  if (roleFilter) filtered = filtered.filter(r=>{
+    const s = getStaff(r.staffId);
+    return s?s.role===roleFilter:(r.fromSheet&&r.roleLabel);
+  });
+  // เรียงลำดับ: pending ขึ้นก่อน (เก่าสุดก่อน = ขอมาก่อนได้รับสิทธิ์ก่อน), ที่เหลือล่าสุดก่อน
+  filtered.sort((a,b) => {
+    if (a.status==='pending' && b.status!=='pending') return -1;
+    if (a.status!=='pending' && b.status==='pending') return 1;
+    if (a.status==='pending' && b.status==='pending') {
+      return (a.submittedAt||a.id) - (b.submittedAt||b.id); // เก่าสุดก่อน
+    }
+    return (b.submittedAt||b.id) - (a.submittedAt||a.id); // ล่าสุดก่อน
+  });
   const tbody = document.getElementById('adminTable');
-  if(filtered.length===0) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div>ไม่พบรายการ</div></td></tr>';
+  if (filtered.length===0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-light);padding:30px;">ไม่พบรายการ</td></tr>';
     return;
   }
-  tbody.innerHTML = filtered.map((r, idx) => {
-    // รองรับทั้ง local (staffId) และ fromSheet (staffName)
+  tbody.innerHTML = filtered.map((r,idx) => {
     const s = r.fromSheet ? null : getStaff(r.staffId);
-    const displayName = s ? s.name : (r.staffName || '?');
-    const displayAbbr = s ? s.abbr : (r.staffName||'??').substring(0,2);
-    const displayColor = s ? s.color : '#7b52a8';
-    const displayRole = s ? s.roleLabel : (r.roleLabel || '?');
-
-    const dateStr = (r.dates && r.dates.length > 0)
-      ? (r.dates.length>1 ? `${formatDate(r.dates[0])} - ${formatDate(r.dates[r.dates.length-1])}` : formatDate(r.dates[0]))
-      : (r.date ? formatDate(r.date) : '-');
+    const displayName  = s ? s.name : (r.staffName||'?');
+    const displayAbbr  = s ? s.abbr : (r.staffName||'??').substring(0,2);
+    const displayColor = s ? s.color : '#A855F7';
+    const displayRole  = s ? s.roleLabel : (r.roleLabel||'');
+    const dateStr = r.dates && r.dates.length ? r.dates.map(d=>formatDate(d)).join(', ') : '-';
+    // วันที่ขอ — แสดงชัดเจน
     const submittedStr = r.submittedAt
-      ? new Date(r.submittedAt).toLocaleString('th-TH', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
-      : r.createdAt
-        ? String(r.createdAt)
-        : '-';
-    const actions = r.status === 'pending' ? `
+      ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : r.submittedAtStr || r.createdAt ? String(r.submittedAtStr||r.createdAt) : '-';
+    // ไฮไลท์ pending ที่ขอก่อนสุด
+    const isPendingFirst = r.status==='pending' && idx===0;
+    const actions = r.status==='pending' ? `
       <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved')">✓ อนุมัติ</button>
       <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected')">✕ ปฏิเสธ</button>
       <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
       <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
-    ` : r.status === 'approved' ? `
+    ` : r.status==='approved' ? `
       <span class="badge badge-approved">อนุมัติแล้ว</span>
       <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
       <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
     ` : `<span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>`;
-
-    return `<tr>
-      <td style="text-align:center;font-weight:700;font-size:14px;color:var(--teal-mid);">${idx+1}</td>
+    return `<tr style="${r.status==='pending'?'background:rgba(251,191,36,0.04);':''}">
+      <td style="text-align:center;font-weight:700;font-size:13px;color:var(--text-light);">${idx+1}</td>
       <td><div class="person-cell">
         <div class="mini-avatar" style="background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;">${displayName}</div>
-          <div style="font-size:11px;color:var(--text-light);">ขอเมื่อ: ${submittedStr}</div>
-          ${r.note?`<div style="font-size:11px;color:var(--text-light);">${r.note}</div>`:''}
-        </div>
+        <div style="font-size:14px;font-weight:600;">${displayName}</div>
       </div></td>
-      <td style="font-size:13px;">${displayRole}</td>
+      <td style="font-size:12px;color:var(--text-mid);">${displayRole}</td>
       <td><span class="badge ${TYPE_BADGE[r.type]||''}">${TYPE_LABELS[r.type]||r.type}</span></td>
-      <td style="font-size:13px;color:var(--text-mid);">${dateStr}</td>
+      <td>
+        <div style="font-size:12px;font-weight:600;color:${r.status==='pending'?'#92400E':'var(--text-mid)'};">${submittedStr}</div>
+        ${r.note?`<div style="font-size:11px;color:var(--text-light);margin-top:2px;">💬 ${r.note}</div>`:''}
+      </td>
+      <td style="font-size:12px;color:var(--text-mid);">${dateStr}</td>
       <td><span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span></td>
-      <td style="display:flex;gap:6px;align-items:center;">${actions}</td>
+      <td style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">${actions}</td>
     </tr>`;
   }).join('');
 }
 
 function updateStatus(id, status) {
-  const req = requests.find(r => String(r.id) === String(id));
+  const req = requests.find(r=>String(r.id)===String(id));
   if (req) {
     req.status = status;
-    showToast(status==='approved' ? '✅ อนุมัติคำขอแล้ว' : '❌ ปฏิเสธคำขอแล้ว', status==='approved'?'success':'error');
-    renderAdminTable();
-    renderMyRequests();
-    renderCalendar();
-    saveToGSheet('UPDATE_STATUS', { id: req.id, status });
+    showToast(status==='approved'?'✅ อนุมัติแล้ว':'❌ ปฏิเสธแล้ว', status==='approved'?'success':'error');
+    renderAdminTable(); renderMyRequests(); renderCalendar();
+    saveToGSheet('UPDATE_STATUS',{id:req.id,status});
   }
 }
 
@@ -2574,22 +2355,35 @@ function updateStatus(id, status) {
 function renderTraining() {
   const trainings = requests.filter(r=>r.type==='training'&&r.status==='approved');
   const list = document.getElementById('trainingList');
-  if(trainings.length===0) {
+  if (trainings.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div>ไม่มีรายการอบรม</div>';
     return;
   }
   list.innerHTML = trainings.map(r => {
-    const s = getStaff(r.staffId);
-    const dateStr = r.dates.length>1 ? `${formatDate(r.dates[0])} ถึง ${formatDate(r.dates[r.dates.length-1])}` : formatDate(r.dates[0]);
+    // รองรับทั้ง local (staffId) และ fromSheet (staffName)
+    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const displayName  = s ? s.name  : (r.staffName || '?');
+    const displayRole  = s ? s.roleLabel : (r.roleLabel || '-');
+    const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
+    const displayColor = s ? s.color : '#A855F7';
+    const dates = r.dates||[];
+    const dateStr = dates.length>1
+      ? `${formatDate(dates[0])} ถึง ${formatDate(dates[dates.length-1])}`
+      : dates.length===1 ? formatDate(dates[0]) : '-';
+    // วันที่ขอ (submittedAt หรือ createdAt)
+    const submittedStr = r.submittedAt
+      ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : r.submittedAtStr || r.createdAt ? String(r.submittedAtStr||r.createdAt) : '';
     return `<div class="training-card">
-      <div class="training-icon">🎓</div>
+      <div class="training-icon" style="background:var(--purple-pale);">🎓</div>
       <div class="training-info" style="flex:1;">
-        <h4>${r.trainingPlace || 'การอบรม'}</h4>
+        <h4>${r.trainingPlace||'การอบรม'}</h4>
         <div class="training-meta">
-          <span>👤 ${s.name}</span>
-          <span>💼 ${s.roleLabel}</span>
+          <span>👤 ${displayName}</span>
+          <span>💼 ${displayRole}</span>
           <span>📅 ${dateStr}</span>
-          <span>📌 ${r.dates.length} วัน</span>
+          <span>📌 ${dates.length} วัน</span>
+          ${submittedStr?`<span>🕐 ขอเมื่อ ${submittedStr}</span>`:''}
         </div>
       </div>
       <span class="badge badge-approved">อนุมัติแล้ว</span>
@@ -2600,58 +2394,53 @@ function renderTraining() {
 // ===== MY REQUESTS =====
 function renderMyRequests() {
   if (!currentUser) return;
-
-  // ── กรองคำขอ ──────────────────────────────────────────────
-  // Admin เห็นทั้งหมด / Staff เห็นเฉพาะของตัวเอง
   const myReqs = currentUser.isAdmin
-    ? [...requests].sort((a,b) => (b.submittedAt||b.id) - (a.submittedAt||a.id))
-    : requests.filter(r => {
-        // local request — เทียบ staffId
-        if (!r.fromSheet) return r.staffId === currentUser.staffId;
-        // fromSheet — เทียบชื่อ
-        return r.staffName === currentUser.name;
-      }).sort((a,b) => (b.submittedAt||b.id) - (a.submittedAt||a.id));
-
+    ? [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id))
+    : requests.filter(r=>!r.fromSheet?r.staffId===currentUser.staffId:r.staffName===currentUser.name)
+              .sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id));
   const list = document.getElementById('myRequestsList');
-  if (myReqs.length === 0) {
+  if (myReqs.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่มีคำขอ</div>';
     return;
   }
-
   list.innerHTML = myReqs.map(r => {
-    // ดึงข้อมูลผู้ขอ — รองรับทั้ง local และ fromSheet
     const s = r.fromSheet ? null : getStaff(r.staffId);
-    const displayName  = s ? s.name  : (r.staffName || '?');
+    const displayName  = s ? s.name  : (r.staffName||'?');
     const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
-    const displayColor = s ? s.color : '#7b52a8';
-
-    const dateStr = r.dates.map(d => formatDate(d)).join(', ');
-    const canManage = currentUser.isAdmin
-      || (!r.fromSheet && currentUser.staffId === r.staffId)
-      || (r.fromSheet  && r.staffName === currentUser.name);
-    const canCancel    = canManage && r.status !== 'cancelled';
-    const canReschedule = canManage && (r.status === 'pending' || r.status === 'approved');
-
-    return `<div class="card" style="margin-bottom:12px;border-left:4px solid ${r.status==='cancelled'?'#e74c3c':r.status==='approved'?'#27ae60':'var(--border)'}">
+    const displayColor = s ? s.color : '#A855F7';
+    const dates = r.dates || [];
+    const dateStr = dates.length ? dates.map(d=>formatDate(d)).join(', ') : '-';
+    // วันที่ขอ
+    const submittedStr = r.submittedAt
+      ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : r.submittedAtStr || r.createdAt ? String(r.submittedAtStr||r.createdAt) : '';
+    const canManage = currentUser.isAdmin||(!r.fromSheet&&currentUser.staffId===r.staffId)||(r.fromSheet&&r.staffName===currentUser.name);
+    const canCancel = canManage&&r.status!=='cancelled';
+    const canReschedule = canManage&&(r.status==='pending'||r.status==='approved');
+    const borderColor = r.status==='cancelled'?'var(--primary)':r.status==='approved'?'var(--green)':'var(--border)';
+    return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          ${currentUser.isAdmin ? `<div class="person-cell" style="gap:6px;">
-            <div class="mini-avatar" style="width:26px;height:26px;font-size:11px;background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
-            <span style="font-size:13px;font-weight:600;">${displayName}</span>
-          </div>` : ''}
+          <div class="person-cell" style="gap:6px;">
+            <div class="mini-avatar" style="background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
+            <div>
+              <span style="font-size:13px;font-weight:600;">${displayName}</span>
+              ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">ขอเมื่อ ${submittedStr}</div>`:''}
+            </div>
+          </div>
           <span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span>
           <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
         </div>
         <div style="display:flex;gap:6px;">
-          ${canReschedule ? `<button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')">📅 เลื่อน</button>` : ''}
-          ${canCancel     ? `<button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')">❌ ยกเลิก</button>` : ''}
+          ${canReschedule?`<button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')">📅 เลื่อน</button>`:''}
+          ${canCancel?`<button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')">❌ ยกเลิก</button>`:''}
         </div>
       </div>
       <div style="font-size:14px;color:var(--text-mid);">📅 ${dateStr}</div>
-      ${r.note         ? `<div style="font-size:13px;color:var(--text-light);margin-top:3px;">💬 ${r.note}</div>` : ''}
-      ${r.trainingPlace? `<div style="font-size:13px;color:#8e44ad;margin-top:3px;">📍 ${r.trainingPlace}</div>` : ''}
-      ${r.cancelNote   ? `<div style="font-size:13px;color:#c0392b;margin-top:3px;">🗑 ยกเลิก: ${r.cancelNote}</div>` : ''}
-      ${r.rescheduledFrom ? `<div style="font-size:12px;color:var(--text-light);margin-top:3px;">📌 เลื่อนจาก: ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>` : ''}
+      ${r.note?`<div style="font-size:13px;color:var(--text-light);margin-top:3px;">💬 ${r.note}</div>`:''}
+      ${r.trainingPlace?`<div style="font-size:13px;color:var(--purple);margin-top:3px;">📍 ${r.trainingPlace}</div>`:''}
+      ${r.cancelNote?`<div style="font-size:13px;color:var(--primary);margin-top:3px;">🗑 ยกเลิก: ${r.cancelNote}</div>`:''}
+      ${r.rescheduledFrom?`<div style="font-size:12px;color:var(--text-light);margin-top:3px;">📌 เลื่อนจาก: ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -2669,48 +2458,37 @@ function renderStats() {
     return `<tr>
       <td><div class="person-cell">
         <div class="mini-avatar" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
-        <span>${s.name}</span>
+        <span style="font-size:13px;">${s.name}</span>
       </div></td>
       <td style="font-size:12px;color:var(--text-mid);">${s.roleLabel}</td>
-      <td style="text-align:center;"><span style="font-weight:600;color:#2980b9;">${leave}</span></td>
-      <td style="text-align:center;"><span style="font-weight:600;color:#c084fc;">${vacation}</span></td>
-      <td style="text-align:center;"><span style="font-weight:600;color:#8e44ad;">${training}</span></td>
-      <td style="text-align:center;"><span style="font-weight:600;color:#e74c3c;">${birthday}</span></td>
-      <td style="text-align:center;"><span style="font-family:Kanit;font-weight:600;font-size:15px;">${total}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:var(--blue);">${leave}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:var(--purple);">${vacation}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:#EC4899;">${training}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:var(--primary);">${birthday}</span></td>
+      <td style="text-align:center;"><span style="font-family:'Prompt',sans-serif;font-weight:700;font-size:15px;">${total}</span></td>
     </tr>`;
   }).join('');
 }
 
 // ===== CONCURRENCY LOCK =====
-// ป้องกันการส่งข้อมูลซ้ำซ้อนหากผู้ใช้หลายคนกดพร้อมกัน
 const submitLock = {
   _locked: false,
-  _queue: new Map(), // key: dateStr+role -> count being processed
-
   async acquire(key) {
-    // รอถ้ากำลัง submit อยู่ (max 5s)
     let waited = 0;
-    while (this._locked && waited < 5000) {
-      await new Promise(r => setTimeout(r, 100));
-      waited += 100;
-    }
+    while (this._locked && waited<5000) { await new Promise(r=>setTimeout(r,100)); waited+=100; }
     this._locked = true;
     return () => { this._locked = false; };
   },
-
-  // ตรวจโควต้า — เตือนเท่านั้น ไม่บล็อก
   checkAndReserve(dates, personRole) {
     const violations = [];
     dates.forEach(d => {
-      const dayReqs = requests.filter(r =>
-        r.dates.includes(d) && r.status !== 'rejected' && r.status !== 'cancelled'
-      );
-      if (personRole === 'nurse') {
-        const count = dayReqs.filter(r => isNurseRole(r)).length;
-        if (count >= 3) violations.push({ date: d, count, limit: 3, group: 'พยาบาล' });
+      const dayReqs = requests.filter(r=>r.dates&&r.dates.includes(d)&&r.status!=='rejected'&&r.status!=='cancelled');
+      if (personRole==='nurse') {
+        const count = dayReqs.filter(r=>isNurseRole(r)).length;
+        if (count>=3) violations.push({date:d,count,limit:3,group:'พยาบาล'});
       } else {
-        const count = dayReqs.filter(r => !isNurseRole(r)).length;
-        if (count >= 3) violations.push({ date: d, count, limit: 3, group: 'ผู้ช่วยพยาบาล/พนักงาน' });
+        const count = dayReqs.filter(r=>!isNurseRole(r)).length;
+        if (count>=3) violations.push({date:d,count,limit:3,group:'ผู้ช่วยพยาบาล/พนักงาน'});
       }
     });
     return violations;
@@ -2719,43 +2497,183 @@ const submitLock = {
 
 // ===== REFRESH =====
 let isRefreshing = false;
-
 function refreshCalendar() {
   if (isRefreshing) return;
   isRefreshing = true;
   const btn = document.getElementById('refreshBtn');
-  if (btn) {
-    btn.style.transform = 'rotate(360deg)';
-    btn.style.transition = 'transform 0.6s ease';
-    btn.disabled = true;
-  }
-  // ถ้าเชื่อม Sheets ให้ดึงข้อมูลใหม่จาก Sheets ด้วย
+  if (btn) { btn.style.opacity='0.5'; btn.disabled=true; }
   const syncPromise = gsConfig.url ? fetchRequestsFromSheet() : Promise.resolve();
   syncPromise.finally(() => {
-    renderCalendar();
-    renderDashboard();
-    if (btn) {
-      btn.style.transform = '';
-      btn.style.transition = '';
-      btn.disabled = false;
-    }
+    renderCalendar(); renderDashboard();
+    if (btn) { btn.style.opacity='1'; btn.disabled=false; }
     isRefreshing = false;
-    showToast(gsConfig.url ? '🔄 ซิงค์จาก Sheets แล้ว ✓' : 'รีเฟรชปฏิทินแล้ว ✓');
+    showToast(gsConfig.url?'🔄 ซิงค์จาก Sheets แล้ว ✓':'รีเฟรชปฏิทินแล้ว ✓');
   });
 }
+
+// ===== CANCEL / RESCHEDULE =====
+let cancelTargetId = null;
+let cancelMode = 'cancel';
+let rescheduleDates = [];
+let rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+function openCancelModal(reqId, mode) {
+  const req = requests.find(r=>String(r.id)===String(reqId));
+  if (!req) return;
+  const isOwner = (!req.fromSheet&&currentUser?.staffId===req.staffId)||(req.fromSheet&&req.staffName===currentUser?.name);
+  const isAdmin = currentUser?.isAdmin;
+  if (!isOwner&&!isAdmin) { showToast('คุณไม่มีสิทธิ์จัดการคำขอนี้','error'); return; }
+  if (req.status==='cancelled') { showToast('คำขอนี้ถูกยกเลิกแล้ว','error'); return; }
+  cancelTargetId = reqId;
+  cancelMode = mode;
+  rescheduleDates = [];
+  const s = getStaff(req.staffId);
+  const dateStr = req.dates.map(d=>formatDate(d)).join(', ');
+  document.getElementById('cancelReqInfo').innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+      <div class="mini-avatar" style="width:34px;height:34px;font-size:13px;background:${s?s.color+'22':'#A855F722'};color:${s?s.color:'#A855F7'};">${s?s.abbr:(req.staffName||'?').substring(0,2)}</div>
+      <div>
+        <div style="font-weight:600;font-size:14px;">${s?s.name:(req.staffName||'?')}</div>
+        <div style="font-size:12px;color:var(--text-light);">${s?s.roleLabel:(req.roleLabel||'')}</div>
+      </div>
+      <span class="badge ${TYPE_BADGE[req.type]}" style="margin-left:auto;">${TYPE_LABELS[req.type]}</span>
+      <span class="badge ${STATUS_BADGE[req.status]}">${STATUS_LABEL[req.status]}</span>
+    </div>
+    <div style="font-size:13px;color:var(--text-mid);">📅 ${dateStr}</div>
+    ${req.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${req.trainingPlace}</div>`:''}
+  `;
+  if (mode==='reschedule') {
+    document.getElementById('cancelModalTitle').textContent = '📅 เลื่อนวันหยุด';
+    document.getElementById('rescheduleSection').style.display='block';
+    document.getElementById('cancelSection').style.display='none';
+    document.getElementById('confirmCancelBtn').style.display='none';
+    document.getElementById('confirmRescheduleBtn').style.display='inline-flex';
+    rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderRescheduleCal();
+    renderRescheduleDates();
+  } else {
+    document.getElementById('cancelModalTitle').textContent = '❌ ยกเลิกคำขอ';
+    document.getElementById('rescheduleSection').style.display='none';
+    document.getElementById('cancelSection').style.display='block';
+    document.getElementById('confirmCancelBtn').style.display='inline-flex';
+    document.getElementById('confirmRescheduleBtn').style.display='none';
+    document.getElementById('cancelNote').value='';
+  }
+  document.getElementById('cancelModal').classList.add('open');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancelModal').classList.remove('open');
+  cancelTargetId = null; rescheduleDates = [];
+}
+
+function confirmCancel() {
+  const req = requests.find(r=>String(r.id)===String(cancelTargetId));
+  if (!req) return;
+  req.status='cancelled';
+  req.cancelNote = document.getElementById('cancelNote').value||'ไม่ระบุ';
+  req.cancelledBy = currentUser?.name;
+  req.cancelledAt = Date.now();
+  closeCancelModal();
+  showToast('ยกเลิกคำขอเรียบร้อย');
+  renderDashboard(); renderMyRequests(); renderAdminTable();
+  saveToGSheet('UPDATE_STATUS',{id:req.id,status:'cancelled',statusLabel:'ยกเลิกแล้ว'});
+}
+
+function confirmReschedule() {
+  if (rescheduleDates.length===0) { showToast('กรุณาเลือกวันที่ใหม่','error'); return; }
+  const req = requests.find(r=>String(r.id)===String(cancelTargetId));
+  if (!req) return;
+  const person = getStaff(req.staffId);
+  const violations = submitLock.checkAndReserve(rescheduleDates, person?person.role:'nurse');
+  const realViolations = violations.filter(v => {
+    const dayReqs = requests.filter(r2=>r2.id!==req.id&&r2.dates&&r2.dates.includes(v.date)&&r2.status!=='rejected'&&r2.status!=='cancelled');
+    const count = person?.role==='nurse'
+      ? dayReqs.filter(r2=>getStaff(r2.staffId)?.role==='nurse').length
+      : dayReqs.filter(r2=>getStaff(r2.staffId)?.role!=='nurse').length;
+    const limit = person?.role==='nurse'?4:3;
+    return count>=limit;
+  });
+  if (realViolations.length>0) { showToast('วันที่เลือกโควต้าเต็ม','error'); return; }
+  req.rescheduledFrom = [...req.dates];
+  req.dates = [...rescheduleDates];
+  req.rescheduleNote = document.getElementById('rescheduleNote').value;
+  req.rescheduledBy = currentUser?.name;
+  req.rescheduledAt = Date.now();
+  if (req.status==='approved') req.status='pending';
+  closeCancelModal();
+  showToast('เลื่อนวันหยุดเรียบร้อย รอการอนุมัติใหม่');
+  renderDashboard(); renderCalendar(); renderMyRequests(); renderAdminTable();
+  saveToGSheet('UPDATE_STATUS',{id:req.id,status:'rescheduled',statusLabel:'เลื่อนวันแล้ว'});
+}
+
+function changeRescheduleMonth(dir) {
+  rescheduleCalDate.setMonth(rescheduleCalDate.getMonth()+dir);
+  renderRescheduleCal();
+}
+
+function renderRescheduleCal() {
+  const y=rescheduleCalDate.getFullYear(), m=rescheduleCalDate.getMonth();
+  document.getElementById('rescheduleMonthLabel').textContent=`${MONTHS_TH[m]} ${y+543}`;
+  const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+  const today=new Date();
+  let html='<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
+  for(let i=0;i<first;i++) html+='<div class="mini-cal-cell empty"></div>';
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
+    const isSel=rescheduleDates.includes(ds);
+    let cls='mini-cal-cell';
+    if(isToday)cls+=' today-mini';
+    if(isSel)cls+=' selected';
+    html+=`<div class="${cls}" onclick="toggleRescheduleDate('${ds}')">${d}</div>`;
+  }
+  document.getElementById('rescheduleCalGrid').innerHTML=html;
+}
+
+function toggleRescheduleDate(ds){
+  const idx=rescheduleDates.indexOf(ds);
+  if(idx>=0)rescheduleDates.splice(idx,1); else rescheduleDates.push(ds);
+  rescheduleDates.sort();
+  renderRescheduleCal();
+  renderRescheduleDates();
+}
+
+function renderRescheduleDates(){
+  const el=document.getElementById('rescheduleDatesDisplay');
+  if(rescheduleDates.length===0){el.innerHTML='<span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>';return;}
+  el.innerHTML=rescheduleDates.map(d=>`<div class="date-chip">${formatDate(d)}<button onclick="toggleRescheduleDate('${d}')">×</button></div>`).join('');
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ===== REAL-TIME CLOCK =====
+const DAY_TH=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+function updateRealTimeClock(){
+  const el=document.getElementById('calRealTimeClock');
+  if(!el)return;
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const ss=String(now.getSeconds()).padStart(2,'0');
+  el.textContent=`วัน${DAY_TH[now.getDay()]}ที่ ${now.getDate()} ${MONTHS_TH[now.getMonth()]} ${now.getFullYear()+543}  |  ${hh}:${mm}:${ss}`;
+}
+setInterval(updateRealTimeClock,1000);
 
 // ===== GOOGLE SHEETS =====
 const APPS_SCRIPT_CODE = `// ============================================================
 //  Google Apps Script — ระบบขอวันหยุด หน่วยการพยาบาล
-//  วิธีใช้:
-//  1. เปิด Google Sheets → Extensions → Apps Script
-//  2. วางโค้ดนี้ทั้งหมด แล้ว Save
-//  3. Project Settings → Script Properties → Add property
-//     Key: SHEET_ID  |  Value: ID ของ Google Sheets
-//     (ดู ID ใน URL: docs.google.com/spreadsheets/d/<<ID>>/edit)
-//  4. Deploy → New deployment → Web App
-//     Execute as: Me  |  Who can access: Anyone
-//  5. คัดลอก Web App URL ไปวางในเว็บ
+//  Structure: A=ID | B=ชื่อ | C=ตำแหน่ง | D=ประเภทการลา
+//             E=วันที่หยุด | F=สถานที่อบรม | G=หมายเหตุ
+//             H=วันที่ขอ | I=สถานะ | J=วันที่บันทึก
 // ============================================================
 
 function doPost(e) {
@@ -2764,35 +2682,40 @@ function doPost(e) {
       PropertiesService.getScriptProperties().getProperty('SHEET_ID')
     );
     const data = JSON.parse(e.postData.contents);
-    const action = data.action;
 
-    if (action === 'ADD') {
+    if (data.action === 'ADD') {
       const sheet = getOrCreateSheet(ss, 'คำขอหยุด');
       ensureHeader(sheet);
       const staff = data.staff;
+      const now = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss');
       data.dates.forEach(date => {
         sheet.appendRow([
-          data.id, staff.name, staff.roleLabel, data.typeLabel,
-          date, data.trainingPlace || '', data.note || '',
-          'รออนุมัติ',
-          Utilities.formatDate(new Date(), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm')
+          data.id,                    // A: ID
+          staff.name,                 // B: ชื่อ
+          staff.roleLabel,            // C: ตำแหน่ง
+          data.typeLabel,             // D: ประเภทการลา
+          date,                       // E: วันที่หยุด
+          data.trainingPlace || '',   // F: สถานที่อบรม
+          data.note || '',            // G: หมายเหตุ
+          data.submittedAt || now,    // H: วันที่ขอ (เวลาที่กดส่งจริง)
+          'รออนุมัติ',               // I: สถานะ
+          now                         // J: วันที่บันทึกลง Sheets
         ]);
       });
       updateSummarySheet(ss, data);
     }
 
-    if (action === 'UPDATE_STATUS') {
+    if (data.action === 'UPDATE_STATUS') {
       const sheet = ss.getSheetByName('คำขอหยุด');
       if (!sheet) return jsonResponse({ ok: false, msg: 'ไม่พบ sheet' });
       const lastRow = sheet.getLastRow();
-      const statusLabel = data.statusLabel || data.status;
       const bgColor = data.status === 'approved' ? '#d4efdf'
                     : data.status === 'rejected'  ? '#fadbd8'
                     : data.status === 'cancelled' ? '#f5f5f5' : '#fff9e6';
       for (let i = 2; i <= lastRow; i++) {
         if (sheet.getRange(i, 1).getValue() == data.id) {
-          sheet.getRange(i, 8).setValue(statusLabel);
-          sheet.getRange(i, 1, 1, 9).setBackground(bgColor);
+          sheet.getRange(i, 9).setValue(data.statusLabel || data.status); // I=สถานะ
+          sheet.getRange(i, 1, 1, 10).setBackground(bgColor);
         }
       }
     }
@@ -2803,35 +2726,29 @@ function doPost(e) {
   }
 }
 
-// GET — ทดสอบการเชื่อมต่อ หรือดึงข้อมูลทั้งหมด
 function doGet(e) {
   try {
-    if (!e.parameter.action) {
-      return jsonResponse({ ok: true, msg: 'พร้อมใช้งาน' });
-    }
+    if (!e.parameter.action) return jsonResponse({ ok: true, msg: 'พร้อมใช้งาน' });
 
     if (e.parameter.action === 'GET_REQUESTS') {
       const ss = SpreadsheetApp.openById(
         PropertiesService.getScriptProperties().getProperty('SHEET_ID')
       );
       const sheet = ss.getSheetByName('คำขอหยุด');
-      if (!sheet || sheet.getLastRow() < 2) {
-        return jsonResponse({ ok: true, data: [] });
-      }
-      const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues();
-      const data = rows
-        .filter(r => r[0] !== '')
-        .map(r => ({
-          id:        String(r[0]),
-          name:      r[1],
-          roleLabel: r[2],
-          typeLabel: r[3],
-          date:      r[4],
-          place:     r[5],
-          note:      r[6],
-          status:    r[7],
-          createdAt: r[8]
-        }));
+      if (!sheet || sheet.getLastRow() < 2) return jsonResponse({ ok: true, data: [] });
+      const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues();
+      const data = rows.filter(r => r[0] !== '').map(r => ({
+        id:          String(r[0]),  // A
+        name:        r[1],          // B
+        roleLabel:   r[2],          // C
+        typeLabel:   r[3],          // D
+        date:        r[4],          // E
+        place:       r[5],          // F
+        note:        r[6],          // G
+        submittedAt: r[7],          // H: วันที่ขอ ← สำคัญ
+        status:      r[8],          // I: สถานะ
+        createdAt:   r[9]           // J: วันที่บันทึก
+      }));
       return jsonResponse({ ok: true, data });
     }
 
@@ -2847,11 +2764,17 @@ function getOrCreateSheet(ss, name) {
 
 function ensureHeader(sheet) {
   if (sheet.getLastRow() === 0) {
-    const headers = ['ID','ชื่อ-สกุล','ตำแหน่ง','ประเภทการลา','วันที่','สถานที่อบรม','หมายเหตุ','สถานะ','วันที่บันทึก'];
-    sheet.appendRow(headers);
-    const hr = sheet.getRange(1, 1, 1, headers.length);
-    hr.setFontWeight('bold').setBackground('#3b1f6b').setFontColor('#ffffff').setHorizontalAlignment('center');
-    [50,180,160,100,100,220,160,100,140].forEach((w,i) => sheet.setColumnWidth(i+1, w));
+    const h = ['ID','ชื่อ','ตำแหน่ง','ประเภทการลา','วันที่หยุด',
+               'สถานที่อบรม','หมายเหตุ','วันที่ขอ','สถานะ','วันที่บันทึก'];
+    sheet.appendRow(h);
+    const hr = sheet.getRange(1, 1, 1, h.length);
+    hr.setFontWeight('bold')
+      .setBackground('#FF6B6B')
+      .setFontColor('#ffffff')
+      .setHorizontalAlignment('center');
+    [50,120,130,110,110,200,150,160,110,160].forEach((w,i) =>
+      sheet.setColumnWidth(i+1, w)
+    );
     sheet.setFrozenRows(1);
   }
 }
@@ -2860,7 +2783,9 @@ function updateSummarySheet(ss, data) {
   const sheet = getOrCreateSheet(ss, 'สรุปรายเดือน');
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(['เดือน','ลาหยุด','พักร้อน','อบรม','วันเกิด','รวม']);
-    sheet.getRange(1,1,1,6).setFontWeight('bold').setBackground('#7b52a8').setFontColor('#ffffff').setHorizontalAlignment('center');
+    sheet.getRange(1,1,1,6)
+      .setFontWeight('bold').setBackground('#4ECDC4')
+      .setFontColor('#ffffff').setHorizontalAlignment('center');
     sheet.setFrozenRows(1);
   }
   const monthKey = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'MM/yyyy');
@@ -2868,7 +2793,10 @@ function updateSummarySheet(ss, data) {
   for (let i = 2; i <= sheet.getLastRow(); i++) {
     if (sheet.getRange(i, 1).getValue() === monthKey) { targetRow = i; break; }
   }
-  if (targetRow === -1) { sheet.appendRow([monthKey,0,0,0,0,0]); targetRow = sheet.getLastRow(); }
+  if (targetRow === -1) {
+    sheet.appendRow([monthKey,0,0,0,0,0]);
+    targetRow = sheet.getLastRow();
+  }
   const colMap = { 'ลาหยุด':2, 'พักร้อน':3, 'อบรม':4, 'วันเกิด':5 };
   const col = colMap[data.typeLabel];
   if (col) {
@@ -2880,466 +2808,187 @@ function updateSummarySheet(ss, data) {
 }
 
 function jsonResponse(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
 }`;
 
-// ── Google Sheets config (ฝังไว้ถาวร ไม่ต้องตั้งค่าทุกเครื่อง) ──
 const DEFAULT_GS_CONFIG = {
   url: 'https://script.google.com/macros/s/AKfycbytbtoARWLNaRZQqPosf67ELkHc-SRId4g-bWxUz3PL8GnJD8hWu52WW0gD2omoEf4/exec',
   sheetId: '12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'
 };
-// ถ้ามีการตั้งค่าใน localStorage ให้ใช้อันนั้นแทน (เผื่อต้องการเปลี่ยน)
-let gsConfig = Object.assign({}, DEFAULT_GS_CONFIG, JSON.parse(localStorage.getItem('gsConfig') || '{}'));
-let sheetRequests = []; // ข้อมูลที่ดึงมาจาก Sheets (ของทุกคน)
+let gsConfig = Object.assign({}, DEFAULT_GS_CONFIG, JSON.parse(localStorage.getItem('gsConfig')||'{}'));
+let sheetRequests = [];
 let syncInterval = null;
 
-// ── แปลง label กลับเป็น key ──────────────────────────────
-function typeLabelToKey(label) {
-  return { 'ลาหยุด':'leave','พักร้อน':'vacation','อบรม':'training','วันเกิด':'birthday' }[label] || 'leave';
-}
-function statusLabelToKey(label) {
-  return { 'อนุมัติแล้ว':'approved','ปฏิเสธ':'rejected','รออนุมัติ':'pending','ยกเลิกแล้ว':'cancelled','เลื่อนวันแล้ว':'pending' }[label] || 'pending';
-}
+function typeLabelToKey(l){return{'ลาหยุด':'leave','พักร้อน':'vacation','อบรม':'training','วันเกิด':'birthday'}[l]||'leave';}
+function statusLabelToKey(l){return{'อนุมัติแล้ว':'approved','ปฏิเสธ':'rejected','รออนุมัติ':'pending','ยกเลิกแล้ว':'cancelled','เลื่อนวันแล้ว':'pending'}[l]||'pending';}
 
-// ── แปลงวันที่จาก Sheets ให้เป็น yyyy-MM-dd ───────────────
-function normalizeDate(raw) {
-  if (!raw) return null;
-  const s = String(raw).trim();
-
-  // รูปแบบ yyyy-MM-dd อยู่แล้ว
-  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-
-  // รูปแบบ dd/MM/yyyy (Sheets ไทย)
-  const m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m1) {
-    const [, d, mo, y] = m1;
-    // ถ้าปีเป็น พ.ศ. (> 2500) ให้แปลงเป็น ค.ศ.
-    const year = parseInt(y) > 2500 ? parseInt(y) - 543 : parseInt(y);
-    return `${year}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-
-  // รูปแบบ MM/dd/yyyy (US)
-  const m2 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m2) {
-    const [, mo, d, y] = m2;
-    return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
-  }
-
-  // พยายาม parse ด้วย Date
-  try {
-    const dt = new Date(s);
-    if (!isNaN(dt)) {
-      return dt.toISOString().substring(0,10);
-    }
-  } catch(e) {}
-
+function normalizeDate(raw){
+  if(!raw)return null;
+  const s=String(raw).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  const m1=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m1){const[,d,mo,y]=m1;const year=parseInt(y)>2500?parseInt(y)-543:parseInt(y);return`${year}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  try{const dt=new Date(s);if(!isNaN(dt))return dt.toISOString().substring(0,10);}catch(e){}
   return null;
 }
 
-// ── ดึงข้อมูลทั้งหมดจาก Sheets เพื่อแสดงในปฏิทิน ─────────
-async function fetchRequestsFromSheet() {
-  if (!gsConfig.url) return;
-  try {
-    // ใช้ no-cors ไม่ได้กับ GET ที่ต้องอ่าน response — ต้องใช้ JSONP หรือ cors proxy
-    // Apps Script ที่ deploy แบบ "Anyone" รองรับ CORS อยู่แล้วสำหรับ GET
-    const res = await fetch(gsConfig.url + '?action=GET_REQUESTS', {
-      method: 'GET',
-      redirect: 'follow'
+async function fetchRequestsFromSheet(){
+  if(!gsConfig.url)return;
+  try{
+    const res=await fetch(gsConfig.url+'?action=GET_REQUESTS',{method:'GET',redirect:'follow'});
+    const json=await res.json();
+    if(!json.ok||!json.data)return;
+
+    // แปลง string วันที่ขอ → timestamp (ms) เพื่อเรียงลำดับได้
+    function parseSubmittedAt(str) {
+      if (!str) return 0;
+      try {
+        // รูปแบบ dd/MM/yyyy HH:mm:ss หรือ dd/MM/yyyy HH:mm
+        const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        if (m) {
+          const [,d,mo,y,h,mi,s] = m;
+          const year = parseInt(y) > 2500 ? parseInt(y)-543 : parseInt(y);
+          return new Date(year, parseInt(mo)-1, parseInt(d), parseInt(h), parseInt(mi), parseInt(s||0)).getTime();
+        }
+        const dt = new Date(str);
+        return isNaN(dt) ? 0 : dt.getTime();
+      } catch(e) { return 0; }
+    }
+
+    const grouped={};
+    json.data.forEach(row=>{
+      const id=String(row.id);
+      // H=วันที่ขอ, ถ้าว่างให้ fallback ไปใช้ J=วันที่บันทึก (ข้อมูลเก่า)
+      const submittedRaw = row.submittedAt || row.createdAt || '';
+      if(!grouped[id]) grouped[id]={
+        id,
+        staffName:      row.name,
+        roleLabel:      row.roleLabel,
+        type:           typeLabelToKey(row.typeLabel),
+        dates:          [],
+        trainingPlace:  row.place||'',
+        note:           row.note||'',
+        status:         statusLabelToKey(row.status),
+        submittedAt:    parseSubmittedAt(submittedRaw),  // timestamp ms
+        submittedAtStr: submittedRaw,                     // string แสดงผล
+        fromSheet:      true
+      };
+      if(row.date){const nd=normalizeDate(row.date);if(nd)grouped[id].dates.push(nd);}
     });
-    const json = await res.json();
-    if (!json.ok || !json.data) return;
-
-    // จัดกลุ่มแถวที่มี id เดียวกันให้เป็น request เดียว (หลายวัน)
-    const grouped = {};
-    json.data.forEach(row => {
-      const id = String(row.id);
-      if (!grouped[id]) {
-        grouped[id] = {
-          id,
-          staffName:  row.name,
-          roleLabel:  row.roleLabel,
-          type:       typeLabelToKey(row.typeLabel),
-          dates:      [],
-          trainingPlace: row.place || '',
-          note:       row.note || '',
-          status:     statusLabelToKey(row.status),
-          fromSheet:  true
-        };
-      }
-      if (row.date) {
-        const nd = normalizeDate(row.date);
-        if (nd) grouped[id].dates.push(nd);
-      }
-    });
-
-    sheetRequests = Object.values(grouped);
-
-    // อัพเดท requests ในหน่วยความจำ — เพิ่มเฉพาะที่ไม่มีใน local
-    const localIds = new Set(requests.filter(r=>!r.fromSheet).map(r=>String(r.id)));
-    // ลบ sheetRequests เก่าออกก่อน แล้วเพิ่มใหม่
-    requests = requests.filter(r => !r.fromSheet);
-    sheetRequests.forEach(sr => {
-      if (!localIds.has(sr.id)) requests.push(sr);
-    });
-
-    // รีเฟรช UI
-    renderCalendar();
-    renderDashboard();
+    sheetRequests=Object.values(grouped);
+    const localIds=new Set(requests.filter(r=>!r.fromSheet).map(r=>String(r.id)));
+    requests=requests.filter(r=>!r.fromSheet);
+    sheetRequests.forEach(sr=>{if(!localIds.has(sr.id))requests.push(sr);});
+    renderCalendar();renderDashboard();
     updateSyncStatus('ok');
-  } catch(err) {
-    console.warn('fetchRequestsFromSheet error:', err);
-    updateSyncStatus('err');
-  }
+  }catch(err){console.warn('fetchRequestsFromSheet error:',err);updateSyncStatus('err');}
 }
 
-function updateSyncStatus(state) {
-  const dot = document.getElementById('gsheetDot');
-  const label = document.getElementById('gsheetBtnLabel');
-  if (state === 'ok') {
-    dot.style.background = '#27ae60';
-    label.textContent = 'Sheets sync ✓';
-  } else if (state === 'err') {
-    dot.style.background = '#e67e22';
-    label.textContent = 'Sync error ⚠';
-  } else {
-    dot.style.background = '#e74c3c';
-    label.textContent = 'ตั้งค่า Google Sheets';
-  }
+function updateSyncStatus(state){
+  const dot=document.getElementById('gsheetDot');
+  const label=document.getElementById('gsheetBtnLabel');
+  if(state==='ok'){dot.style.background='#10B981';label.textContent='Sheets sync ✓';}
+  else if(state==='err'){dot.style.background='#F97316';label.textContent='Sync error ⚠';}
+  else{dot.style.background='var(--primary)';label.textContent='ตั้งค่า Google Sheets';}
 }
 
-function updateGSheetIndicator() {
-  if (gsConfig.url) {
-    updateSyncStatus('ok');
-  } else {
-    updateSyncStatus('none');
-  }
+function updateGSheetIndicator(){
+  updateSyncStatus(gsConfig.url?'ok':'none');
 }
 
-// เริ่ม sync อัตโนมัติทุก 30 วินาที
-function startAutoSync() {
-  if (syncInterval) clearInterval(syncInterval);
-  fetchRequestsFromSheet(); // ดึงครั้งแรกทันที
-  syncInterval = setInterval(fetchRequestsFromSheet, 30000);
+function startAutoSync(){
+  if(syncInterval)clearInterval(syncInterval);
+  fetchRequestsFromSheet();
+  syncInterval=setInterval(fetchRequestsFromSheet,30000);
 }
 
-function showGSheetModal() {
-  document.getElementById('gsUrl').value = gsConfig.url || '';
-  document.getElementById('gsSheetId').value = gsConfig.sheetId || '';
-  document.getElementById('appsScriptCode').textContent = APPS_SCRIPT_CODE;
+function showGSheetModal(){
+  document.getElementById('gsUrl').value=gsConfig.url||'';
+  document.getElementById('gsSheetId').value=gsConfig.sheetId||'';
+  document.getElementById('appsScriptCode').textContent=APPS_SCRIPT_CODE;
   document.getElementById('gsheetModal').classList.add('open');
 }
 
-function closeGSheetModal() {
+function closeGSheetModal(){
   document.getElementById('gsheetModal').classList.remove('open');
-  document.getElementById('gsTestResult').style.display = 'none';
+  document.getElementById('gsTestResult').style.display='none';
 }
 
-function copyScript() {
-  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('คัดลอกโค้ดแล้ว ✓'));
-}
+function copyScript(){navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('คัดลอกโค้ดแล้ว ✓'));}
 
-function saveGSheetSettings() {
-  const url = document.getElementById('gsUrl').value.trim();
-  const sheetId = document.getElementById('gsSheetId').value.trim();
-  if(!url) { showToast('กรุณากรอก URL','error'); return; }
-  gsConfig = { url, sheetId };
-  localStorage.setItem('gsConfig', JSON.stringify(gsConfig));
+function saveGSheetSettings(){
+  const url=document.getElementById('gsUrl').value.trim();
+  const sheetId=document.getElementById('gsSheetId').value.trim();
+  if(!url){showToast('กรุณากรอก URL','error');return;}
+  gsConfig={url,sheetId};
+  localStorage.setItem('gsConfig',JSON.stringify(gsConfig));
   updateGSheetIndicator();
   closeGSheetModal();
   showToast('บันทึกการตั้งค่าแล้ว ✓');
-  startAutoSync(); // เริ่ม sync ทันทีหลังตั้งค่า
+  startAutoSync();
 }
 
-async function testGSheet() {
-  const url = document.getElementById('gsUrl').value.trim();
-  const res = document.getElementById('gsTestResult');
-  if(!url) { showToast('กรุณากรอก URL ก่อน','error'); return; }
-  res.style.display = 'block';
-  res.style.background = 'rgba(192,132,252,0.1)';
-  res.style.color = 'var(--text-mid)';
-  res.textContent = '⏳ กำลังทดสอบ...';
-  try {
-    const r = await fetch(url, { method:'GET', redirect:'follow' });
-    const json = await r.json();
-    if (json.ok) {
-      res.style.background = 'rgba(39,174,96,0.1)';
-      res.style.color = '#1d8b50';
-      res.textContent = '✅ เชื่อมต่อสำเร็จ! พร้อมใช้งาน';
-    } else {
-      throw new Error(json.msg || 'response not ok');
-    }
-  } catch(e) {
-    res.style.background = 'rgba(231,76,60,0.1)';
-    res.style.color = '#b83c2d';
-    res.textContent = '❌ เชื่อมต่อไม่ได้: ' + e.message;
-  }
+async function testGSheet(){
+  const url=document.getElementById('gsUrl').value.trim();
+  const res=document.getElementById('gsTestResult');
+  if(!url){showToast('กรุณากรอก URL ก่อน','error');return;}
+  res.style.display='block';res.style.background='var(--accent-pale)';res.style.color='var(--text-mid)';res.textContent='⏳ กำลังทดสอบ...';
+  try{
+    const r=await fetch(url,{method:'GET',redirect:'follow'});
+    const json=await r.json();
+    if(json.ok){res.style.background='var(--green-pale)';res.style.color='#065F46';res.textContent='✅ เชื่อมต่อสำเร็จ!';}
+    else throw new Error(json.msg||'error');
+  }catch(e){res.style.background='var(--primary-pale)';res.style.color='#991B1B';res.textContent='❌ เชื่อมต่อไม่ได้: '+e.message;}
 }
 
-async function saveToGSheet(action, data) {
-  if(!gsConfig.url) return;
-  const TYPE_LABELS_MAP = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
-  const STATUS_LABELS_MAP = { approved:'อนุมัติแล้ว', rejected:'ปฏิเสธ', cancelled:'ยกเลิกแล้ว', rescheduled:'เลื่อนวันแล้ว' };
-  try {
-    const payload = action === 'ADD' ? {
-      action, id: data.id,
+async function saveToGSheet(action, data){
+  if(!gsConfig.url)return;
+  const TYPE_LABELS_MAP={leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
+  const STATUS_LABELS_MAP={approved:'อนุมัติแล้ว',rejected:'ปฏิเสธ',cancelled:'ยกเลิกแล้ว',rescheduled:'เลื่อนวันแล้ว'};
+  try{
+    // แปลง timestamp เป็น string วันที่-เวลา ไทย
+    const fmtSubmitted = (ts) => {
+      if (!ts) return '';
+      const d = new Date(ts);
+      return d.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    };
+    const payload = action==='ADD' ? {
+      action, id:data.id,
       staff: getStaff(data.staffId),
       dates: data.dates,
       typeLabel: TYPE_LABELS_MAP[data.type],
       trainingPlace: data.trainingPlace,
-      note: data.note
+      note: data.note,
+      submittedAt: fmtSubmitted(data.submittedAt)   // ← วันที่-เวลาที่ขอ
     } : {
-      action, id: data.id, status: data.status,
-      statusLabel: STATUS_LABELS_MAP[data.status] || data.status
+      action, id:data.id,
+      status: data.status,
+      statusLabel: STATUS_LABELS_MAP[data.status]||data.status
     };
-    await fetch(gsConfig.url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    showToast(action==='ADD' ? '📊 บันทึกลง Google Sheets แล้ว' : '📊 อัพเดท Sheets แล้ว');
-    // ดึงข้อมูลใหม่หลังบันทึก เพื่อให้ทุกคนเห็นทันที
-    setTimeout(fetchRequestsFromSheet, 1500);
-  } catch(e) {
-    console.warn('Google Sheets error:', e);
-  }
+    await fetch(gsConfig.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    showToast(action==='ADD'?'📊 บันทึกลง Google Sheets แล้ว':'📊 อัพเดท Sheets แล้ว');
+    setTimeout(fetchRequestsFromSheet,1500);
+  }catch(e){console.warn('GSheet error:',e);}
 }
 
-// ===== CANCEL / RESCHEDULE =====
-let cancelTargetId = null;
-let cancelMode = 'cancel'; // 'cancel' | 'reschedule'
-let rescheduleDates = [];
-let rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-
-function openCancelModal(reqId, mode) {
-  // Permission check
-  const req = requests.find(r => String(r.id) === String(reqId));
-  if (!req) return;
-  const isOwner = (!req.fromSheet && currentUser?.staffId === req.staffId) || (req.fromSheet && req.staffName === currentUser?.name);
-  const isAdmin = currentUser?.isAdmin;
-  if (!isOwner && !isAdmin) {
-    showToast('คุณไม่มีสิทธิ์จัดการคำขอนี้', 'error');
-    return;
-  }
-  if (req.status === 'cancelled') {
-    showToast('คำขอนี้ถูกยกเลิกแล้ว', 'error');
-    return;
-  }
-
-  cancelTargetId = reqId;
-  cancelMode = mode;
-  rescheduleDates = [];
-
-  const s = getStaff(req.staffId);
-  const dateStr = req.dates.map(d => formatDate(d)).join(', ');
-
-  document.getElementById('cancelReqInfo').innerHTML = `
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
-      <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${s.color}22;color:${s.color};">${s.abbr}</div>
-      <div>
-        <div style="font-weight:600;">${s.name}</div>
-        <div style="font-size:12px;color:var(--text-light);">${s.roleLabel}</div>
-      </div>
-      <span class="badge ${TYPE_BADGE[req.type]}" style="margin-left:auto;">${TYPE_LABELS[req.type]}</span>
-      <span class="badge ${STATUS_BADGE[req.status]}">${STATUS_LABEL[req.status]}</span>
-    </div>
-    <div style="font-size:13px;">📅 ${dateStr}</div>
-    ${req.trainingPlace ? `<div style="font-size:12px;color:#8e44ad;margin-top:2px;">📍 ${req.trainingPlace}</div>` : ''}
-  `;
-
-  if (mode === 'reschedule') {
-    document.getElementById('cancelModalTitle').textContent = '📅 เลื่อนวันหยุด';
-    document.getElementById('rescheduleSection').style.display = 'block';
-    document.getElementById('cancelSection').style.display = 'none';
-    document.getElementById('confirmCancelBtn').style.display = 'none';
-    document.getElementById('confirmRescheduleBtn').style.display = 'inline-flex';
-    rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    renderRescheduleCal();
-    renderRescheduleDates();
-  } else {
-    document.getElementById('cancelModalTitle').textContent = '❌ ยกเลิกคำขอ';
-    document.getElementById('rescheduleSection').style.display = 'none';
-    document.getElementById('cancelSection').style.display = 'block';
-    document.getElementById('confirmCancelBtn').style.display = 'inline-flex';
-    document.getElementById('confirmRescheduleBtn').style.display = 'none';
-    document.getElementById('cancelNote').value = '';
-  }
-
-  document.getElementById('cancelModal').classList.add('open');
-}
-
-function closeCancelModal() {
-  document.getElementById('cancelModal').classList.remove('open');
-  cancelTargetId = null;
-  rescheduleDates = [];
-}
-
-function confirmCancel() {
-  const req = requests.find(r => String(r.id) === String(cancelTargetId));
-  if (!req) return;
-  req.status = 'cancelled';
-  req.cancelNote = document.getElementById('cancelNote').value || 'ไม่ระบุ';
-  req.cancelledBy = currentUser?.name;
-  req.cancelledAt = Date.now();
-  closeCancelModal();
-  showToast('ยกเลิกคำขอเรียบร้อยแล้ว');
-  renderDashboard();
-  renderMyRequests();
-  renderAdminTable();
-  saveToGSheet('UPDATE_STATUS', { id: req.id, status: 'cancelled', statusLabel: 'ยกเลิกแล้ว' });
-}
-
-function confirmReschedule() {
-  if (rescheduleDates.length === 0) {
-    showToast('กรุณาเลือกวันที่ใหม่', 'error');
-    return;
-  }
-  const req = requests.find(r => String(r.id) === String(cancelTargetId));
-  if (!req) return;
-
-  // Quota check for new dates
-  const person = getStaff(req.staffId);
-  const violations = submitLock.checkAndReserve(rescheduleDates, person.role);
-  // Exclude current req from count
-  const realViolations = violations.filter(v => {
-    const dayReqsExcluding = requests.filter(r2 =>
-      r2.id !== req.id && r2.dates.includes(v.date) && r2.status !== 'rejected' && r2.status !== 'cancelled'
-    );
-    const count = person.role === 'nurse'
-      ? dayReqsExcluding.filter(r2 => getStaff(r2.staffId)?.role === 'nurse').length
-      : dayReqsExcluding.filter(r2 => getStaff(r2.staffId)?.role !== 'nurse').length;
-    const limit = person.role === 'nurse' ? 4 : 3;
-    return count >= limit;
-  });
-
-  if (realViolations.length > 0) {
-    showToast('วันที่เลือกโควต้าเต็ม', 'error');
-    return;
-  }
-
-  req.rescheduledFrom = [...req.dates];
-  req.dates = [...rescheduleDates];
-  req.rescheduleNote = document.getElementById('rescheduleNote').value;
-  req.rescheduledBy = currentUser?.name;
-  req.rescheduledAt = Date.now();
-  if (req.status === 'approved') req.status = 'pending'; // ต้องอนุมัติใหม่
-
-  closeCancelModal();
-  showToast('เลื่อนวันหยุดเรียบร้อย รอการอนุมัติใหม่');
-  renderDashboard();
-  renderCalendar();
-  renderMyRequests();
-  renderAdminTable();
-  saveToGSheet('UPDATE_STATUS', { id: req.id, status: 'rescheduled', statusLabel: 'เลื่อนวันแล้ว' });
-}
-
-// Mini calendar for reschedule
-function changeRescheduleMonth(dir) {
-  rescheduleCalDate.setMonth(rescheduleCalDate.getMonth() + dir);
-  renderRescheduleCal();
-}
-
-function renderRescheduleCal() {
-  const y = rescheduleCalDate.getFullYear();
-  const m = rescheduleCalDate.getMonth();
-  document.getElementById('rescheduleMonthLabel').textContent = `${MONTHS_TH[m]} ${y+543}`;
-  const first = new Date(y, m, 1).getDay();
-  const days = new Date(y, m+1, 0).getDate();
-  const today = new Date();
-  let html = '<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
-  for (let i = 0; i < first; i++) html += '<div class="mini-cal-cell empty"></div>';
-  for (let d = 1; d <= days; d++) {
-    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
-    const isSel = rescheduleDates.includes(ds);
-    let cls = 'mini-cal-cell';
-    if (isToday) cls += ' today-mini';
-    if (isSel) cls += ' selected';
-    html += `<div class="${cls}" onclick="toggleRescheduleDate('${ds}')">${d}</div>`;
-  }
-  document.getElementById('rescheduleCalGrid').innerHTML = html;
-}
-
-function toggleRescheduleDate(ds) {
-  const idx = rescheduleDates.indexOf(ds);
-  if (idx >= 0) rescheduleDates.splice(idx, 1);
-  else rescheduleDates.push(ds);
-  rescheduleDates.sort();
-  renderRescheduleCal();
-  renderRescheduleDates();
-}
-
-function renderRescheduleDates() {
-  const el = document.getElementById('rescheduleDatesDisplay');
-  if (rescheduleDates.length === 0) {
-    el.innerHTML = '<span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>';
-    return;
-  }
-  el.innerHTML = rescheduleDates.map(d =>
-    `<div class="date-chip">${formatDate(d)}<button onclick="toggleRescheduleDate('${d}')">×</button></div>`
-  ).join('');
-}
-
-// ── Update openRequestModal to check login ──
-const _origOpenReqModal = openRequestModal;
-
-// ── Add logout button to sidebar bottom ──
-function addLogoutBtn() {
-  const gsheetDiv = document.querySelector('#gsheetBtn')?.parentElement;
-  if (gsheetDiv && !document.getElementById('logoutBtn')) {
-    const btn = document.createElement('button');
-    btn.id = 'logoutBtn';
-    btn.innerHTML = '🚪 ออกจากระบบ';
-    btn.style.cssText = 'width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid rgba(255,100,100,0.2);background:rgba(231,76,60,0.08);color:rgba(255,150,150,0.8);font-family:Sarabun,sans-serif;font-size:12px;cursor:pointer;';
-    btn.onclick = logout;
+function addLogoutBtn(){
+  const gsheetDiv=document.querySelector('#gsheetBtn')?.parentElement;
+  if(gsheetDiv&&!document.getElementById('logoutBtn')){
+    const btn=document.createElement('button');
+    btn.id='logoutBtn';
+    btn.innerHTML='🚪 ออกจากระบบ';
+    btn.style.cssText='width:100%;padding:8px;margin-top:6px;border-radius:50px;border:1px solid rgba(255,107,107,0.25);background:rgba(255,107,107,0.06);color:var(--primary);font-family:Sarabun,sans-serif;font-size:12px;font-weight:600;cursor:pointer;';
+    btn.onclick=logout;
     gsheetDiv.appendChild(btn);
   }
 }
-
-// ===== MOBILE SIDEBAR =====
-function toggleSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('open');
-}
-
-function closeSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  sidebar.classList.remove('open');
-  overlay.classList.remove('open');
-}
-
-// ===== REAL-TIME CLOCK =====
-const DAY_TH = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-
-function updateRealTimeClock() {
-  const el = document.getElementById('calRealTimeClock');
-  if (!el) return;
-  const now = new Date();
-  const day  = DAY_TH[now.getDay()];
-  const date = now.getDate();
-  const month = MONTHS_TH[now.getMonth()];
-  const year  = now.getFullYear() + 543;
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mm = String(now.getMinutes()).padStart(2,'0');
-  const ss = String(now.getSeconds()).padStart(2,'0');
-  el.textContent = `วัน${day}ที่ ${date} ${month} ${year}  |  ${hh}:${mm}:${ss}`;
-}
-
-// เริ่ม clock
-setInterval(updateRealTimeClock, 1000);
 
 // ===== INIT =====
 updateGSheetIndicator();
 initLoginDropdown();
 addLogoutBtn();
-// เริ่ม sync ถ้ามี URL อยู่แล้ว (จาก localStorage)
-if (gsConfig.url) startAutoSync();
-// Don't render dashboard yet - wait for login
-
+if(gsConfig.url)startAutoSync();
 </script>
-</div><!-- /app-wrapper -->
 </body>
 </html>
