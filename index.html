@@ -2272,7 +2272,9 @@ function renderCalendar() {
 }
 
 function calDayClick(dateStr) {
-  openRequestModal(dateStr);
+  // ปฏิทินดูได้ทุกคน — คลิกวันเพื่อดูรายละเอียด ไม่เปิดฟอร์มอัตโนมัติ
+  // scroll ลงไปที่รายการกิจกรรมแทน
+  document.getElementById('calEventList').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ===== FORM CALENDAR =====
@@ -2480,15 +2482,15 @@ function renderAdminTable() {
       <td><div class="person-cell">
         <div class="mini-avatar" style="background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
         <div>
-          <div style="font-size:13px;font-weight:500;">${displayName}</div>
-          <div style="font-size:10px;color:var(--text-light);">ขอเมื่อ: ${submittedStr}</div>
+          <div style="font-size:14px;font-weight:600;">${displayName}</div>
+          <div style="font-size:11px;color:var(--text-light);">ขอเมื่อ: ${submittedStr}</div>
           ${r.note?`<div style="font-size:11px;color:var(--text-light);">${r.note}</div>`:''}
         </div>
       </div></td>
-      <td style="font-size:12px;">${displayRole}</td>
+      <td style="font-size:13px;">${displayRole}</td>
       <td><span class="badge ${TYPE_BADGE[r.type]||''}">${TYPE_LABELS[r.type]||r.type}</span></td>
-      <td style="font-size:12px;color:var(--text-mid);">${dateStr}</td>
-      <td>${r.status==='pending'?'<span class="badge badge-pending">รออนุมัติ</span>':''}</td>
+      <td style="font-size:13px;color:var(--text-mid);">${dateStr}</td>
+      <td><span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span></td>
       <td style="display:flex;gap:6px;align-items:center;">${actions}</td>
     </tr>`;
   }).join('');
@@ -2534,39 +2536,58 @@ function renderTraining() {
 // ===== MY REQUESTS =====
 function renderMyRequests() {
   if (!currentUser) return;
-  // Admin sees all; staff sees own
+
+  // ── กรองคำขอ ──────────────────────────────────────────────
+  // Admin เห็นทั้งหมด / Staff เห็นเฉพาะของตัวเอง
   const myReqs = currentUser.isAdmin
-    ? [...requests].sort((a,b) => (a.submittedAt||a.id) - (b.submittedAt||b.id))
-    : requests.filter(r=>r.staffId===currentUser.staffId).sort((a,b) => (a.submittedAt||a.id) - (b.submittedAt||b.id));
+    ? [...requests].sort((a,b) => (b.submittedAt||b.id) - (a.submittedAt||a.id))
+    : requests.filter(r => {
+        // local request — เทียบ staffId
+        if (!r.fromSheet) return r.staffId === currentUser.staffId;
+        // fromSheet — เทียบชื่อ
+        return r.staffName === currentUser.name;
+      }).sort((a,b) => (b.submittedAt||b.id) - (a.submittedAt||a.id));
 
   const list = document.getElementById('myRequestsList');
-  if(myReqs.length===0) {
+  if (myReqs.length === 0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่มีคำขอ</div>';
     return;
   }
+
   list.innerHTML = myReqs.map(r => {
-    const s = getStaff(r.staffId);
-    const dateStr = r.dates.map(d=>formatDate(d)).join(', ');
-    const canManage = currentUser.isAdmin || (currentUser.staffId === r.staffId);
-    const canCancel = canManage && r.status !== 'cancelled';
+    // ดึงข้อมูลผู้ขอ — รองรับทั้ง local และ fromSheet
+    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const displayName  = s ? s.name  : (r.staffName || '?');
+    const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
+    const displayColor = s ? s.color : '#7b52a8';
+
+    const dateStr = r.dates.map(d => formatDate(d)).join(', ');
+    const canManage = currentUser.isAdmin
+      || (!r.fromSheet && currentUser.staffId === r.staffId)
+      || (r.fromSheet  && r.staffName === currentUser.name);
+    const canCancel    = canManage && r.status !== 'cancelled';
     const canReschedule = canManage && (r.status === 'pending' || r.status === 'approved');
+
     return `<div class="card" style="margin-bottom:12px;border-left:4px solid ${r.status==='cancelled'?'#e74c3c':r.status==='approved'?'#27ae60':'var(--border)'}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          ${currentUser.isAdmin?`<div class="person-cell" style="gap:6px;"><div class="mini-avatar" style="width:24px;height:24px;font-size:10px;background:${s?.color||'#888'}22;color:${s?.color||'#888'}">${s?.abbr||'?'}</div><span style="font-size:12px;font-weight:500;">${s?.name||'?'}</span></div>`:''}
+          ${currentUser.isAdmin ? `<div class="person-cell" style="gap:6px;">
+            <div class="mini-avatar" style="width:26px;height:26px;font-size:11px;background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
+            <span style="font-size:13px;font-weight:600;">${displayName}</span>
+          </div>` : ''}
           <span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span>
-          <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]}</span>
+          <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
         </div>
         <div style="display:flex;gap:6px;">
-          ${canReschedule?`<button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')">📅 เลื่อน</button>`:''}
-          ${canCancel?`<button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')">❌ ยกเลิก</button>`:''}
+          ${canReschedule ? `<button class="danger-btn btn-reschedule" onclick="openCancelModal(${r.id},'reschedule')">📅 เลื่อน</button>` : ''}
+          ${canCancel     ? `<button class="danger-btn btn-cancel-req" onclick="openCancelModal(${r.id},'cancel')">❌ ยกเลิก</button>` : ''}
         </div>
       </div>
-      <div style="font-size:13px;color:var(--text-mid);">📅 ${dateStr}</div>
-      ${r.note?`<div style="font-size:12px;color:var(--text-light);margin-top:3px;">💬 ${r.note}</div>`:''}
-      ${r.trainingPlace?`<div style="font-size:12px;color:#8e44ad;margin-top:3px;">📍 ${r.trainingPlace}</div>`:''}
-      ${r.cancelNote?`<div style="font-size:12px;color:#c0392b;margin-top:3px;">🗑 ยกเลิก: ${r.cancelNote}</div>`:''}
-      ${r.rescheduledFrom?`<div style="font-size:11px;color:var(--text-light);margin-top:3px;">📌 เลื่อนจาก: ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>`:''}
+      <div style="font-size:14px;color:var(--text-mid);">📅 ${dateStr}</div>
+      ${r.note         ? `<div style="font-size:13px;color:var(--text-light);margin-top:3px;">💬 ${r.note}</div>` : ''}
+      ${r.trainingPlace? `<div style="font-size:13px;color:#8e44ad;margin-top:3px;">📍 ${r.trainingPlace}</div>` : ''}
+      ${r.cancelNote   ? `<div style="font-size:13px;color:#c0392b;margin-top:3px;">🗑 ยกเลิก: ${r.cancelNote}</div>` : ''}
+      ${r.rescheduledFrom ? `<div style="font-size:12px;color:var(--text-light);margin-top:3px;">📌 เลื่อนจาก: ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>` : ''}
     </div>`;
   }).join('');
 }
