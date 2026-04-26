@@ -2362,7 +2362,17 @@ async function submitRequest() {
     renderDashboard();
     renderCalendar();
     renderMyRequests();
-    await saveToGSheet('ADD', { id:req.id, staffId:personId, dates:selectedDates, type, trainingPlace:req.trainingPlace, note, submittedAt:req.submittedAt });
+    await saveToGSheet('ADD', {
+      id: req.id,
+      staffId: personId,
+      staffName: person.name,
+      roleLabel: person.roleLabel,
+      dates: selectedDates,
+      type,
+      trainingPlace: req.trainingPlace,
+      note,
+      submittedAt: req.submittedAt
+    });
   } finally {
     release();
     if (submitBtn) { submitBtn.disabled=false; submitBtn.textContent='ส่งคำขอ'; }
@@ -3104,22 +3114,32 @@ async function saveToGSheet(action, data){
       const d = new Date(ts);
       return d.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
     };
-    const payload = action==='ADD' ? {
-      action, id: data.id,
-      staff: getStaff(data.staffId),
-      dates: data.dates,
-      typeLabel: TYPE_LABELS_MAP[data.type],
-      trainingPlace: data.trainingPlace,
-      note: data.note,
-      submittedAt: fmtSubmitted(data.submittedAt)
-    } : {
-      action, id: data.id,
-      status: data.status,
-      statusLabel: STATUS_LABELS_MAP[data.status] || data.status
-    };
 
-    // ใช้ no-cors เพราะ Apps Script ไม่รองรับ CORS headers บน POST
-    // แต่ข้อมูลยังส่งได้ — ตรวจสอบผลที่ Sheet โดยตรง
+    let payload;
+    if (action === 'ADD') {
+      // หาข้อมูล staff — ถ้าไม่เจอใช้ข้อมูลที่ส่งมาโดยตรง
+      const staffObj = getStaff(data.staffId);
+      payload = {
+        action,
+        id: data.id,
+        staff: {
+          name:      staffObj ? staffObj.name      : (data.staffName || 'ไม่ทราบ'),
+          roleLabel: staffObj ? staffObj.roleLabel : (data.roleLabel  || 'พยาบาล')
+        },
+        dates:         data.dates,
+        typeLabel:     TYPE_LABELS_MAP[data.type] || data.type,
+        trainingPlace: data.trainingPlace || '',
+        note:          data.note || '',
+        submittedAt:   fmtSubmitted(data.submittedAt)
+      };
+    } else {
+      payload = {
+        action, id: data.id,
+        status:      data.status,
+        statusLabel: STATUS_LABELS_MAP[data.status] || data.status
+      };
+    }
+
     await fetch(gsConfig.url, {
       method: 'POST',
       mode: 'no-cors',
@@ -3128,7 +3148,6 @@ async function saveToGSheet(action, data){
     });
 
     showToast(action==='ADD' ? '📊 ส่งข้อมูลไป Sheets แล้ว' : '📊 อัพเดท Sheets แล้ว');
-    // รอ 2 วินาทีให้ Sheet อัปเดตก่อนดึงกลับ
     setTimeout(fetchRequestsFromSheet, 2000);
   } catch(e) {
     console.warn('GSheet save error:', e);
