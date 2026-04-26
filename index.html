@@ -2955,19 +2955,20 @@ function jsonResponse(obj) {
 }`;
 
 const DEFAULT_GS_CONFIG = {
-  url: 'https://script.google.com/macros/s/AKfycbwoplvKFA_SPaF_7-bQw4XpXaGSJyq4bdoPGBxSlkpC20laW8Y6H0wjv9sCo9eT1ww1/exec',
+  url: 'https://script.google.com/macros/s/AKfycbw6V2T5Bt6zaAiV4esDr2OBiP_W4_7w-76eRyIjGfuj5Lc5bf3eN_1hddn9TYWJp0x0/exec',
   sheetId: '12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'
 };
 // อ่านจาก localStorage ก่อน ถ้าไม่มีหรือ URL ว่างค่อยใช้ default
+// *** ไม่ทับ localStorage ถ้ามีค่าที่ถูกต้องอยู่แล้ว ***
 let gsConfig = (()=>{
   try {
     const saved = JSON.parse(localStorage.getItem('gsConfig')||'null');
-    if (saved && saved.url && saved.url.startsWith('https://')) return saved;
+    if (saved && saved.url && saved.url.startsWith('https://script.google.com/macros/s/')) return saved;
   } catch(e) {}
+  // ถ้าไม่มี หรือ URL ผิดรูปแบบ ให้ใช้ default แล้วบันทึก
+  localStorage.setItem('gsConfig', JSON.stringify(DEFAULT_GS_CONFIG));
   return Object.assign({}, DEFAULT_GS_CONFIG);
 })();
-// ล้าง localStorage เก่าที่อาจมี URL ผิด แล้วบันทึก config ปัจจุบัน
-localStorage.setItem('gsConfig', JSON.stringify(gsConfig));
 let sheetRequests = [];
 let syncInterval = null;
 
@@ -3172,6 +3173,17 @@ function addLogoutBtn(){
 }
 
 // ===== INIT =====
+// ถ้า localStorage มี URL เก่า ให้ reset เป็น default ใหม่อัตโนมัติ
+(function clearStaleUrl(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('gsConfig')||'null');
+    const OLD_URL = 'AKfycbwoplvKFA_SPaF_7-bQw4XpXaGSJyq4bdoPGBxSlkpC20laW8Y6H0wjv9sCo9eT1ww1';
+    if (saved && saved.url && saved.url.includes(OLD_URL)) {
+      localStorage.setItem('gsConfig', JSON.stringify(DEFAULT_GS_CONFIG));
+      gsConfig = Object.assign({}, DEFAULT_GS_CONFIG);
+    }
+  } catch(e) {}
+})();
 updateGSheetIndicator();
 initLoginDropdown();
 addLogoutBtn();
