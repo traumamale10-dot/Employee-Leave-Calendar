@@ -1597,11 +1597,11 @@
     </div>
     <div class="form-group">
       <label class="form-label">Google Apps Script Web App URL</label>
-      <input class="form-input" type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/AKfycbw7HkPZV7tW4RRF8jjIa-2e4S8lFSDSRId_GhA9fNV71ISz_U3uSiHIvheGU9clAi22/exec" style="font-size:12px;">
+      <input class="form-input" type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/xxxx/exec" style="font-size:12px;">
     </div>
     <div class="form-group">
       <label class="form-label">Google Sheet ID</label>
-      <input class="form-input" type="text" id="gsSheetId" placeholder="12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM" style="font-size:12px;">
+      <input class="form-input" type="text" id="gsSheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" style="font-size:12px;">
     </div>
     <details style="margin-bottom:16px;">
       <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);padding:8px 0;">📋 คัดลอกโค้ด Apps Script</summary>
@@ -2945,10 +2945,17 @@ function jsonResponse(obj) {
 }`;
 
 const DEFAULT_GS_CONFIG = {
-  url: 'https://script.google.com/macros/s/AKfycbytbtoARWLNaRZQqPosf67ELkHc-SRId4g-bWxUz3PL8GnJD8hWu52WW0gD2omoEf4/exec',
+  url: 'https://script.google.com/macros/s/AKfycbw7HkPZV7tW4RRF8jjIa-2e4S8IFSDSRld_GhA9fNV71ISz_U3uSiHlvheGU9clAi22/exec',
   sheetId: '12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'
 };
-let gsConfig = Object.assign({}, DEFAULT_GS_CONFIG, JSON.parse(localStorage.getItem('gsConfig')||'{}'));
+// อ่านจาก localStorage ก่อน ถ้าไม่มีค่อยใช้ default
+let gsConfig = (()=>{
+  try {
+    const saved = JSON.parse(localStorage.getItem('gsConfig')||'null');
+    if (saved && saved.url) return saved;
+  } catch(e) {}
+  return Object.assign({}, DEFAULT_GS_CONFIG);
+})();
 let sheetRequests = [];
 let syncInterval = null;
 
@@ -3057,14 +3064,20 @@ function closeGSheetModal(){
 function copyScript(){navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('คัดลอกโค้ดแล้ว ✓'));}
 
 function saveGSheetSettings(){
-  const url=document.getElementById('gsUrl').value.trim();
-  const sheetId=document.getElementById('gsSheetId').value.trim();
-  if(!url){showToast('กรุณากรอก URL','error');return;}
-  gsConfig={url,sheetId};
-  localStorage.setItem('gsConfig',JSON.stringify(gsConfig));
+  const url = document.getElementById('gsUrl').value.trim();
+  const sheetId = document.getElementById('gsSheetId').value.trim();
+  if (!url) { showToast('กรุณากรอก URL','error'); return; }
+  if (!url.startsWith('https://script.google.com/macros/s/')) {
+    showToast('URL ไม่ถูกต้อง ต้องขึ้นต้นด้วย https://script.google.com/macros/s/','error');
+    return;
+  }
+  // ล้าง localStorage เก่า แล้วบันทึกใหม่
+  localStorage.removeItem('gsConfig');
+  gsConfig = { url, sheetId };
+  localStorage.setItem('gsConfig', JSON.stringify(gsConfig));
   updateGSheetIndicator();
   closeGSheetModal();
-  showToast('บันทึกการตั้งค่าแล้ว ✓');
+  showToast('✅ บันทึกการตั้งค่าแล้ว กำลังซิงค์...');
   startAutoSync();
 }
 
@@ -3082,33 +3095,45 @@ async function testGSheet(){
 }
 
 async function saveToGSheet(action, data){
-  if(!gsConfig.url)return;
+  if(!gsConfig.url) return;
   const TYPE_LABELS_MAP={leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
   const STATUS_LABELS_MAP={approved:'อนุมัติแล้ว',rejected:'ปฏิเสธ',cancelled:'ยกเลิกแล้ว',rescheduled:'เลื่อนวันแล้ว'};
-  try{
-    // แปลง timestamp เป็น string วันที่-เวลา ไทย
+  try {
     const fmtSubmitted = (ts) => {
       if (!ts) return '';
       const d = new Date(ts);
       return d.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
     };
     const payload = action==='ADD' ? {
-      action, id:data.id,
+      action, id: data.id,
       staff: getStaff(data.staffId),
       dates: data.dates,
       typeLabel: TYPE_LABELS_MAP[data.type],
       trainingPlace: data.trainingPlace,
       note: data.note,
-      submittedAt: fmtSubmitted(data.submittedAt)   // ← วันที่-เวลาที่ขอ
+      submittedAt: fmtSubmitted(data.submittedAt)
     } : {
-      action, id:data.id,
+      action, id: data.id,
       status: data.status,
-      statusLabel: STATUS_LABELS_MAP[data.status]||data.status
+      statusLabel: STATUS_LABELS_MAP[data.status] || data.status
     };
-    await fetch(gsConfig.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    showToast(action==='ADD'?'📊 บันทึกลง Google Sheets แล้ว':'📊 อัพเดท Sheets แล้ว');
-    setTimeout(fetchRequestsFromSheet,1500);
-  }catch(e){console.warn('GSheet error:',e);}
+
+    // ใช้ no-cors เพราะ Apps Script ไม่รองรับ CORS headers บน POST
+    // แต่ข้อมูลยังส่งได้ — ตรวจสอบผลที่ Sheet โดยตรง
+    await fetch(gsConfig.url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    showToast(action==='ADD' ? '📊 ส่งข้อมูลไป Sheets แล้ว' : '📊 อัพเดท Sheets แล้ว');
+    // รอ 2 วินาทีให้ Sheet อัปเดตก่อนดึงกลับ
+    setTimeout(fetchRequestsFromSheet, 2000);
+  } catch(e) {
+    console.warn('GSheet save error:', e);
+    showToast('⚠️ ส่งข้อมูลไม่ได้ ตรวจสอบการเชื่อมต่อ', 'error');
+  }
 }
 
 function addLogoutBtn(){
