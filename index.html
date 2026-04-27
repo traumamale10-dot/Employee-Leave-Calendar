@@ -2956,7 +2956,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtjoAKh4W7dMUVWzVxJM8S4KJcwhieZNB43mAZViJryYzSw_IstYUj3oX-GDDg7mV4/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtEunECCO6hr-Qhv5qQ4NUMLyUzBcq8nI9oyTvspTyFoErCTnCqc8eVgD7GslsDTE/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3124,16 +3124,18 @@ async function saveToGSheet(action, data){
       };
     }
 
-    // ส่งเป็น text/plain + JSON — เหมือนระบบสอนน้องใหม่ (หลบ CORS ได้ + อ่าน response ได้)
+    // ส่งแบบเดียวกับระบบสอนน้องใหม่ทุกประการ
+    alert("SENDING: " + JSON.stringify(payload).substring(0,100));
     const r = await fetch(GAS_URL, {
       method: 'POST',
       redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: {'Content-Type': 'text/plain'},
       body: JSON.stringify(payload)
     });
     const text = await r.text();
-    const result = JSON.parse(text);
-    if (result.error) throw new Error(result.error);
+    let result;
+    try { result = JSON.parse(text); } catch(pe) { throw new Error('parse error: ' + text.substring(0,100)); }
+    if (result && result.error) throw new Error(result.error);
 
     showToast(action==='ADD' ? '📊 บันทึก Sheets สำเร็จ ✓' : '📊 อัพเดท Sheets แล้ว ✓');
     setTimeout(fetchRequestsFromSheet, 2500);
