@@ -792,6 +792,8 @@
   .btn-approve:hover { background: #D1FAE5; }
   .btn-reject { background: var(--primary-pale); color: #991B1B; }
   .btn-reject:hover { background: #FFE4E6; }
+  .btn-delete { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .btn-delete:hover { background: #FEE2E2; }
 
   /* ─── TRAINING CARD ──────────────────────── */
   .training-card {
@@ -1480,6 +1482,7 @@
     <!-- ADMIN PAGE -->
     <div class="page" id="page-admin">
       <div class="filter-bar">
+        <button class="btn btn-primary" onclick="syncFromSheet()" style="padding:8px 16px;font-size:13px;border-radius:50px;white-space:nowrap;">🔄 ซิงค์จาก Sheet</button>
         <select class="filter-select" id="adminFilterType" onchange="renderAdminTable()">
           <option value="">ทุกประเภท</option>
           <option value="leave">ลาหยุด</option>
@@ -2326,7 +2329,6 @@ document.getElementById('req-person').addEventListener('change', checkQuota);
 
 async function submitRequest() {
   const personId = parseInt(document.getElementById('req-person').value);
-  alert('DEBUG: personId=' + personId + ' dates=' + JSON.stringify(selectedDates) + ' user=' + (currentUser?currentUser.name:'null'));
   const type = document.getElementById('req-type').value;
   const note = document.getElementById('req-note').value;
   const trainingPlace = document.getElementById('req-training-place').value;
@@ -2425,11 +2427,14 @@ function renderAdminTable() {
       <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected')">✕ ปฏิเสธ</button>
       <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
       <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
+      ${currentUser&&currentUser.isAdmin?`<button class="action-btn btn-delete" onclick="deleteRequest('${r.id}')" style="font-size:11px;padding:4px 8px;">🗑 ลบ</button>`:''}
     ` : r.status==='approved' ? `
       <span class="badge badge-approved">อนุมัติแล้ว</span>
       <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
       <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
-    ` : `<span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>`;
+      ${currentUser&&currentUser.isAdmin?`<button class="action-btn btn-delete" onclick="deleteRequest('${r.id}')" style="font-size:11px;padding:4px 8px;">🗑 ลบ</button>`:''}
+    ` : `<span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
+      ${currentUser&&currentUser.isAdmin?`<button class="action-btn btn-delete" onclick="deleteRequest('${r.id}')" style="font-size:11px;padding:4px 8px;">🗑 ลบ</button>`:''}`;
     return `<tr style="${r.status==='pending'?'background:rgba(251,191,36,0.04);':''}">
       <td style="text-align:center;font-weight:700;font-size:13px;color:var(--text-light);">${idx+1}</td>
       <td><div class="person-cell">
@@ -2447,6 +2452,24 @@ function renderAdminTable() {
       <td style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">${actions}</td>
     </tr>`;
   }).join('');
+}
+
+function deleteRequest(id) {
+  if (!confirm('ลบรายการนี้ออกจากระบบและ Google Sheet?')) return;
+  requests = requests.filter(r => String(r.id) !== String(id));
+  renderAdminTable(); renderMyRequests(); renderCalendar(); renderDashboard();
+  showToast('🗑 ลบรายการแล้ว');
+  saveToGSheet('DELETE', { id: String(id) });
+}
+
+function syncFromSheet() {
+  showToast('🔄 กำลังดึงข้อมูลจาก Sheet...');
+  requests = requests.filter(r => !r.fromSheet);
+  sheetRequests = [];
+  fetchRequestsFromSheet().then(() => {
+    renderAdminTable(); renderMyRequests(); renderCalendar(); renderDashboard();
+    showToast('✅ ซิงค์ข้อมูลเรียบร้อย');
+  });
 }
 
 function updateStatus(id, status) {
@@ -2957,7 +2980,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyfd8iEOFxhimxkDFjXOi5k65R5lU62aUx6NVOQ8gxhPwqJ4oUfBT2F67M1h2qGJR3p/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbycEFubg9xBnwgyPRbBDUrxlR4P2lKBZw6gdT7Pl4Km0uhJs3yUMIlC2UY2TD7B1qin/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3126,7 +3149,6 @@ async function saveToGSheet(action, data){
     }
 
     // ส่งแบบเดียวกับระบบสอนน้องใหม่ทุกประการ
-    alert("SENDING: " + JSON.stringify(payload).substring(0,100));
     const r = await fetch(GAS_URL, {
       method: 'POST',
       redirect: 'follow',
@@ -3142,7 +3164,6 @@ async function saveToGSheet(action, data){
     setTimeout(fetchRequestsFromSheet, 2500);
   } catch(e) {
     console.warn('GSheet save error:', e);
-    alert('ERROR: ' + e.message + ' | ' + e.toString());
     showToast('⚠️ ส่งข้อมูลไม่ได้: ' + e.message, 'error');
   }
 }
