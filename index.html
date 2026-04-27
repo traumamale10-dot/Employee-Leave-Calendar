@@ -1163,6 +1163,7 @@
     .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .stat-number { font-size: 26px; }
     .stat-card { padding: 14px; }
+    #typeStatCards { grid-template-columns: repeat(2, 1fr) !important; }
     .dashboard-grid { grid-template-columns: 1fr; gap: 14px; }
     .two-col, .three-col { grid-template-columns: 1fr; }
     .card { padding: 14px; overflow: hidden; }
@@ -1302,9 +1303,7 @@
       <span class="nav-icon">📝</span> ขอวันหยุด
     </div>
     <div class="nav-section">จัดการ</div>
-    <div class="nav-item admin-only" data-page="admin" onclick="showPage('admin')">
-      <span class="nav-icon">✅</span> อนุมัติคำขอ
-    </div>
+
     <div class="nav-item" data-page="training" onclick="showPage('training')">
       <span class="nav-icon">🎓</span> การอบรม
     </div>
@@ -1360,55 +1359,58 @@
           <option value="">ทั้งหมด</option>
         </select>
       </div>
-      <!-- Stat cards -->
-      <div class="stat-cards" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));">
-        <div class="stat-card" id="dash-overquota-card" style="display:none;border:2px solid #EF4444;">
-          <div class="stat-icon" style="background:#FEE2E2;">⚠️</div>
-          <div class="stat-label" style="color:#EF4444;">เกินกำหนด</div>
-          <div class="stat-number" id="stat-overquota" style="color:#EF4444;">0</div>
-          <div class="stat-sub">วันที่เต็มโควต้า</div>
+      <!-- Overquota alert -->
+      <div id="dash-overquota-card" style="display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:14px;padding:14px 18px;margin-bottom:16px;align-items:center;gap:12px;">
+        <div style="font-size:28px;">⚠️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#DC2626;">มีวันที่เกินโควต้า!</div>
+          <div style="font-size:13px;color:#EF4444;"><span id="stat-overquota">0</span> วันที่มีผู้ขอเกินกำหนด</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon icon-red">📋</div>
-          <div class="stat-label">คำขอทั้งหมด</div>
-          <div class="stat-number" id="stat-total">0</div>
-          <div class="stat-sub">ทุกประเภท</div>
+      </div>
+
+      <!-- Stat cards — แถว 1: สรุปสถานะ -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div style="background:linear-gradient(135deg,#FF6B6B,#FF8E8E);border-radius:16px;padding:18px 20px;color:white;position:relative;overflow:hidden;">
+          <div style="font-size:11px;font-weight:600;opacity:0.85;margin-bottom:4px;letter-spacing:0.05em;">คำขอทั้งหมด</div>
+          <div id="stat-total" style="font-family:'Prompt',sans-serif;font-size:36px;font-weight:700;line-height:1;">0</div>
+          <div style="font-size:11px;opacity:0.75;margin-top:2px;">ทุกประเภท</div>
+          <div style="position:absolute;right:-10px;bottom:-10px;font-size:48px;opacity:0.15;">📋</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="background:#EFF6FF;">🏖️</div>
-          <div class="stat-label">ลาหยุด</div>
-          <div class="stat-number" id="stat-leave" style="color:var(--blue);">0</div>
-          <div class="stat-sub">วัน</div>
+        <div style="display:grid;grid-template-rows:1fr 1fr;gap:12px;">
+          <div style="background:linear-gradient(135deg,#10B981,#34D399);border-radius:14px;padding:14px 18px;color:white;position:relative;overflow:hidden;">
+            <div style="font-size:11px;font-weight:600;opacity:0.85;">อนุมัติแล้ว</div>
+            <div id="stat-approved" style="font-family:'Prompt',sans-serif;font-size:28px;font-weight:700;line-height:1.1;">0</div>
+            <div style="position:absolute;right:8px;bottom:4px;font-size:22px;opacity:0.2;">✅</div>
+          </div>
+          <div style="background:linear-gradient(135deg,#FBBF24,#F59E0B);border-radius:14px;padding:14px 18px;color:white;position:relative;overflow:hidden;">
+            <div style="font-size:11px;font-weight:600;opacity:0.85;">รออนุมัติ</div>
+            <div id="stat-pending" style="font-family:'Prompt',sans-serif;font-size:28px;font-weight:700;line-height:1.1;">0</div>
+            <div style="position:absolute;right:8px;bottom:4px;font-size:22px;opacity:0.2;">⏳</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="background:#F5F0FF;">🌴</div>
-          <div class="stat-label">พักร้อน</div>
-          <div class="stat-number" id="stat-vacation" style="color:var(--purple);">0</div>
-          <div class="stat-sub">วัน</div>
+      </div>
+
+      <!-- Stat cards — แถว 2: ประเภทการลา -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;" id="typeStatCards">
+        <div style="background:white;border-radius:14px;padding:14px 12px;border:1px solid #E2E8F0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div style="font-size:22px;margin-bottom:4px;">🏖️</div>
+          <div id="stat-leave" style="font-family:'Prompt',sans-serif;font-size:24px;font-weight:700;color:#3B82F6;line-height:1;">0</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">ลาหยุด</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon icon-teal">🎓</div>
-          <div class="stat-label">อบรม</div>
-          <div class="stat-number" id="stat-training">0</div>
-          <div class="stat-sub">วัน</div>
+        <div style="background:white;border-radius:14px;padding:14px 12px;border:1px solid #E2E8F0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div style="font-size:22px;margin-bottom:4px;">🌴</div>
+          <div id="stat-vacation" style="font-family:'Prompt',sans-serif;font-size:24px;font-weight:700;color:#A855F7;line-height:1;">0</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">พักร้อน</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon" style="background:#FDF4FF;">🎂</div>
-          <div class="stat-label">วันเกิด</div>
-          <div class="stat-number" id="stat-birthday" style="color:#EC4899;">0</div>
-          <div class="stat-sub">วัน</div>
+        <div style="background:white;border-radius:14px;padding:14px 12px;border:1px solid #E2E8F0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div style="font-size:22px;margin-bottom:4px;">🎓</div>
+          <div id="stat-training" style="font-family:'Prompt',sans-serif;font-size:24px;font-weight:700;color:#4ECDC4;line-height:1;">0</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">อบรม</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon icon-green">✅</div>
-          <div class="stat-label">อนุมัติแล้ว</div>
-          <div class="stat-number" id="stat-approved">0</div>
-          <div class="stat-sub">รายการ</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon icon-yellow">⏳</div>
-          <div class="stat-label">รออนุมัติ</div>
-          <div class="stat-number" id="stat-pending">0</div>
-          <div class="stat-sub">รายการ</div>
+        <div style="background:white;border-radius:14px;padding:14px 12px;border:1px solid #E2E8F0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          <div style="font-size:22px;margin-bottom:4px;">🎂</div>
+          <div id="stat-birthday" style="font-family:'Prompt',sans-serif;font-size:24px;font-weight:700;color:#EC4899;line-height:1;">0</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">วันเกิด</div>
         </div>
       </div>
       <!-- Birthday banner -->
@@ -2366,15 +2368,26 @@ function showDayPopup(dateStr) {
       const submittedStr = e.submittedAt
         ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
         : e.submittedAtStr || '';
-      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
-        <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${col}22;color:${col};">${abbr}</div>
-        <div style="flex:1;">
-          <div style="font-size:14px;font-weight:600;">${name}</div>
-          ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+      const adminBtns = currentUser?.isAdmin && e.status==='pending' ? `
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          <button class="action-btn btn-approve" style="font-size:11px;padding:4px 10px;" onclick="updateStatus('${e.id}','approved');document.getElementById('dayPopup').classList.remove('open');renderCalendar();">✓ อนุมัติ</button>
+          <button class="action-btn btn-reject" style="font-size:11px;padding:4px 10px;" onclick="updateStatus('${e.id}','rejected');document.getElementById('dayPopup').classList.remove('open');renderCalendar();">✕ ปฏิเสธ</button>
+        </div>` : currentUser?.isAdmin && e.status==='approved' ? `
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          <button class="danger-btn btn-cancel-req" style="font-size:11px;padding:4px 10px;" onclick="openCancelModal('${e.id}','cancel');document.getElementById('dayPopup').classList.remove('open');">❌ ยกเลิก</button>
+        </div>` : '';
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
+          <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${col}22;color:${col};">${abbr}</div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;">${name}</div>
+            ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+          </div>
+          <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
+          <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
         </div>
-        <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
-        <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
+        ${adminBtns}
       </div>`;
     }).join('');
     return `<div style="margin-bottom:14px;">
@@ -3249,7 +3262,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxA5MC_RJ-wPjjuFYKZ23AevygOGjBsDDeTu1vcCEQOAp0gkmwpHUh5MwN02DRdYUmX/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxcrqR_eHLkpAXnjc0gH_QA7c3pcASBgNFT6IzS1ujat6qRvdlW289QF2how-0wvpPU/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
