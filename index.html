@@ -1505,7 +1505,29 @@
 
     <!-- REQUEST PAGE -->
     <div class="page" id="page-request">
-      <div class="section-title">📝 คำขอวันหยุดของฉัน</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <div class="section-title" style="margin-bottom:0;">📝 คำขอวันหยุดของฉัน</div>
+        <div id="adminReqFilters" style="display:none;gap:8px;flex-wrap:wrap;">
+          <input id="reqSearchInput" type="text" placeholder="🔍 ค้นหาชื่อ..." oninput="renderMyRequests()"
+            style="padding:8px 14px;border-radius:50px;border:1.5px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;outline:none;width:160px;">
+          <select id="reqStatusFilter" onchange="renderMyRequests()"
+            style="padding:8px 14px;border-radius:50px;border:1.5px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+            <option value="">ทุกสถานะ</option>
+            <option value="pending">รออนุมัติ</option>
+            <option value="approved">อนุมัติแล้ว</option>
+            <option value="rejected">ปฏิเสธ</option>
+            <option value="cancelled">ยกเลิกแล้ว</option>
+          </select>
+          <select id="reqTypeFilter" onchange="renderMyRequests()"
+            style="padding:8px 14px;border-radius:50px;border:1.5px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+            <option value="">ทุกประเภท</option>
+            <option value="leave">ลาหยุด</option>
+            <option value="vacation">พักร้อน</option>
+            <option value="training">อบรม</option>
+            <option value="birthday">วันเกิด</option>
+          </select>
+        </div>
+      </div>
       <div id="myRequestsList"></div>
     </div>
 
@@ -2828,9 +2850,25 @@ function renderMyRequests() {
     return sn === un || sn.includes(un) || un.includes(sn);
   }
 
-  const myReqs = currentUser.isAdmin
-    ? [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id))
-    : requests.filter(nameMatch).sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id));
+  // แสดง filter bar เฉพาะ Admin
+  const filterBar = document.getElementById('adminReqFilters');
+  if (filterBar) filterBar.style.display = currentUser.isAdmin ? 'flex' : 'none';
+
+  const searchVal = (document.getElementById('reqSearchInput')?.value||'').trim().toLowerCase();
+  const statusVal = document.getElementById('reqStatusFilter')?.value || '';
+  const typeVal   = document.getElementById('reqTypeFilter')?.value || '';
+
+  let myReqs = currentUser.isAdmin
+    ? [...requests]
+    : requests.filter(nameMatch);
+
+  // Admin filter
+  if (currentUser.isAdmin) {
+    if (searchVal) myReqs = myReqs.filter(r => (r.staffName||'').toLowerCase().includes(searchVal));
+    if (statusVal) myReqs = myReqs.filter(r => r.status === statusVal);
+    if (typeVal)   myReqs = myReqs.filter(r => r.type === typeVal);
+  }
+  myReqs.sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id));
 
   if (myReqs.length===0) {
     // แสดง debug เล็กน้อยเพื่อช่วย diagnose
