@@ -3140,19 +3140,18 @@ async function saveToGSheet(action, data){
       };
     }
 
-    // ส่งเป็น form-encoded — ทำงานได้กับ no-cors + Apps Script doPost
-    const formBody = Object.entries(payload)
-      .map(([k,v]) => encodeURIComponent(k)+'='+encodeURIComponent(v))
-      .join('&');
-
-    await fetch(gsConfig.url, {
+    // ส่งเป็น text/plain + JSON — เหมือนระบบสอนน้องใหม่ (หลบ CORS ได้ + อ่าน response ได้)
+    const r = await fetch(gsConfig.url, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formBody
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
     });
+    const text = await r.text();
+    const result = JSON.parse(text);
+    if (result.error) throw new Error(result.error);
 
-    showToast(action==='ADD' ? '📊 ส่งข้อมูลไป Sheets แล้ว' : '📊 อัพเดท Sheets แล้ว');
+    showToast(action==='ADD' ? '📊 บันทึก Sheets สำเร็จ ✓' : '📊 อัพเดท Sheets แล้ว ✓');
     setTimeout(fetchRequestsFromSheet, 2500);
   } catch(e) {
     console.warn('GSheet save error:', e);
