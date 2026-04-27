@@ -3071,8 +3071,10 @@ async function fetchRequestsFromSheet(){
       if(row.date){const nd=normalizeDate(row.date);if(nd&&!grouped[groupKey].dates.includes(nd))grouped[groupKey].dates.push(nd);}
     });
     sheetRequests=Object.values(grouped);
-    requests=requests.filter(r=>!r.fromSheet);
-    sheetRequests.forEach(sr=>{ requests.push(sr); });
+    // เก็บ local requests ที่ id ไม่ซ้ำกับ Sheet (เพิ่งส่งยังไม่ sync)
+    const sheetIds = new Set(sheetRequests.map(r=>String(r.id)));
+    const localOnly = requests.filter(r=>!r.fromSheet && !sheetIds.has(String(r.id)));
+    requests = [...sheetRequests, ...localOnly];
     renderCalendar();renderDashboard();
     updateSyncStatus('ok');
   }catch(err){console.warn('fetchRequestsFromSheet error:',err);updateSyncStatus('err');}
@@ -3219,7 +3221,7 @@ function addLogoutBtn(){
 updateGSheetIndicator();
 initLoginDropdown();
 addLogoutBtn();
-startAutoSync();
+// ไม่ sync ก่อน login — รอให้ login ก่อนค่อย sync
 </script>
 </body>
 </html>
