@@ -750,6 +750,17 @@
   .mini-cal-cell.selected { background: var(--primary); color: #fff; }
   .mini-cal-cell.today-mini { font-weight: 800; color: var(--primary); }
   .mini-cal-cell.past { color: var(--text-light); pointer-events: none; }
+  .mini-cal-cell { position: relative; }
+  .mini-cal-cell .quota-dot {
+    position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; font-weight: 700; line-height: 1;
+    white-space: nowrap;
+  }
+  .mini-cal-cell.quota-1 { background: #FEF9C3; }
+  .mini-cal-cell.quota-2 { background: #FEF08A; }
+  .mini-cal-cell.quota-full { background: #FEE2E2; color: #991B1B; }
+  .mini-cal-cell.quota-full:hover { background: #FECACA; }
+  .mini-cal-cell.selected.quota-full { background: var(--primary); color: #fff; }
 
   /* ─── LAYOUT HELPERS ─────────────────────── */
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -2393,16 +2404,40 @@ function renderFormCal() {
   const first = new Date(y,m,1).getDay();
   const days = new Date(y,m+1,0).getDate();
   const today = new Date();
+  // หาคนที่ขอในแต่ละวัน (เฉพาะ pending/approved)
+  const personId = parseInt(document.getElementById('req-person')?.value||'0');
+  const personRole = personId ? (getStaff(personId)?.role||'nurse') : 'nurse';
   let html = '<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
   for (let i=0;i<first;i++) html += '<div class="mini-cal-cell empty"></div>';
   for (let d=1;d<=days;d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
     const isSel = selectedDates.includes(ds);
+    // นับคนที่ขอวันนี้ในกลุ่มเดียวกัน
+    const dayReqs = requests.filter(r =>
+      r.dates && r.dates.includes(ds) &&
+      r.status !== 'rejected' && r.status !== 'cancelled'
+    );
+    const nurseCount = dayReqs.filter(r => {
+      const s = getStaff(r.staffId);
+      return s ? s.role === 'nurse' : (r.roleLabel||'').includes('พยาบาล');
+    }).length;
+    const otherCount = dayReqs.filter(r => {
+      const s = getStaff(r.staffId);
+      return s ? s.role !== 'nurse' : !(r.roleLabel||'').includes('พยาบาล');
+    }).length;
+    const limit = personRole === 'nurse' ? 4 : 3;
+    const count = personRole === 'nurse' ? nurseCount : otherCount;
     let cls = 'mini-cal-cell';
     if (isToday) cls += ' today-mini';
     if (isSel) cls += ' selected';
-    html += `<div class="${cls}" onclick="toggleDate('${ds}')">${d}</div>`;
+    if (!isSel) {
+      if (count >= limit) cls += ' quota-full';
+      else if (count >= limit-1) cls += ' quota-2';
+      else if (count >= 1) cls += ' quota-1';
+    }
+    const dot = count > 0 ? `<span class="quota-dot" style="color:${count>=limit?'#EF4444':count>=limit-1?'#D97706':'#6B7280'}">${count}/${limit}</span>` : '';
+    html += `<div class="${cls}" onclick="toggleDate('${ds}')" title="${count} คนขอวันนี้">${d}${dot}</div>`;
   }
   document.getElementById('formCalGrid').innerHTML = html;
 }
@@ -3214,7 +3249,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycby2CVT8QC--Pjx5HoF36aPen1nUyrVYjIFqG_OtG_9k2QQZFPHQwEAm-4qmNxdd-qCh/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxA5MC_RJ-wPjjuFYKZ23AevygOGjBsDDeTu1vcCEQOAp0gkmwpHUh5MwN02DRdYUmX/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
