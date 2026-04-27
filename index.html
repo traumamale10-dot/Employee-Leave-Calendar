@@ -3045,10 +3045,11 @@ async function fetchRequestsFromSheet(){
         s.name.includes(sheetName)
       );
       const submittedRaw = row.submittedAt || row.createdAt || '';
-      // ใช้ id+ชื่อ+ประเภท เป็น key เพื่อป้องกัน ID ซ้ำกันข้ามคน
-      const groupKey = id + '|' + sheetName + '|' + (row.typeLabel||'');
+      // ใช้ชื่อ+ประเภท+วันที่ขอ เป็น key เพื่อป้องกัน ID ซ้ำกันข้ามคน
+      const submittedKey = (row.submittedAt||row.createdAt||'').substring(0,16);
+      const groupKey = sheetName + '|' + (row.typeLabel||'') + '|' + submittedKey;
       if(!grouped[groupKey]) grouped[groupKey]={
-        id,
+        id: groupKey,
         staffId:        matchedStaff ? matchedStaff.id : null,  // ← resolve staffId
         staffName:      matchedStaff ? matchedStaff.name : sheetName,
         roleLabel:      matchedStaff ? matchedStaff.roleLabel : (row.roleLabel||''),
@@ -3064,9 +3065,8 @@ async function fetchRequestsFromSheet(){
       if(row.date){const nd=normalizeDate(row.date);if(nd)grouped[groupKey].dates.push(nd);}
     });
     sheetRequests=Object.values(grouped);
-    const localIds=new Set(requests.filter(r=>!r.fromSheet).map(r=>String(r.id)));
     requests=requests.filter(r=>!r.fromSheet);
-    sheetRequests.forEach(sr=>{if(!localIds.has(sr.id))requests.push(sr);});
+    sheetRequests.forEach(sr=>{ requests.push(sr); });
     renderCalendar();renderDashboard();
     updateSyncStatus('ok');
   }catch(err){console.warn('fetchRequestsFromSheet error:',err);updateSyncStatus('err');}
