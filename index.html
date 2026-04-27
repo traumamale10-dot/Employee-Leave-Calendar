@@ -1534,6 +1534,17 @@
     <!-- STATS PAGE -->
     <div class="page" id="page-stats">
       <div class="section-title">📈 สถิติรายบุคคล</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--text-mid);font-weight:600;">เลือกเดือน:</label>
+        <select id="statsMonthFilter" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="">ทั้งหมด</option>
+        </select>
+        <select id="statsStatusFilter" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="approved">อนุมัติแล้ว</option>
+          <option value="">ทุกสถานะ</option>
+          <option value="pending">รออนุมัติ</option>
+        </select>
+      </div>
       <div class="card">
         <table class="data-table">
           <thead>
@@ -2490,40 +2501,56 @@ function updateStatus(id, status) {
 
 // ===== TRAINING =====
 function renderTraining() {
-  const trainings = requests.filter(r=>r.type==='training'&&r.status==='approved');
+  // แสดงทุกสถานะ เรียง pending ก่อน
+  const trainings = requests
+    .filter(r=>r.type==='training')
+    .sort((a,b)=>{
+      if(a.status==='pending'&&b.status!=='pending') return -1;
+      if(a.status!=='pending'&&b.status==='pending') return 1;
+      return (b.submittedAt||0)-(a.submittedAt||0);
+    });
   const list = document.getElementById('trainingList');
   if (trainings.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div>ไม่มีรายการอบรม</div>';
     return;
   }
   list.innerHTML = trainings.map(r => {
-    // รองรับทั้ง local (staffId) และ fromSheet (staffName)
-    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const s = getStaff(r.staffId);
     const displayName  = s ? s.name  : (r.staffName || '?');
     const displayRole  = s ? s.roleLabel : (r.roleLabel || '-');
     const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
     const displayColor = s ? s.color : '#A855F7';
     const dates = r.dates||[];
-    const dateStr = dates.length>1
-      ? `${formatDate(dates[0])} ถึง ${formatDate(dates[dates.length-1])}`
-      : dates.length===1 ? formatDate(dates[0]) : '-';
-    // วันที่ขอ (submittedAt หรือ createdAt)
+    const dateStr = dates.map(d=>formatDate(d)).join(', ') || '-';
     const submittedStr = r.submittedAt
       ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
-      : r.submittedAtStr || r.createdAt ? String(r.submittedAtStr||r.createdAt) : '';
-    return `<div class="training-card">
-      <div class="training-icon" style="background:var(--purple-pale);">🎓</div>
-      <div class="training-info" style="flex:1;">
-        <h4>${r.trainingPlace||'การอบรม'}</h4>
-        <div class="training-meta">
-          <span>👤 ${displayName}</span>
-          <span>💼 ${displayRole}</span>
-          <span>📅 ${dateStr}</span>
-          <span>📌 ${dates.length} วัน</span>
-          ${submittedStr?`<span>🕐 ขอเมื่อ ${submittedStr}</span>`:''}
+      : r.submittedAtStr || '';
+    const statusBadge = r.status==='approved'
+      ? '<span class="badge badge-approved">อนุมัติแล้ว</span>'
+      : r.status==='rejected'
+      ? '<span class="badge badge-rejected">ปฏิเสธ</span>'
+      : r.status==='cancelled'
+      ? '<span class="badge badge-rejected">ยกเลิกแล้ว</span>'
+      : '<span class="badge badge-pending">รออนุมัติ</span>';
+    const actionBtns = currentUser?.isAdmin && r.status==='pending' ? `
+      <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved');renderTraining();" style="font-size:12px;padding:6px 12px;">✓ อนุมัติ</button>
+      <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected');renderTraining();" style="font-size:12px;padding:6px 12px;">✕ ปฏิเสธ</button>
+    ` : '';
+    const borderColor = r.status==='approved'?'var(--green)':r.status==='rejected'?'#EF4444':r.status==='cancelled'?'var(--primary)':'var(--border)';
+    return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};padding:14px 18px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="mini-avatar" style="width:38px;height:38px;font-size:13px;background:${displayColor}22;color:${displayColor};flex-shrink:0;">${displayAbbr}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;margin-bottom:2px;">${r.trainingPlace||'การอบรม'}</div>
+          <div style="font-size:12px;color:var(--text-mid);">👤 ${displayName} · ${displayRole}</div>
+          <div style="font-size:12px;color:var(--text-mid);">📅 ${dateStr} (${dates.length} วัน)</div>
+          ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          ${statusBadge}
+          ${actionBtns}
         </div>
       </div>
-      <span class="badge badge-approved">อนุมัติแล้ว</span>
     </div>`;
   }).join('');
 }
@@ -2620,10 +2647,43 @@ function renderMyRequests() {
 }
 
 // ===== STATS =====
+function populateStatsMonthFilter() {
+  const sel = document.getElementById('statsMonthFilter');
+  if (!sel) return;
+  const months = new Set();
+  requests.forEach(r => {
+    (r.dates||[]).forEach(d => {
+      if (d) months.add(d.substring(0,7)); // yyyy-MM
+    });
+  });
+  const current = sel.value;
+  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+    [...months].sort().reverse().map(m => {
+      const [y,mo] = m.split('-');
+      const label = MONTHS_TH[parseInt(mo)-1] + ' ' + (parseInt(y)+543);
+      return `<option value="${m}" ${m===current?'selected':''}>${label}</option>`;
+    }).join('');
+}
+
 function renderStats() {
+  populateStatsMonthFilter();
+  const monthFilter = document.getElementById('statsMonthFilter')?.value || '';
+  const statusFilter = document.getElementById('statsStatusFilter')?.value ?? 'approved';
   const tbody = document.getElementById('statsTable');
   tbody.innerHTML = STAFF.map(s => {
-    const reqs = requests.filter(r=>r.staffId===s.id&&r.status==='approved');
+    let reqs = requests.filter(r=>(
+      (statusFilter===''||r.status===statusFilter) && (
+        r.staffId===s.id ||
+        (r.staffName && (r.staffName===s.name || r.staffName.includes(s.name) || s.name.includes(r.staffName)))
+      )
+    ));
+    // กรองเดือน
+    if (monthFilter) {
+      reqs = reqs.map(r => ({
+        ...r,
+        dates: (r.dates||[]).filter(d => d && d.startsWith(monthFilter))
+      })).filter(r => r.dates.length > 0);
+    }
     const leave = reqs.filter(r=>r.type==='leave').reduce((a,r)=>a+r.dates.length,0);
     const vacation = reqs.filter(r=>r.type==='vacation').reduce((a,r)=>a+r.dates.length,0);
     const training = reqs.filter(r=>r.type==='training').reduce((a,r)=>a+r.dates.length,0);
@@ -2999,7 +3059,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzJEOL7V0fcJWE-aWWl-CP85Z_4SqurlcczzudqdSB2kh39PNmcSuhTpQ-T2ho2DmwJ/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyfd8iEOFxhimxkDFjXOi5k65R5lU62aUx6NVOQ8gxhPwqJ4oUfBT2F67M1h2qGJR3p/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3075,7 +3135,7 @@ async function fetchRequestsFromSheet(){
     const sheetIds = new Set(sheetRequests.map(r=>String(r.id)));
     const localOnly = requests.filter(r=>!r.fromSheet && !sheetIds.has(String(r.id)));
     requests = [...sheetRequests, ...localOnly];
-    renderCalendar();renderDashboard();
+    renderCalendar();renderDashboard();populateStatsMonthFilter();
     updateSyncStatus('ok');
   }catch(err){console.warn('fetchRequestsFromSheet error:',err);updateSyncStatus('err');}
 }
