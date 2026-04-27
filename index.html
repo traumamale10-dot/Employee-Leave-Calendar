@@ -427,7 +427,7 @@
   /* ─── CHART BARS ─────────────────────────────── */
   .chart-bars {
     display: flex; align-items: flex-end;
-    gap: 6px; height: 120px; padding-top: 10px;
+    gap: 6px; height: 140px; padding-top: 10px;
   }
 
   .bar-group {
@@ -435,7 +435,7 @@
     gap: 4px; flex: 1;
   }
 
-  .bar-wrap { display: flex; gap: 2px; align-items: flex-end; height: 100px; }
+  .bar-wrap { display: flex; gap: 2px; align-items: flex-end; height: 100px; overflow: visible; }
 
   .bar {
     width: 12px;
@@ -1297,7 +1297,7 @@
     <div class="nav-item" data-page="training" onclick="showPage('training')">
       <span class="nav-icon">🎓</span> การอบรม
     </div>
-    <div class="nav-item admin-only" data-page="stats" onclick="showPage('stats')">
+    <div class="nav-item" data-page="stats" onclick="showPage('stats')">
       <span class="nav-icon">📈</span> สถิติ
     </div>
   </nav>
@@ -1968,17 +1968,31 @@ function renderDashboard() {
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
     months.push({ y:d.getFullYear(), m:d.getMonth(), label:MONTHS_TH[d.getMonth()].substring(0,3) });
   }
-  const chartHtml = months.map(({y,m,label}) => {
+  // กรองเฉพาะเดือนที่มีข้อมูล
+  const monthsWithData = months.filter(({y,m}) => {
     const mStr = `${y}-${String(m+1).padStart(2,'0')}`;
-    const approved = requests.filter(r=>r.status==='approved'&&r.dates.some(d=>d.startsWith(mStr))).length;
-    const pending = requests.filter(r=>r.status==='pending'&&r.dates.some(d=>d.startsWith(mStr))).length;
-    const maxV = 10;
-    const ah = Math.round((approved/maxV)*100);
-    const ph = Math.round((pending/maxV)*100);
+    return requests.some(r=>r.dates&&r.dates.some(d=>d.startsWith(mStr)));
+  });
+  const chartMonths = monthsWithData.length > 0 ? monthsWithData : months.slice(-1);
+  const allCounts = chartMonths.map(({y,m}) => {
+    const mStr = `${y}-${String(m+1).padStart(2,'0')}`;
+    const approved = requests.filter(r=>r.status==='approved'&&r.dates&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const pending = requests.filter(r=>r.status==='pending'&&r.dates&&r.dates.some(d=>d.startsWith(mStr))).length;
+    return approved + pending;
+  });
+  const maxV = Math.max(...allCounts, 1);
+  const chartHtml = chartMonths.map(({y,m,label}) => {
+    const mStr = `${y}-${String(m+1).padStart(2,'0')}`;
+    const approved = requests.filter(r=>r.status==='approved'&&r.dates&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const pending = requests.filter(r=>r.status==='pending'&&r.dates&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const total = approved + pending;
+    const ah = Math.round((approved/maxV)*85);
+    const ph = Math.round((pending/maxV)*85);
     return `<div class="bar-group">
-      <div class="bar-wrap">
-        <div class="bar teal" style="height:${Math.max(ah,3)}%;"></div>
-        <div class="bar red" style="height:${Math.max(ph,3)}%;"></div>
+      <div class="bar-wrap" style="position:relative;">
+        ${total>0?`<div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--text-dark);">${total}</div>`:''}
+        <div class="bar teal" style="height:${Math.max(ah,2)}%;"></div>
+        <div class="bar red" style="height:${Math.max(ph,2)}%;"></div>
       </div>
       <div class="bar-label">${label}</div>
     </div>`;
