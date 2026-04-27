@@ -2357,6 +2357,7 @@ async function submitRequest() {
       status: 'pending',
       submittedAt: Date.now()
     };
+    const datesToSave = [...selectedDates];
     requests.push(req);
     closeModal();
     showToast('ส่งคำขอวันหยุดแล้ว ✓');
@@ -2368,7 +2369,7 @@ async function submitRequest() {
       staffId: personId,
       staffName: person.name,
       roleLabel: person.roleLabel,
-      dates: selectedDates,
+      dates: datesToSave,
       type,
       trainingPlace: req.trainingPlace,
       note,
@@ -2956,7 +2957,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtEunECCO6hr-Qhv5qQ4NUMLyUzBcq8nI9oyTvspTyFoErCTnCqc8eVgD7GslsDTE/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw6V2T5Bt6zaAiV4esDr2OBiP_W4_7w-76eRyIjGfuj5Lc5bf3eN_1hddn9TYWJp0x0/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
