@@ -2772,7 +2772,19 @@ function confirmReschedule() {
   closeCancelModal();
   showToast('เลื่อนวันหยุดเรียบร้อย รอการอนุมัติใหม่');
   renderDashboard(); renderCalendar(); renderMyRequests(); renderAdminTable();
-  saveToGSheet('UPDATE_STATUS',{id:req.id,status:'rescheduled',statusLabel:'เลื่อนวันแล้ว'});
+  // ลบแถวเก่าและเพิ่มแถวใหม่พร้อมวันที่ใหม่
+  const staffObj = getStaff(req.staffId);
+  const TYPE_LABELS_R={leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
+  saveToGSheet('RESCHEDULE', {
+    id: req.id,
+    staffName: staffObj ? staffObj.name : (req.staffName||''),
+    staffRole: staffObj ? staffObj.roleLabel : (req.roleLabel||''),
+    dates: JSON.stringify(req.dates),
+    typeLabel: TYPE_LABELS_R[req.type]||req.type,
+    trainingPlace: req.trainingPlace||'',
+    note: req.rescheduleNote||req.note||'',
+    submittedAt: req.submittedAt
+  });
 }
 
 function changeRescheduleMonth(dir) {
@@ -2981,7 +2993,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbycEFubg9xBnwgyPRbBDUrxlR4P2lKBZw6gdT7Pl4Km0uhJs3yUMIlC2UY2TD7B1qin/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxtIa7Ohcrs9aMdmiFdyE7WhdSkIOafIRqzWQagOS-iczM0GSxZxa4GwZlmN5lrI22C/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3131,7 +3143,7 @@ async function saveToGSheet(action, data){
       const staffObj = getStaff(data.staffId);
       payload = {
         action,
-        id: String(data.id),
+        id:            String(data.id),
         staffName:     staffObj ? staffObj.name      : (data.staffName || 'ไม่ทราบ'),
         staffRole:     staffObj ? staffObj.roleLabel : (data.roleLabel  || 'พยาบาล'),
         dates:         JSON.stringify(data.dates),
@@ -3140,6 +3152,20 @@ async function saveToGSheet(action, data){
         note:          data.note || '',
         submittedAt:   fmtSubmitted(data.submittedAt)
       };
+    } else if (action === 'RESCHEDULE') {
+      payload = {
+        action,
+        id:            String(data.id),
+        staffName:     data.staffName || '',
+        staffRole:     data.staffRole || '',
+        dates:         data.dates,
+        typeLabel:     data.typeLabel || '',
+        trainingPlace: data.trainingPlace || '',
+        note:          data.note || '',
+        submittedAt:   typeof data.submittedAt === 'number' ? fmtSubmitted(data.submittedAt) : (data.submittedAt || '')
+      };
+    } else if (action === 'DELETE') {
+      payload = { action, id: String(data.id) };
     } else {
       payload = {
         action,
