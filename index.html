@@ -2126,7 +2126,7 @@ function renderDashboard() {
       const dateStr = r.dates && r.dates.length ? formatDate(r.dates[0]) : '-';
       return `<tr>
         <td><div class="person-cell">
-          <div class="mini-avatar" style="background:${color}22;color:${color};">${abbr}</div>
+
           <span style="font-size:13px;font-weight:500;">${name.substring(0,10)}</span>
         </div></td>
         <td><span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span></td>
@@ -2326,7 +2326,7 @@ function renderCalendar() {
       : e.submittedAtStr || '';
     return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
       <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
-      <div class="mini-avatar" style="width:38px;height:38px;font-size:13px;background:${disp.color}22;color:${disp.color};">${disp.abbr}</div>
+
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:600;">${disp.name}</div>
         <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} · ${disp.roleLabel}</div>
@@ -2403,7 +2403,7 @@ function showDayPopup(dateStr) {
       return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
-          <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${col}22;color:${col};">${abbr}</div>
+
           <div style="flex:1;">
             <div style="font-size:14px;font-weight:600;">${name}</div>
             ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
@@ -2681,7 +2681,7 @@ function renderAdminTable() {
     return `<tr style="${r.status==='pending'?'background:rgba(251,191,36,0.04);':''}">
       <td style="text-align:center;font-weight:700;font-size:13px;color:var(--text-light);">${idx+1}</td>
       <td><div class="person-cell">
-        <div class="mini-avatar" style="background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
+
         <div style="font-size:14px;font-weight:600;">${displayName}</div>
       </div></td>
       <td style="font-size:12px;color:var(--text-mid);">${displayRole}</td>
@@ -2988,7 +2988,7 @@ function renderStats() {
     if (total === 0) return '';
     return `<tr>
       <td><div class="person-cell">
-        <div class="mini-avatar" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
+
         <span style="font-size:13px;">${s.name}</span>
       </div></td>
       <td style="font-size:12px;color:var(--text-mid);">${s.roleLabel}</td>
@@ -3356,7 +3356,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwgIA0xWitwKhaKJKIH8wbsXv3E9H8-r3DVGm4EPJIOGlf5txAdiXjFjKypbfAevHlK/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzs3CA7fJaj9_gGzxaY5EKnbaZhxxIG5-kcQQo2rQgCIFqITNDbiGQUytXKMDdD1IVr/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
