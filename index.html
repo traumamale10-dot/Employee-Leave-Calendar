@@ -1855,6 +1855,9 @@ const STAFF = [
 
 let requests = [];
 let nextId = 1;
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2,7);
+}
 let currentRole = 'admin';
 let calendarDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let formCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -2350,7 +2353,7 @@ async function submitRequest() {
       }
     }
     const req = {
-      id: nextId++,
+      id: genId(),
       staffId: personId,
       type,
       dates: [...selectedDates],
@@ -2993,7 +2996,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwBtT9HkCCzZ3BH9GnCRhFcgMJf616j-usJ4oDaiVnY7i4zzwJWmRswieoWwuZPGHEP/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwO1uQlnJx-RVsqbII0AXSJTtQqfOpos2p7gJ5qMCc2kAsnlyaVIBzt7MfR-NfmKKgs/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3045,13 +3048,13 @@ async function fetchRequestsFromSheet(){
         s.name.includes(sheetName)
       );
       const submittedRaw = row.submittedAt || row.createdAt || '';
-      // ใช้ชื่อ+ประเภท+วันที่ขอ เป็น key เพื่อป้องกัน ID ซ้ำกันข้ามคน
-      const submittedKey = (row.submittedAt||row.createdAt||'').substring(0,16);
-      const groupKey = sheetName + '|' + (row.typeLabel||'') + '|' + submittedKey;
+      // ใช้ ชื่อ+ประเภท+วันที่ขอ(นาที) เป็น key — unique ต่อ 1 คำขอ
+      // ใช้ id จาก Sheet เป็น key โดยตรง เพราะตอนนี้ id เป็น unique string แล้ว
+      const groupKey = id;
       if(!grouped[groupKey]) grouped[groupKey]={
-        id: groupKey,
-        staffId:        matchedStaff ? matchedStaff.id : null,  // ← resolve staffId
-        staffName:      matchedStaff ? matchedStaff.name : sheetName,
+        id,
+        staffId:        matchedStaff ? matchedStaff.id : null,
+        staffName:      sheetName,  // ← ใช้ชื่อจาก Sheet เสมอ เพื่อให้ nameMatch ทำงานได้
         roleLabel:      matchedStaff ? matchedStaff.roleLabel : (row.roleLabel||''),
         type:           typeLabelToKey(row.typeLabel),
         dates:          [],
@@ -3062,7 +3065,7 @@ async function fetchRequestsFromSheet(){
         submittedAtStr: submittedRaw,
         fromSheet:      true
       };
-      if(row.date){const nd=normalizeDate(row.date);if(nd)grouped[groupKey].dates.push(nd);}
+      if(row.date){const nd=normalizeDate(row.date);if(nd&&!grouped[groupKey].dates.includes(nd))grouped[groupKey].dates.push(nd);}
     });
     sheetRequests=Object.values(grouped);
     requests=requests.filter(r=>!r.fromSheet);
