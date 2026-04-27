@@ -1,0 +1,3164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดการวันหยุด หอผู้ป่วย ศอช.ชั้น10</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #FF6B6B;
+    --primary-light: #FF8E8E;
+    --primary-pale: #FFF0F0;
+    --accent: #4ECDC4;
+    --accent-light: #7EDDD6;
+    --accent-pale: #EDFAFA;
+    --purple: #A855F7;
+    --purple-light: #C084FC;
+    --purple-pale: #F5F0FF;
+    --yellow: #FBBF24;
+    --yellow-pale: #FFFBEB;
+    --green: #10B981;
+    --green-pale: #ECFDF5;
+    --blue: #3B82F6;
+    --blue-pale: #EFF6FF;
+    --orange: #F97316;
+    --bg: #F8F9FE;
+    --bg-card: #FFFFFF;
+    --sidebar-bg: #FFFFFF;
+    --text-dark: #1A1A2E;
+    --text-mid: #64748B;
+    --text-light: #94A3B8;
+    --border: #E2E8F0;
+    --shadow-sm: 0 1px 8px rgba(0,0,0,0.06);
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 16px;
+    background: var(--bg);
+    color: var(--text-dark);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─────────────────────────────── */
+  .sidebar {
+    width: 230px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.4;
+  }
+
+  .sidebar-logo p {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
+  .user-profile {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: 0;
+  }
+
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700; font-size: 15px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .user-info .name {
+    font-size: 14px; font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  .user-info .role {
+    font-size: 12px;
+    color: var(--text-light);
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 2px;
+    font-family: 'Prompt', sans-serif;
+  }
+
+  .role-badge.admin { background: var(--primary); color: #fff; }
+  .role-badge.nurse { background: var(--blue-pale); color: var(--blue); }
+
+  nav { flex: 1; padding: 12px 12px; }
+
+  .nav-section {
+    padding: 8px 10px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 14px;
+    color: var(--text-mid);
+    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+
+  .nav-item:hover { color: var(--text-dark); background: var(--bg); }
+
+  .nav-item.active {
+    color: var(--primary);
+    background: var(--primary-pale);
+    font-weight: 600;
+  }
+
+  .nav-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 16px;
+    background: var(--bg);
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+
+  .nav-item.active .nav-icon {
+    background: var(--primary);
+    font-size: 15px;
+  }
+
+  .active-users {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .active-users p {
+    font-size: 11px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .avatar-stack { display: flex; }
+
+  .avatar-sm {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    margin-right: -6px;
+  }
+
+  /* ─── MAIN CONTENT ────────────────────────── */
+  .main {
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .topbar {
+    background: var(--bg-card);
+    padding: 14px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .topbar h1 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  .topbar-actions {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .btn {
+    padding: 9px 18px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255,107,107,0.35);
+  }
+  .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+
+  .btn-outline {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    color: var(--text-mid);
+  }
+  .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+  .btn-teal {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(78,205,196,0.3);
+  }
+  .btn-teal:hover { background: var(--accent-light); }
+
+  .content { padding: 24px 28px; flex: 1; }
+
+  /* ─── PAGES ─────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ─── STAT CARDS ─────────────────────────────── */
+  .stat-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+  .stat-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .icon-red { background: var(--primary-pale); }
+  .icon-teal { background: var(--accent-pale); }
+  .icon-purple { background: var(--purple-pale); }
+  .icon-green { background: var(--green-pale); }
+  .icon-yellow { background: var(--yellow-pale); }
+  .icon-blue { background: var(--blue-pale); }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .stat-number {
+    font-family: 'Prompt', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+
+  /* ─── CARDS ─────────────────────────────────── */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .card-sub {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 16px;
+  }
+
+  /* ─── TABLE ─────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; }
+
+  .data-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-light);
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: var(--bg);
+  }
+
+  .data-table td {
+    padding: 12px 14px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    vertical-align: middle;
+  }
+
+  .data-table tr:hover td { background: var(--bg); }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* ─── BADGES ─────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Prompt', sans-serif;
+  }
+
+  .badge-pending { background: #FEF3C7; color: #92400E; }
+  .badge-approved { background: var(--green-pale); color: #065F46; }
+  .badge-rejected { background: var(--primary-pale); color: #991B1B; }
+  .badge-leave { background: var(--blue-pale); color: #1E40AF; }
+  .badge-vacation { background: var(--purple-pale); color: #6D28D9; }
+  .badge-training { background: #FDF4FF; color: #7E22CE; }
+  .badge-birthday { background: #FFF1F2; color: #9F1239; }
+
+  /* ─── PERSON CELL ─────────────────────────────── */
+  .person-cell {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .mini-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Prompt', sans-serif;
+  }
+
+  /* ─── CHART BARS ─────────────────────────────── */
+  .chart-bars {
+    display: flex; align-items: flex-end;
+    gap: 6px; height: 120px; padding-top: 10px;
+  }
+
+  .bar-group {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; flex: 1;
+  }
+
+  .bar-wrap { display: flex; gap: 2px; align-items: flex-end; height: 100px; }
+
+  .bar {
+    width: 12px;
+    border-radius: 4px 4px 0 0;
+    min-height: 4px;
+    transition: opacity 0.2s;
+  }
+
+  .bar:hover { opacity: 0.7; }
+  .bar.teal { background: var(--accent); }
+  .bar.red { background: var(--primary); }
+  .bar-label { font-size: 12px; color: var(--text-light); }
+
+  /* ─── DONUT ─────────────────────────────────── */
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .donut-legend { width: 100%; }
+
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-mid);
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    justify-content: space-between;
+  }
+
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-left { display: flex; align-items: center; gap: 8px; }
+
+  /* ─── CALENDAR ─────────────────────────────── */
+  .calendar-wrap {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .cal-header {
+    background: var(--primary);
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .cal-header h3 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .cal-nav { display: flex; gap: 8px; }
+
+  .cal-nav-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: background 0.2s;
+  }
+
+  .cal-nav-btn:hover { background: rgba(255,255,255,0.35); }
+
+  .cal-grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #FFF5F5;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cal-day-name {
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 0.04em;
+  }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 8px;
+    gap: 3px;
+  }
+
+  .cal-cell {
+    position: relative;
+    min-height: 76px;
+    border-radius: 10px;
+    padding: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: 1.5px solid transparent;
+  }
+
+  .cal-cell:hover { background: var(--bg); }
+  .cal-cell.empty { cursor: default; }
+  .cal-cell.empty:hover { background: transparent; }
+  .cal-cell.today { background: var(--primary-pale); border-color: var(--primary); }
+  .cal-cell.selected { background: var(--accent-pale); border-color: var(--accent); }
+
+  .cal-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 3px;
+    font-family: 'Prompt', sans-serif;
+  }
+
+  .cal-cell.today .cal-date {
+    background: var(--primary);
+    color: #fff;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+  }
+
+  .cal-events { display: flex; flex-direction: column; gap: 2px; }
+
+  .cal-event-dot {
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+  }
+
+  .cal-cell.over-quota { border-color: var(--primary) !important; background: rgba(255,107,107,0.04); }
+  .cal-cell.over-quota .cal-date { color: var(--primary); }
+
+  .cal-quota-warn { position: absolute; top: 4px; right: 4px; font-size: 11px; }
+
+  .evt-leave { background: var(--blue-pale); color: #1E40AF; }
+  .evt-vacation { background: var(--purple-pale); color: #6D28D9; }
+  .evt-training { background: #FDF4FF; color: #7E22CE; }
+  .evt-birthday { background: #FFF1F2; color: #9F1239; }
+
+  .cal-count-bar {
+    position: absolute; bottom: 3px; left: 6px; right: 6px;
+    display: flex; gap: 2px;
+  }
+
+  .count-pill { flex: 1; height: 3px; border-radius: 2px; background: var(--border); }
+  .count-pill.used-nurse { background: var(--blue); }
+  .count-pill.used-other { background: var(--accent); }
+
+  /* ─── MODAL ─────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,26,46,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 28px;
+    width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+  }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .modal-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+
+  .modal-close {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-mid);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .modal-close:hover { background: var(--primary-pale); color: var(--primary); }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    color: var(--text-dark);
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.1);
+  }
+
+  .form-textarea { min-height: 80px; resize: vertical; }
+
+  .selected-dates {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    min-height: 44px;
+    border: 1.5px dashed var(--border);
+  }
+
+  .date-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .date-chip button {
+    background: none; border: none;
+    color: rgba(255,255,255,0.75);
+    cursor: pointer; padding: 0;
+    font-size: 15px; line-height: 1;
+  }
+
+  /* ─── MINI CAL IN FORM ────────────────────── */
+  .mini-cal {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .mini-cal-header {
+    background: var(--primary);
+    padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .mini-cal-header span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    font-family: 'Prompt', sans-serif;
+  }
+
+  .mini-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding: 8px;
+  }
+
+  .mini-cal-day-name {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-light);
+    padding: 4px;
+  }
+
+  .mini-cal-cell {
+    text-align: center;
+    padding: 5px 2px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 6px;
+    color: var(--text-dark);
+    transition: background 0.15s;
+    font-weight: 500;
+  }
+
+  .mini-cal-cell:hover { background: var(--primary-pale); color: var(--primary); }
+  .mini-cal-cell.empty { cursor: default; }
+  .mini-cal-cell.empty:hover { background: none; }
+  .mini-cal-cell.selected { background: var(--primary); color: #fff; }
+  .mini-cal-cell.today-mini { font-weight: 800; color: var(--primary); }
+  .mini-cal-cell.past { color: var(--text-light); pointer-events: none; }
+
+  /* ─── LAYOUT HELPERS ─────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* ─── FILTER BAR ─────────────────────────── */
+  .filter-bar {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+
+  .filter-select {
+    padding: 8px 12px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    color: var(--text-dark);
+    background: var(--bg-card);
+    outline: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .filter-select:focus { border-color: var(--primary); }
+
+  /* ─── ACTION BUTTONS ─────────────────────── */
+  .action-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: none;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-approve { background: var(--green-pale); color: #065F46; }
+  .btn-approve:hover { background: #D1FAE5; }
+  .btn-reject { background: var(--primary-pale); color: #991B1B; }
+  .btn-reject:hover { background: #FFE4E6; }
+
+  /* ─── TRAINING CARD ──────────────────────── */
+  .training-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 14px;
+    margin-bottom: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid var(--purple);
+  }
+
+  .training-card:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+
+  .training-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: var(--purple-pale);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+
+  .training-info h4 {
+    font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px;
+    font-family: 'Prompt', sans-serif;
+  }
+
+  .training-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .training-meta span {
+    font-size: 13px; color: var(--text-light);
+    display: flex; align-items: center; gap: 3px;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  /* ─── TOAST ──────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--text-dark);
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    display: none;
+    align-items: center; gap: 10px;
+    max-width: 320px;
+  }
+
+  .toast.show { display: flex; }
+  .toast.success { background: #065F46; }
+  .toast.error { background: #991B1B; }
+
+  /* ─── LOGIN SCREEN ───────────────────────── */
+  .login-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FF6B6B 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; overflow: hidden;
+  }
+
+  .login-screen::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: rgba(255,255,255,0.15); border-radius: 50%;
+  }
+
+  .login-screen::after {
+    content: '';
+    position: absolute; bottom: -100px; left: -60px;
+    width: 280px; height: 280px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
+  }
+
+  .login-deco-circle {
+    position: absolute; top: 30%; right: 8%;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
+  }
+
+  .login-box {
+    background: #fff;
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 420px;
+    z-index: 1;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+  }
+
+  .login-logo { text-align: center; margin-bottom: 28px; }
+
+  .login-logo .logo-icon {
+    width: 64px; height: 64px;
+    background: var(--primary);
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 20px rgba(255,107,107,0.4);
+  }
+
+  .login-logo h2 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 20px; font-weight: 700;
+    color: var(--text-dark); line-height: 1.4;
+  }
+
+  .login-logo p { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+
+  .login-input-wrap { position: relative; }
+
+  .login-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dark);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .login-input::placeholder { color: var(--text-light); }
+  .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,107,0.15); background: #fff; }
+
+  .login-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 17px; }
+
+  .login-select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dark);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 12px;
+    appearance: none;
+    transition: border-color 0.2s;
+  }
+
+  .login-select:focus { border-color: var(--primary); background: #fff; }
+
+  .login-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+    box-shadow: 0 6px 16px rgba(255,107,107,0.35);
+  }
+
+  .login-btn:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(255,107,107,0.4); }
+  .login-btn:active { transform: scale(0.98); }
+
+  .login-error {
+    background: #FFF1F2;
+    border: 1px solid #FECDD3;
+    color: #991B1B;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    display: none;
+  }
+
+  .login-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 18px;
+    line-height: 1.6;
+    background: var(--bg);
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  /* ─── CANCEL/RESCHEDULE ──────────────────── */
+  .danger-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: none;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel-req { background: var(--primary-pale); color: #991B1B; }
+  .btn-cancel-req:hover { background: #FFE4E6; }
+  .btn-reschedule { background: var(--purple-pale); color: #6D28D9; }
+  .btn-reschedule:hover { background: #EDE9FE; }
+
+  .app-wrapper { display: flex; width: 100%; height: 100vh; }
+
+  /* ─── SCROLLBAR ─────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ─── ROLE SWITCH ────────────────────────── */
+  .role-switch {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg);
+    border-radius: 50px;
+    padding: 3px;
+    margin: 0 12px 8px;
+  }
+
+  .role-btn {
+    padding: 4px 12px;
+    border-radius: 50px;
+    border: none; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--text-light);
+    background: transparent;
+  }
+
+  .role-btn.active { background: #fff; color: var(--primary); box-shadow: var(--shadow-sm); }
+
+  /* ─── SECTION TITLE ──────────────────────── */
+  .section-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 17px; font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ─── QUOTA BAR ──────────────────────────── */
+  .quota-bar-wrap { margin-bottom: 10px; }
+  .quota-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-mid); margin-bottom: 4px; font-weight: 500; }
+  .quota-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .quota-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+  .quota-fill.nurse { background: var(--blue); }
+  .quota-fill.other { background: var(--accent); }
+  .quota-fill.full { background: var(--primary); }
+
+  /* ─── EMPTY STATE ────────────────────────── */
+  .empty-state {
+    text-align: center; padding: 48px;
+    color: var(--text-light); font-size: 15px;
+  }
+
+  .empty-state .empty-icon { font-size: 42px; margin-bottom: 10px; }
+
+  /* ─── GSHEET BTN ─────────────────────────── */
+  #gsheetBtn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    color: var(--text-mid);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  #gsheetBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+  #gsheetDot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+  }
+
+  /* ─── MOBILE ──────────────────────────────── */
+  .hamburger-btn {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    cursor: pointer; font-size: 20px; flex-shrink: 0;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 998;
+  }
+  .sidebar-overlay.open { display: block; }
+
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    z-index: 900;
+    padding: 6px 0 env(safe-area-inset-bottom, 6px);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  }
+
+  .bottom-nav-items { display: flex; justify-content: space-around; align-items: center; }
+
+  .bottom-nav-item {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px; padding: 6px 10px;
+    cursor: pointer; border-radius: 10px;
+    transition: all 0.2s; min-width: 52px;
+    color: var(--text-light); font-size: 11px; font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-item.active { color: var(--primary); }
+  .bottom-nav-item.active .bn-icon { transform: scale(1.1); }
+
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  @media (max-width: 768px) {
+    body { overflow: auto; height: auto; }
+    .app-wrapper { height: auto; min-height: 100vh; flex-direction: column; }
+    .hamburger-btn { display: flex; }
+    .bottom-nav { display: block; }
+    .sidebar {
+      position: fixed; top: 0; left: -260px;
+      width: 260px; height: 100vh;
+      z-index: 999; transition: left 0.3s ease; box-shadow: none;
+    }
+    .sidebar.open { left: 0; box-shadow: 8px 0 40px rgba(0,0,0,0.2); }
+    .main { width: 100%; height: auto; min-height: 100vh; overflow-y: visible; }
+    .topbar { padding: 12px 16px; position: sticky; top: 0; z-index: 100; }
+    .topbar h1 { font-size: 16px; }
+    .topbar-actions .btn-outline { display: none; }
+    .content { padding: 16px; padding-bottom: 80px; }
+    .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-number { font-size: 26px; }
+    .stat-card { padding: 14px; }
+    .dashboard-grid { grid-template-columns: 1fr; gap: 14px; }
+    .two-col, .three-col { grid-template-columns: 1fr; }
+    .card { padding: 14px; overflow: hidden; }
+    .data-table { min-width: 540px; }
+    .cal-cell { min-height: 48px; padding: 4px; }
+    .cal-date { font-size: 12px; }
+    .cal-event-dot { font-size: 9px; padding: 1px 3px; }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal { width: 100% !important; max-width: 100%; border-radius: 20px 20px 0 0; max-height: 92vh; padding: 20px 20px 30px; }
+    .login-box { width: calc(100% - 32px); padding: 28px 20px; }
+    .filter-bar { gap: 6px; }
+    .filter-select { font-size: 13px; padding: 7px 10px; flex: 1; min-width: 0; }
+    .toast { bottom: 80px; right: 12px; left: 12px; max-width: 100%; }
+  }
+
+  @media (max-width: 480px) {
+    .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-number { font-size: 22px; }
+    .cal-cell { min-height: 38px; }
+    .content { padding: 12px; padding-bottom: 80px; }
+  }
+
+  /* Promo banner style (like -50% off in Eatland) */
+  .promo-banner {
+    background: linear-gradient(135deg, var(--primary), #FF8E53);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    color: #fff;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 20px rgba(255,107,107,0.3);
+    position: relative; overflow: hidden;
+  }
+
+  .promo-banner::before {
+    content: '';
+    position: absolute; right: -30px; top: -30px;
+    width: 140px; height: 140px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+  }
+
+  .promo-badge {
+    background: #fff;
+    color: var(--primary);
+    font-family: 'Prompt', sans-serif;
+    font-size: 20px; font-weight: 800;
+    padding: 10px 14px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .promo-text h3 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px; font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .promo-text p { font-size: 13px; opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-deco-circle"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-icon">🏥</div>
+      <h2>ระบบจัดการวันหยุด<br>หอผู้ป่วย ศอช. ชั้น 10</h2>
+      <p>Ward Leave Management System</p>
+    </div>
+
+    <div class="login-error" id="loginError"></div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">เลือกชื่อผู้ใช้</label>
+      <select class="login-select" id="loginStaff">
+        <option value="">-- เลือกชื่อ-สกุล --</option>
+        <option value="admin">👑 ผู้ดูแลระบบ (Admin)</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">รหัสผ่าน</label>
+      <div class="login-input-wrap">
+        <span class="login-input-icon">🔒</span>
+        <input class="login-input" type="password" id="loginPassword" placeholder="รหัสผ่าน 4 หลัก" maxlength="4" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+
+    <div class="login-hint">
+      รหัสบุคลากรทั่วไป: <strong>1234</strong> &nbsp;|&nbsp; รหัส Admin: <strong>0000</strong>
+    </div>
+  </div>
+</div>
+
+<div class="app-wrapper" id="appWrapper" style="display:none;">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-pill">🏥 ศอช. ชั้น 10</div>
+    <h2>ระบบจัดการวันหยุด</h2>
+    <p>Nursing Leave Management</p>
+  </div>
+
+  <div class="user-profile">
+    <div class="avatar" id="sidebarAvatar">นา</div>
+    <div class="user-info">
+      <div class="name" id="sidebarName">น.ส.สมหญิง</div>
+      <div class="role" id="sidebarRole">พยาบาล</div>
+      <span class="role-badge nurse" id="sidebarBadge">RN</span>
+    </div>
+  </div>
+
+  <div style="padding: 8px 12px 4px;">
+    <div class="role-switch">
+      <button class="role-btn" onclick="switchRole('nurse')">พยาบาล</button>
+      <button class="role-btn active" onclick="switchRole('admin')">Admin</button>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-section">เมนูหลัก</div>
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span> แดชบอร์ด
+    </div>
+    <div class="nav-item" data-page="calendar" onclick="showPage('calendar')">
+      <span class="nav-icon">📅</span> ปฏิทิน
+    </div>
+    <div class="nav-item" data-page="request" onclick="showPage('request')">
+      <span class="nav-icon">📝</span> ขอวันหยุด
+    </div>
+    <div class="nav-section">จัดการ</div>
+    <div class="nav-item admin-only" data-page="admin" onclick="showPage('admin')">
+      <span class="nav-icon">✅</span> อนุมัติคำขอ
+    </div>
+    <div class="nav-item" data-page="training" onclick="showPage('training')">
+      <span class="nav-icon">🎓</span> การอบรม
+    </div>
+    <div class="nav-item admin-only" data-page="stats" onclick="showPage('stats')">
+      <span class="nav-icon">📈</span> สถิติ
+    </div>
+  </nav>
+
+  <div style="padding: 10px 16px; border-top: 1px solid var(--border);">
+    <button id="gsheetBtn" onclick="showGSheetModal()">
+      <div id="gsheetDot"></div>
+      <span id="gsheetBtnLabel">ตั้งค่า Google Sheets</span>
+    </button>
+  </div>
+
+  <div class="active-users">
+    <p>ผู้ใช้งาน</p>
+    <div class="avatar-stack">
+      <div class="avatar-sm" style="background:#3B82F6;color:#fff;">คำ</div>
+      <div class="avatar-sm" style="background:#10B981;color:#fff;">สด</div>
+      <div class="avatar-sm" style="background:#A855F7;color:#fff;">พก</div>
+      <div class="avatar-sm" style="background:var(--primary);color:#fff;">+30</div>
+    </div>
+  </div>
+</aside>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+      <h1 id="pageTitle">แดชบอร์ด</h1>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline" onclick="showPage('calendar')">📅 ปฏิทิน</button>
+      <button class="btn btn-primary" onclick="openRequestModal()">+ ขอวันหยุด</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <!-- Promo banner -->
+      <div class="promo-banner" id="promoBanner">
+        <div class="promo-badge">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.05em;">วันนี้</div>
+          <div id="todayQuotaShort">0/4</div>
+        </div>
+        <div class="promo-text">
+          <h3>โควต้าวันหยุดวันนี้</h3>
+          <p id="todayQuotaDate">—</p>
+        </div>
+        <div style="margin-left:auto;text-align:right;z-index:1;">
+          <div style="font-size:26px;">👩‍⚕️</div>
+        </div>
+      </div>
+
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-icon icon-red">📋</div>
+          <div class="stat-label">คำขอทั้งหมด</div>
+          <div class="stat-number" id="stat-total">0</div>
+          <div class="stat-sub">ทุกประเภท</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-yellow">⏳</div>
+          <div class="stat-label">รออนุมัติ</div>
+          <div class="stat-number" id="stat-pending">0</div>
+          <div class="stat-sub">รอดำเนินการ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-green">✅</div>
+          <div class="stat-label">อนุมัติแล้ว</div>
+          <div class="stat-number" id="stat-approved">0</div>
+          <div class="stat-sub">เดือนนี้</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-teal">🎓</div>
+          <div class="stat-label">การอบรม</div>
+          <div class="stat-number" id="stat-training">0</div>
+          <div class="stat-sub">ที่อนุมัติแล้ว</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-title">📊 คำขอรายเดือน</div>
+          <div class="card-sub">6 เดือนล่าสุด</div>
+          <div class="chart-bars" id="monthlyChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🍩 สัดส่วนการลา</div>
+          <div class="card-sub">เฉพาะที่อนุมัติแล้ว</div>
+          <div class="donut-wrap">
+            <div id="donutChart"></div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">📋 คำขอล่าสุด</div>
+          <div class="card-sub" style="margin-bottom:12px;">รายการขอวันหยุดล่าสุด</div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ชื่อ</th>
+                <th>ประเภท</th>
+                <th>วันที่</th>
+                <th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="recentRequests"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 โควต้าวันนี้</div>
+          <div class="card-sub" id="todayQuotaDateCard">—</div>
+          <div class="quota-bar-wrap">
+            <div class="quota-label">
+              <span>👩‍⚕️ พยาบาล</span>
+              <span id="nurse-quota-text">0/4</span>
+            </div>
+            <div class="quota-track">
+              <div class="quota-fill nurse" id="nurse-quota-bar" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="quota-bar-wrap">
+            <div class="quota-label">
+              <span>🧑‍💼 ผช./พนง.</span>
+              <span id="other-quota-text">0/3</span>
+            </div>
+            <div class="quota-track">
+              <div class="quota-fill other" id="other-quota-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="page" id="page-calendar">
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+          </div>
+          <div style="text-align:center;">
+            <h3 id="calMonthLabel"></h3>
+            <div id="calRealTimeClock" style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px;font-family:'Prompt',sans-serif;"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="refreshBtn" onclick="refreshCalendar()" style="padding:6px 12px;border-radius:50px;border:none;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:13px;font-weight:600;" title="รีเฟรช">🔄 รีเฟรช</button>
+            <button class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:50px;" onclick="openRequestModal()">+ ขอวันหยุด</button>
+          </div>
+        </div>
+        <div class="cal-grid-header">
+          <div class="cal-day-name">อา</div>
+          <div class="cal-day-name">จ</div>
+          <div class="cal-day-name">อ</div>
+          <div class="cal-day-name">พ</div>
+          <div class="cal-day-name">พฤ</div>
+          <div class="cal-day-name">ศ</div>
+          <div class="cal-day-name">ส</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div style="margin-top:20px;">
+        <div class="section-title">📌 กิจกรรมในเดือนนี้</div>
+        <div id="calEventList"></div>
+      </div>
+    </div>
+
+    <!-- REQUEST PAGE -->
+    <div class="page" id="page-request">
+      <div class="section-title">📝 คำขอวันหยุดของฉัน</div>
+      <div id="myRequestsList"></div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div class="page" id="page-admin">
+      <div class="filter-bar">
+        <select class="filter-select" id="adminFilterType" onchange="renderAdminTable()">
+          <option value="">ทุกประเภท</option>
+          <option value="leave">ลาหยุด</option>
+          <option value="vacation">พักร้อน</option>
+          <option value="training">อบรม</option>
+          <option value="birthday">วันเกิด</option>
+        </select>
+        <select class="filter-select" id="adminFilterStatus" onchange="renderAdminTable()">
+          <option value="">ทุกสถานะ</option>
+          <option value="pending">รออนุมัติ</option>
+          <option value="approved">อนุมัติแล้ว</option>
+          <option value="rejected">ปฏิเสธ</option>
+        </select>
+        <select class="filter-select" id="adminFilterRole" onchange="renderAdminTable()">
+          <option value="">ทุกตำแหน่ง</option>
+          <option value="nurse">พยาบาล</option>
+          <option value="assistant">ผู้ช่วยพยาบาล</option>
+          <option value="helper">พนักงานช่วยเหลือ</option>
+          <option value="nursing-aide">พนักงานช่วยการพยาบาล</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">#</th>
+                <th>ชื่อ</th>
+                <th>ตำแหน่ง</th>
+                <th>ประเภท</th>
+                <th>วันที่ขอ ⏱️</th>
+                <th>วันที่หยุด</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="adminTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAINING PAGE -->
+    <div class="page" id="page-training">
+      <div class="section-title">🎓 รายการอบรม</div>
+      <div id="trainingList"></div>
+    </div>
+
+    <!-- STATS PAGE -->
+    <div class="page" id="page-stats">
+      <div class="section-title">📈 สถิติรายบุคคล</div>
+      <div class="card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ชื่อ-สกุล</th>
+              <th>ตำแหน่ง</th>
+              <th>ลาหยุด</th>
+              <th>พักร้อน</th>
+              <th>อบรม</th>
+              <th>วันเกิด</th>
+              <th>รวม</th>
+            </tr>
+          </thead>
+          <tbody id="statsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- BOTTOM NAV (mobile) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-items">
+    <div class="bottom-nav-item active" onclick="showPage('dashboard')">
+      <span class="bn-icon">📊</span><span>หน้าหลัก</span>
+    </div>
+    <div class="bottom-nav-item" onclick="showPage('calendar')">
+      <span class="bn-icon">📅</span><span>ปฏิทิน</span>
+    </div>
+    <div class="bottom-nav-item" onclick="openRequestModal()">
+      <span class="bn-icon">➕</span><span>ขอหยุด</span>
+    </div>
+    <div class="bottom-nav-item" onclick="showPage('request')">
+      <span class="bn-icon">📝</span><span>คำขอ</span>
+    </div>
+    <div class="bottom-nav-item" onclick="showPage('training')">
+      <span class="bn-icon">🎓</span><span>อบรม</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app-wrapper -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- GSHEET MODAL -->
+<div class="modal-overlay" id="gsheetModal">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ ตั้งค่า Google Sheets</div>
+      <button class="modal-close" onclick="closeGSheetModal()">✕</button>
+    </div>
+    <div style="background:var(--accent-pale);border:1px solid var(--accent-light);border-radius:10px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--text-mid);line-height:1.7;">
+      <strong style="color:var(--text-dark);">วิธีเชื่อม Google Sheets:</strong><br>
+      1. เปิด Google Sheets → <strong>Extensions → Apps Script</strong><br>
+      2. วางโค้ด Apps Script แล้ว Deploy → New deployment<br>
+      3. ตั้งเป็น <strong>Web App</strong>, Execute as: Me, Anyone<br>
+      4. คัดลอก URL มาใส่ด้านล่าง
+    </div>
+    <div class="form-group">
+      <label class="form-label">Google Apps Script Web App URL</label>
+      <input class="form-input" type="text" id="gsUrl" placeholder="https://script.google.com/macros/s/xxxx/exec" style="font-size:12px;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Google Sheet ID</label>
+      <input class="form-input" type="text" id="gsSheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" style="font-size:12px;">
+    </div>
+    <details style="margin-bottom:16px;">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--accent);padding:8px 0;">📋 คัดลอกโค้ด Apps Script</summary>
+      <div style="margin-top:10px;background:#f8f9fe;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.6;color:#333;white-space:pre-wrap;max-height:200px;overflow-y:auto;border:1px solid var(--border);" id="appsScriptCode"></div>
+      <button onclick="copyScript()" style="margin-top:8px;padding:6px 16px;border-radius:50px;border:1px solid var(--border);background:#fff;font-family:Sarabun,sans-serif;font-size:12px;cursor:pointer;font-weight:600;">📋 คัดลอก</button>
+    </details>
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <button class="btn btn-outline" onclick="testGSheet()" style="flex:1;">🔗 ทดสอบ</button>
+      <button class="btn btn-teal" onclick="saveGSheetSettings()" style="flex:1;">💾 บันทึก</button>
+    </div>
+    <div id="gsTestResult" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+  </div>
+</div>
+
+<!-- REQUEST MODAL -->
+<div class="modal-overlay" id="requestModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🗓️ ขอวันหยุด</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ชื่อผู้ขอ</label>
+      <select class="form-select" id="req-person">
+        <option value="">-- เลือกชื่อ --</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ประเภทการขอ</label>
+      <select class="form-select" id="req-type">
+        <option value="leave">ลาหยุด</option>
+        <option value="vacation">พักร้อน</option>
+        <option value="training">อบรม</option>
+        <option value="birthday">วันเกิด</option>
+      </select>
+    </div>
+
+    <div class="form-group" id="training-extra" style="display:none;">
+      <label class="form-label">สถานที่/ชื่อการอบรม</label>
+      <input class="form-input" type="text" id="req-training-place" placeholder="ชื่อหลักสูตร และสถานที่อบรม">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">เลือกวันที่ (เลือกได้มากกว่า 1 วัน)</label>
+      <div class="mini-cal">
+        <div class="mini-cal-header">
+          <button class="cal-nav-btn" onclick="changeFormMonth(-1)">‹</button>
+          <span id="formMonthLabel"></span>
+          <button class="cal-nav-btn" onclick="changeFormMonth(1)">›</button>
+        </div>
+        <div class="mini-cal-grid" id="formCalGrid"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">วันที่เลือก</label>
+      <div class="selected-dates" id="selectedDatesDisplay">
+        <span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">หมายเหตุ</label>
+      <textarea class="form-textarea" id="req-note" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+    </div>
+
+    <div id="quota-warning" style="display:none;background:var(--primary-pale);color:#991B1B;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;border-left:3px solid var(--primary);"></div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-teal" onclick="submitRequest()">ส่งคำขอ</button>
+    </div>
+  </div>
+</div>
+
+<!-- CANCEL/RESCHEDULE MODAL -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header">
+      <div class="modal-title" id="cancelModalTitle">❌ ยกเลิกคำขอ</div>
+      <button class="modal-close" onclick="closeCancelModal()">✕</button>
+    </div>
+    <div id="cancelReqInfo" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid var(--border);"></div>
+
+    <div id="cancelSection">
+      <div class="form-group">
+        <label class="form-label">เหตุผลการยกเลิก</label>
+        <textarea class="form-textarea" id="cancelNote" placeholder="ระบุเหตุผล..." style="min-height:70px;"></textarea>
+      </div>
+    </div>
+
+    <div id="rescheduleSection" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">เลือกวันที่ใหม่</label>
+        <div class="mini-cal">
+          <div class="mini-cal-header">
+            <button class="cal-nav-btn" onclick="changeRescheduleMonth(-1)">‹</button>
+            <span id="rescheduleMonthLabel"></span>
+            <button class="cal-nav-btn" onclick="changeRescheduleMonth(1)">›</button>
+          </div>
+          <div class="mini-cal-grid" id="rescheduleCalGrid"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันที่เลือกใหม่</label>
+        <div class="selected-dates" id="rescheduleDatesDisplay">
+          <span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมายเหตุ</label>
+        <textarea class="form-textarea" id="rescheduleNote" placeholder="เหตุผลการเลื่อน..." style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeCancelModal()">ปิด</button>
+      <button class="btn btn-primary" id="confirmCancelBtn" onclick="confirmCancel()">ยืนยันยกเลิก</button>
+      <button class="btn btn-teal" id="confirmRescheduleBtn" onclick="confirmReschedule()" style="display:none;">ยืนยันเลื่อนวัน</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== LOGIN =====
+const ADMIN_PASSWORD = '0000';
+const STAFF_PASSWORD = '1234';
+let currentUser = null;
+
+function initLoginDropdown() {
+  const sel = document.getElementById('loginStaff');
+  STAFF.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = `${s.name} (${s.roleLabel})`;
+    sel.appendChild(opt);
+  });
+}
+
+function doLogin() {
+  const staffVal = document.getElementById('loginStaff').value;
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  if (!staffVal) { showLoginError('กรุณาเลือกชื่อผู้ใช้'); return; }
+  if (!password) { showLoginError('กรุณากรอกรหัสผ่าน'); return; }
+  if (staffVal === 'admin') {
+    if (password !== ADMIN_PASSWORD) { showLoginError('รหัสผ่าน Admin ไม่ถูกต้อง'); return; }
+    currentUser = { staffId: null, name: 'ผู้ดูแลระบบ', roleLabel: 'Administrator', isAdmin: true, abbr: 'Ad', color: '#FF6B6B' };
+  } else {
+    if (password !== STAFF_PASSWORD) { showLoginError('รหัสผ่านไม่ถูกต้อง (ใช้ 1234)'); return; }
+    const staff = getStaff(parseInt(staffVal));
+    if (!staff) { showLoginError('ไม่พบข้อมูลผู้ใช้'); return; }
+    currentUser = { ...staff, isAdmin: false };
+  }
+  errEl.style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appWrapper').style.display = 'flex';
+  updateSidebarUser();
+  updateNavForRole();
+  if (GAS_URL) startAutoSync();
+  renderDashboard();
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginPassword').focus();
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appWrapper').style.display = 'none';
+  document.getElementById('loginStaff').value = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  showPage('dashboard');
+}
+
+function updateSidebarUser() {
+  if (!currentUser) return;
+  const av = document.getElementById('sidebarAvatar');
+  av.textContent = currentUser.abbr || currentUser.name.slice(0,2);
+  av.style.background = currentUser.isAdmin ? 'var(--primary)' : (currentUser.color || 'var(--blue)');
+  av.style.color = '#fff';
+  document.getElementById('sidebarName').textContent = currentUser.name;
+  document.getElementById('sidebarRole').textContent = currentUser.roleLabel;
+  const badge = document.getElementById('sidebarBadge');
+  if (currentUser.isAdmin) {
+    badge.className = 'role-badge admin';
+    badge.textContent = 'ADMIN';
+  } else {
+    badge.className = 'role-badge nurse';
+    badge.textContent = currentUser.role === 'nurse' ? 'RN' : 'Staff';
+  }
+}
+
+function updateNavForRole() {
+  const adminItems = document.querySelectorAll('.admin-only');
+  adminItems.forEach(el => { el.style.display = currentUser?.isAdmin ? 'flex' : 'none'; });
+  const roleSwitch = document.querySelector('.role-switch');
+  if (roleSwitch) roleSwitch.style.display = 'none';
+}
+
+// ===== DATA =====
+const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const DAYS_TH = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+
+const STAFF = [
+  { id:1,  name:'คำพุด',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'คำ', color:'#2980b9' },
+  { id:2,  name:'เบญจมาศ',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'บญ', color:'#1a6fa5' },
+  { id:3,  name:'สาคร',       role:'nurse',        roleLabel:'พยาบาล',               abbr:'สค', color:'#0d5a8a' },
+  { id:4,  name:'นวลตา',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'นว', color:'#2374aa' },
+  { id:5,  name:'สุรีรัตน์',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'สร', color:'#1560a0' },
+  { id:6,  name:'พิศา',       role:'nurse',        roleLabel:'พยาบาล',               abbr:'พศ', color:'#2060a8' },
+  { id:7,  name:'สุนันทา',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สน', color:'#0a4f90' },
+  { id:8,  name:'จารุวรรณ',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'จร', color:'#1a70b5' },
+  { id:9,  name:'ฐิตินันท์',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'ฐต', color:'#2575c0' },
+  { id:10, name:'จันจิรา',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'จจ', color:'#0e65a8' },
+  { id:11, name:'อัญชลี',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'อช', color:'#1855a0' },
+  { id:12, name:'สรวงสุดา',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'สว', color:'#2265b0' },
+  { id:13, name:'ศิริรัตน์',  role:'nurse',        roleLabel:'พยาบาล',               abbr:'ศร', color:'#0d5898' },
+  { id:14, name:'พุทธชาติ',   role:'nurse',        roleLabel:'พยาบาล',               abbr:'พธ', color:'#1a6ab0' },
+  { id:15, name:'อรอุมา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'ออ', color:'#2070b8' },
+  { id:16, name:'สุพรรณี',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สพ', color:'#1060a5' },
+  { id:17, name:'อริสรา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'อร', color:'#1870b5' },
+  { id:18, name:'อุ้มบุญ',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'อบ', color:'#2568a8' },
+  { id:19, name:'ชนาภา',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'ชน', color:'#0d62a0' },
+  { id:20, name:'กนกพร',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'กน', color:'#1a78c0' },
+  { id:21, name:'วริศรา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'วร', color:'#2270b5' },
+  { id:22, name:'ภูวิศ',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'ภว', color:'#1565b0' },
+  { id:23, name:'อริสา',      role:'nurse',        roleLabel:'พยาบาล',               abbr:'อส', color:'#0e68a5' },
+  { id:24, name:'อนัญญา',     role:'nurse',        roleLabel:'พยาบาล',               abbr:'อน', color:'#1a5fa0' },
+  { id:25, name:'สิตานัน',    role:'nurse',        roleLabel:'พยาบาล',               abbr:'สต', color:'#2075b8' },
+  { id:26, name:'สุดารัตน์',  role:'assistant',    roleLabel:'ผู้ช่วยพยาบาล',       abbr:'สด', color:'#10B981' },
+  { id:27, name:'กมลวรรณ',    role:'assistant',    roleLabel:'ผู้ช่วยพยาบาล',       abbr:'กม', color:'#059669' },
+  { id:28, name:'พศิกา',      role:'helper',       roleLabel:'พนง.ช่วยเหลือคนไข้',  abbr:'พก', color:'#A855F7' },
+  { id:29, name:'วันทกาล',    role:'helper',       roleLabel:'พนง.ช่วยเหลือคนไข้',  abbr:'วก', color:'#9333EA' },
+  { id:30, name:'เกียรติภูมิ',role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'กต', color:'#F97316' },
+  { id:31, name:'สกล',        role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'สก', color:'#EA580C' },
+  { id:32, name:'สมภพ',       role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'สภ', color:'#DC6B19' },
+  { id:33, name:'มีชัย',      role:'nursing-aide', roleLabel:'พนง.ช่วยการพยาบาล',   abbr:'มช', color:'#C2570D' },
+];
+
+let requests = [];
+let nextId = 1;
+let currentRole = 'admin';
+let calendarDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let formCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedDates = [];
+
+// ===== UTILS =====
+function getStaff(id) { return STAFF.find(s=>s.id===id); }
+
+function formatDate(d) {
+  const [y,m,day] = d.split('-');
+  return `${parseInt(day)} ${MONTHS_TH[parseInt(m)-1].substring(0,3)} ${parseInt(y)+543}`;
+}
+
+function todayStr() {
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+}
+
+const TYPE_LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
+const TYPE_BADGE = { leave:'badge-leave', vacation:'badge-vacation', training:'badge-training', birthday:'badge-birthday' };
+const STATUS_LABEL = { pending:'รออนุมัติ', approved:'อนุมัติแล้ว', rejected:'ปฏิเสธ' };
+const STATUS_BADGE = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' };
+const ROLE_CLASS = { nurse:'nurse', assistant:'assistant', helper:'helper', 'nursing-aide':'helper' };
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.className = 'toast show ' + type;
+  document.getElementById('toast-icon').textContent = type==='success' ? '✅' : '❌';
+  document.getElementById('toast-msg').textContent = msg;
+  setTimeout(()=>{ t.className='toast'; }, 3000);
+}
+
+// ===== NAVIGATION =====
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.remove('active'));
+  const p = document.getElementById('page-'+page);
+  if (p) p.classList.add('active');
+  const n = document.querySelector(`[data-page="${page}"]`);
+  if (n) n.classList.add('active');
+  const titles = {dashboard:'แดชบอร์ด',calendar:'ปฏิทิน',request:'คำขอวันหยุด',admin:'อนุมัติคำขอ',training:'การอบรม',stats:'สถิติ'};
+  document.getElementById('pageTitle').textContent = titles[page]||'';
+  closeSidebar();
+  if (page==='dashboard') renderDashboard();
+  else if (page==='calendar') renderCalendar();
+  else if (page==='request') renderMyRequests();
+  else if (page==='admin') renderAdminTable();
+  else if (page==='training') renderTraining();
+  else if (page==='stats') renderStats();
+}
+
+function switchRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.toggle('active', b.textContent.toLowerCase().includes(role==='admin'?'admin':'พยาบาล')));
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const active = requests.filter(r=>r.status!=='cancelled');
+  document.getElementById('stat-total').textContent = active.length;
+  document.getElementById('stat-pending').textContent = active.filter(r=>r.status==='pending').length;
+  document.getElementById('stat-approved').textContent = active.filter(r=>r.status==='approved').length;
+  document.getElementById('stat-training').textContent = active.filter(r=>r.type==='training'&&r.status==='approved').length;
+
+  // Recent requests
+  const recent = [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id)).slice(0,6);
+  const tbody = document.getElementById('recentRequests');
+  if (recent.length===0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-light);padding:20px;">ยังไม่มีคำขอ</td></tr>';
+  } else {
+    tbody.innerHTML = recent.map(r => {
+      const s = r.fromSheet ? null : getStaff(r.staffId);
+      const name = s ? s.name.replace(/^(นาง|นางสาว|นาย)/,'') : (r.staffName||'?');
+      const abbr = s ? s.abbr : (r.staffName||'??').substring(0,2);
+      const color = s ? s.color : '#7b52a8';
+      const dateStr = r.dates && r.dates.length ? formatDate(r.dates[0]) : '-';
+      return `<tr>
+        <td><div class="person-cell">
+          <div class="mini-avatar" style="background:${color}22;color:${color};">${abbr}</div>
+          <span style="font-size:13px;font-weight:500;">${name.substring(0,10)}</span>
+        </div></td>
+        <td><span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span></td>
+        <td style="font-size:12px;color:var(--text-light);">${dateStr}</td>
+        <td><span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${STATUS_LABEL[r.status]||r.status}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Monthly chart
+  const now = new Date();
+  const months = [];
+  for (let i=5;i>=0;i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ y:d.getFullYear(), m:d.getMonth(), label:MONTHS_TH[d.getMonth()].substring(0,3) });
+  }
+  const chartHtml = months.map(({y,m,label}) => {
+    const mStr = `${y}-${String(m+1).padStart(2,'0')}`;
+    const approved = requests.filter(r=>r.status==='approved'&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const pending = requests.filter(r=>r.status==='pending'&&r.dates.some(d=>d.startsWith(mStr))).length;
+    const maxV = 10;
+    const ah = Math.round((approved/maxV)*100);
+    const ph = Math.round((pending/maxV)*100);
+    return `<div class="bar-group">
+      <div class="bar-wrap">
+        <div class="bar teal" style="height:${Math.max(ah,3)}%;"></div>
+        <div class="bar red" style="height:${Math.max(ph,3)}%;"></div>
+      </div>
+      <div class="bar-label">${label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('monthlyChart').innerHTML = chartHtml;
+
+  // Donut
+  const approvedReqs = requests.filter(r=>r.status==='approved');
+  const COLORS = { leave:'#3B82F6', vacation:'#A855F7', training:'#EC4899', birthday:'#EF4444' };
+  const LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
+  const typeOrder = ['leave','vacation','training','birthday'];
+  const typeDays = {};
+  approvedReqs.forEach(r => { typeDays[r.type] = (typeDays[r.type]||0) + (r.dates?.length||0); });
+  const totalDays = Object.values(typeDays).reduce((a,b)=>a+b,0);
+  let offset = 25;
+  const circles = typeOrder.map(type => {
+    const pct = totalDays>0 ? (typeDays[type]||0)/totalDays*100 : 0;
+    const dash = `${pct} ${100-pct}`;
+    const el = `<circle cx="75" cy="75" r="55" fill="none" stroke="${COLORS[type]}" stroke-width="20" stroke-dasharray="${dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 75 75)" opacity="${pct>0?1:0}"/>`;
+    offset += pct;
+    return el;
+  }).join('');
+  const legend = typeOrder.map(type => {
+    const days = typeDays[type]||0;
+    const pct = totalDays>0?Math.round((days/totalDays)*100):0;
+    return `<div class="legend-item">
+      <div class="legend-left"><div class="legend-dot" style="background:${COLORS[type]};"></div>${LABELS[type]}</div>
+      <span style="font-weight:700;color:var(--text-dark);font-family:'Prompt',sans-serif;">${pct}%</span>
+    </div>`;
+  }).join('');
+  document.getElementById('donutChart').innerHTML = `<svg width="140" height="140" viewBox="0 0 150 150">
+    <circle cx="75" cy="75" r="55" fill="none" stroke="#F1F5F9" stroke-width="20"/>
+    ${totalDays>0?circles:''}
+    <text x="75" y="71" text-anchor="middle" font-family="Prompt" font-size="22" font-weight="700" fill="#1A1A2E">${totalDays}</text>
+    <text x="75" y="87" text-anchor="middle" font-family="Sarabun" font-size="11" fill="#94A3B8">วัน</text>
+  </svg>`;
+  document.getElementById('donutLegend').innerHTML = totalDays>0 ? legend : '<div style="text-align:center;color:var(--text-light);font-size:13px;padding:16px;">ยังไม่มีข้อมูล</div>';
+
+  // Quota
+  const today = todayStr();
+  const todayFmt = formatDate(today);
+  document.getElementById('todayQuotaDate').textContent = todayFmt;
+  document.getElementById('todayQuotaDateCard').textContent = todayFmt;
+  const todayReqs = active.filter(r=>r.dates&&r.dates.includes(today)&&r.status==='approved');
+  const nurseCount = todayReqs.filter(r=>getStaff(r.staffId)?.role==='nurse'||(r.fromSheet&&r.roleLabel==='พยาบาล')).length;
+  const otherCount = todayReqs.length - nurseCount;
+  document.getElementById('todayQuotaShort').textContent = `${nurseCount}/4`;
+  document.getElementById('nurse-quota-text').textContent = `${nurseCount}/4`;
+  document.getElementById('other-quota-text').textContent = `${otherCount}/3`;
+  const nb = document.getElementById('nurse-quota-bar');
+  nb.style.width = `${(nurseCount/4)*100}%`;
+  nb.className = `quota-fill nurse${nurseCount>=4?' full':''}`;
+  const ob = document.getElementById('other-quota-bar');
+  ob.style.width = `${(otherCount/3)*100}%`;
+  ob.className = `quota-fill other${otherCount>=3?' full':''}`;
+}
+
+// ===== CALENDAR =====
+function changeMonth(dir) {
+  calendarDate.setMonth(calendarDate.getMonth()+dir);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const y = calendarDate.getFullYear();
+  const m = calendarDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = `${MONTHS_TH[m]} ${y+543}`;
+  const first = new Date(y,m,1).getDay();
+  const days = new Date(y,m+1,0).getDate();
+  const today = new Date();
+  const eventMap = {};
+  requests.forEach(r => {
+    r.dates && r.dates.forEach(d => {
+      if (!d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)) return;
+      if (!eventMap[d]) eventMap[d] = [];
+      eventMap[d].push(r);
+    });
+  });
+
+  function getReqDisplay(r) {
+    if (r.fromSheet) {
+      const name = r.staffName || '?';
+      return { abbr: name.substring(0,2), color:'#A855F7', name, roleLabel:r.roleLabel||'' };
+    }
+    const s = getStaff(r.staffId);
+    return s ? { abbr:s.abbr, color:s.color, name:s.name, roleLabel:s.roleLabel }
+             : { abbr:'?', color:'#999', name:'ไม่ทราบ', roleLabel:'' };
+  }
+
+  function countRole(evts, isNurse) {
+    return evts.filter(e => {
+      if (e.status==='rejected'||e.status==='cancelled') return false;
+      return isNurse ? isNurseRole(e) : !isNurseRole(e);
+    }).length;
+  }
+
+  let html = '';
+  for (let i=0;i<first;i++) html += '<div class="cal-cell empty"></div>';
+  for (let d=1;d<=days;d++) {
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
+    // เรียง: pending ขอก่อนขึ้นก่อน, approved ตามหลัง
+    const evts = (eventMap[ds]||[]).slice().sort((a,b)=>{
+      if(a.status==='pending'&&b.status!=='pending') return -1;
+      if(a.status!=='pending'&&b.status==='pending') return 1;
+      return (a.submittedAt||0)-(b.submittedAt||0);
+    });
+    const nurseCount = countRole(evts,true);
+    const otherCount = countRole(evts,false);
+    const isOverQuota = nurseCount>=3||otherCount>=3;
+    let cls = 'cal-cell';
+    if (isToday) cls += ' today';
+    if (evts.length) cls += ' has-leave';
+    if (isOverQuota) cls += ' over-quota';
+    // แสดงแค่ชื่อ (ไม่มี abbr prefix), สูงสุด 3 รายการ
+    const evtDots = evts.slice(0,3).map(e => {
+      const disp = getReqDisplay(e);
+      return `<div class="cal-event-dot evt-${e.type}">${disp.name}</div>`;
+    }).join('');
+    const moreBadge = evts.length>3
+      ? `<div class="cal-event-dot" style="background:var(--bg);color:var(--text-light);cursor:pointer;" onclick="showDayPopup('${ds}')">+${evts.length-3} คน</div>`
+      : '';
+    const quotaWarn = isOverQuota ? `<div class="cal-quota-warn">⚠️</div>` : '';
+    html += `<div class="${cls}" onclick="calDayClick('${ds}')">
+      ${quotaWarn}
+      <div class="cal-date">${d}</div>
+      <div class="cal-events">${evtDots}${moreBadge}</div>
+      ${evts.length>0?`<div class="cal-count-bar">
+        ${[...Array(4)].map((_,i)=>`<div class="count-pill${i<nurseCount?' used-nurse':''}"></div>`).join('')}
+        ${[...Array(3)].map((_,i)=>`<div class="count-pill${i<otherCount?' used-other':''}"></div>`).join('')}
+      </div>`:''}
+    </div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+
+  // กิจกรรมในเดือน — เรียง pending ก่อน แล้วเรียง submittedAt
+  const allEvts = [];
+  Object.entries(eventMap).forEach(([date,evts]) => evts.forEach(e=>allEvts.push({date,...e})));
+  allEvts.sort((a,b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    if (a.status==='pending'&&b.status!=='pending') return -1;
+    if (a.status!=='pending'&&b.status==='pending') return 1;
+    return (a.submittedAt||0)-(b.submittedAt||0);
+  });
+  const list = document.getElementById('calEventList');
+  if (allEvts.length===0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div>ไม่มีกิจกรรมในเดือนนี้</div>';
+    return;
+  }
+  list.innerHTML = allEvts.map((e,idx) => {
+    const disp = getReqDisplay(e);
+    const submittedStr = e.submittedAt
+      ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : e.submittedAtStr || '';
+    return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
+      <div class="mini-avatar" style="width:38px;height:38px;font-size:13px;background:${disp.color}22;color:${disp.color};">${disp.abbr}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${disp.name}</div>
+        <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} · ${disp.roleLabel}</div>
+        ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+        ${e.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
+      </div>
+      <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
+      <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
+    </div>`;
+  }).join('');
+}
+
+function calDayClick(dateStr) {
+  showDayPopup(dateStr);
+}
+
+// popup รายชื่อผู้ขอในวันที่เลือก
+function showDayPopup(dateStr) {
+  const evts = requests.filter(r =>
+    r.dates && r.dates.includes(dateStr) &&
+    r.status !== 'cancelled' && r.status !== 'rejected'
+  ).sort((a,b) => {
+    if(a.status==='pending'&&b.status!=='pending') return -1;
+    if(a.status!=='pending'&&b.status==='pending') return 1;
+    return (a.submittedAt||0)-(b.submittedAt||0);
+  });
+
+  // ถ้าไม่มีกิจกรรม scroll ไปที่รายการแทน
+  if (evts.length === 0) {
+    document.getElementById('calEventList').scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+
+  // สร้าง popup
+  let popup = document.getElementById('dayPopup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'dayPopup';
+    popup.className = 'modal-overlay';
+    popup.innerHTML = `<div class="modal" style="width:420px;max-height:80vh;">
+      <div class="modal-header">
+        <div class="modal-title" id="dayPopupTitle">📅 วันที่ —</div>
+        <button class="modal-close" onclick="document.getElementById('dayPopup').classList.remove('open')">✕</button>
+      </div>
+      <div id="dayPopupBody"></div>
+    </div>`;
+    popup.addEventListener('click', function(e){ if(e.target===popup) popup.classList.remove('open'); });
+    document.body.appendChild(popup);
+  }
+
+  document.getElementById('dayPopupTitle').textContent = `📅 ${formatDate(dateStr)}`;
+
+  const nurseEvts  = evts.filter(e => isNurseRole(e));
+  const otherEvts  = evts.filter(e => !isNurseRole(e));
+
+  function renderPopupGroup(label, color, list) {
+    if (!list.length) return '';
+    const rows = list.map((e,idx) => {
+      const s = e.fromSheet ? null : getStaff(e.staffId);
+      const name  = s ? s.name  : (e.staffName || '?');
+      const abbr  = s ? s.abbr  : (e.staffName||'??').substring(0,2);
+      const col   = s ? s.color : '#A855F7';
+      const submittedStr = e.submittedAt
+        ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+        : e.submittedAtStr || '';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
+        <div class="mini-avatar" style="width:32px;height:32px;font-size:12px;background:${col}22;color:${col};">${abbr}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${name}</div>
+          ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+        </div>
+        <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
+        <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.06em;padding:6px 0 4px;">${label} (${list.length} คน)</div>
+      ${rows}
+    </div>`;
+  }
+
+  document.getElementById('dayPopupBody').innerHTML =
+    renderPopupGroup('👩‍⚕️ พยาบาล', 'var(--blue)', nurseEvts) +
+    renderPopupGroup('🧑‍💼 ผช./พนักงาน', 'var(--accent)', otherEvts) ||
+    '<div style="text-align:center;color:var(--text-light);padding:20px;">ไม่มีรายการ</div>';
+
+  popup.classList.add('open');
+}
+
+// ===== FORM CALENDAR =====
+function changeFormMonth(dir) {
+  formCalDate.setMonth(formCalDate.getMonth()+dir);
+  renderFormCal();
+}
+
+function renderFormCal() {
+  const y = formCalDate.getFullYear();
+  const m = formCalDate.getMonth();
+  document.getElementById('formMonthLabel').textContent = `${MONTHS_TH[m]} ${y+543}`;
+  const first = new Date(y,m,1).getDay();
+  const days = new Date(y,m+1,0).getDate();
+  const today = new Date();
+  let html = '<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
+  for (let i=0;i<first;i++) html += '<div class="mini-cal-cell empty"></div>';
+  for (let d=1;d<=days;d++) {
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
+    const isSel = selectedDates.includes(ds);
+    let cls = 'mini-cal-cell';
+    if (isToday) cls += ' today-mini';
+    if (isSel) cls += ' selected';
+    html += `<div class="${cls}" onclick="toggleDate('${ds}')">${d}</div>`;
+  }
+  document.getElementById('formCalGrid').innerHTML = html;
+}
+
+function toggleDate(ds) {
+  const idx = selectedDates.indexOf(ds);
+  if (idx>=0) selectedDates.splice(idx,1);
+  else selectedDates.push(ds);
+  selectedDates.sort();
+  renderFormCal();
+  renderSelectedDates();
+  checkQuota();
+}
+
+function renderSelectedDates() {
+  const el = document.getElementById('selectedDatesDisplay');
+  if (selectedDates.length===0) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>';
+    return;
+  }
+  el.innerHTML = selectedDates.map(d=>`<div class="date-chip">${formatDate(d)}<button onclick="removeDate('${d}')">×</button></div>`).join('');
+}
+
+function removeDate(d) {
+  selectedDates = selectedDates.filter(x=>x!==d);
+  renderFormCal();
+  renderSelectedDates();
+  checkQuota();
+}
+
+function isNurseRole(r) {
+  if (r.fromSheet) return r.roleLabel==='พยาบาล';
+  return getStaff(r.staffId)?.role==='nurse';
+}
+
+function checkQuota() {
+  const personId = parseInt(document.getElementById('req-person').value);
+  if (!personId||selectedDates.length===0) { document.getElementById('quota-warning').style.display='none'; return; }
+  const person = getStaff(personId);
+  if (!person) return;
+  const isNurse = person.role==='nurse';
+  const warnings = [];
+  selectedDates.forEach(d => {
+    const dayReqs = requests.filter(r=>r.dates&&r.dates.includes(d)&&r.status!=='rejected'&&r.status!=='cancelled');
+    if (isNurse) {
+      const count = dayReqs.filter(r=>isNurseRole(r)).length;
+      if (count>=3) warnings.push({date:d,count,limit:3,group:'พยาบาล',over:true});
+      else if (count===2) warnings.push({date:d,count,limit:3,group:'พยาบาล',over:false});
+    } else {
+      const count = dayReqs.filter(r=>!isNurseRole(r)).length;
+      if (count>=3) warnings.push({date:d,count,limit:3,group:'ผู้ช่วยพยาบาล/พนักงาน',over:true});
+      else if (count===2) warnings.push({date:d,count,limit:3,group:'ผู้ช่วยพยาบาล/พนักงาน',over:false});
+    }
+  });
+  const warn = document.getElementById('quota-warning');
+  if (warnings.length>0) {
+    warn.style.display='block';
+    warn.innerHTML = warnings.map(w=>w.over
+      ? `⚠️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count} คนแล้ว (เกินโควต้า)`
+      : `ℹ️ วันที่ ${formatDate(w.date)}: ${w.group} มี ${w.count}/${w.limit} คน (ใกล้เต็ม)`
+    ).join('<br>');
+  } else {
+    warn.style.display='none';
+  }
+}
+
+// ===== MODAL =====
+function openRequestModal(dateStr) {
+  if (!currentUser) { showToast('กรุณาเข้าสู่ระบบก่อน','error'); return; }
+  selectedDates = dateStr ? [dateStr] : [];
+  formCalDate = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+  const sel = document.getElementById('req-person');
+  sel.innerHTML = '<option value="">-- เลือกชื่อ --</option>' +
+    STAFF.map(s=>`<option value="${s.id}">${s.name} (${s.roleLabel})</option>`).join('');
+  if (!currentUser.isAdmin && currentUser.staffId) sel.value = currentUser.staffId;
+  document.getElementById('req-type').value='leave';
+  document.getElementById('req-note').value='';
+  document.getElementById('req-training-place').value='';
+  document.getElementById('training-extra').style.display='none';
+  document.getElementById('quota-warning').style.display='none';
+  renderFormCal();
+  renderSelectedDates();
+  document.getElementById('requestModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('requestModal').classList.remove('open');
+  selectedDates = [];
+}
+
+document.getElementById('req-type').addEventListener('change', function() {
+  document.getElementById('training-extra').style.display = this.value==='training'?'block':'none';
+});
+document.getElementById('req-person').addEventListener('change', checkQuota);
+
+async function submitRequest() {
+  const personId = parseInt(document.getElementById('req-person').value);
+  const type = document.getElementById('req-type').value;
+  const note = document.getElementById('req-note').value;
+  const trainingPlace = document.getElementById('req-training-place').value;
+  if (!personId) { showToast('กรุณาเลือกชื่อผู้ขอ','error'); return; }
+  if (selectedDates.length===0) { showToast('กรุณาเลือกวันที่','error'); return; }
+  if (type==='training'&&!trainingPlace) { showToast('กรุณาระบุสถานที่อบรม','error'); return; }
+  const person = getStaff(personId);
+  const submitBtn = document.querySelector('#requestModal .btn-teal');
+  if (submitBtn) { submitBtn.disabled=true; submitBtn.textContent='⏳ กำลังส่ง...'; }
+  const release = await submitLock.acquire('submit');
+  try {
+    const violations = submitLock.checkAndReserve(selectedDates, person.role);
+    if (violations.length>0) {
+      const vDates = violations.map(v=>formatDate(v.date)).join(', ');
+      if (!confirm(`⚠️ วันที่ ${vDates} โควต้าใกล้เต็ม ยืนยันส่งคำขอต่อไปหรือไม่?`)) {
+        if (submitBtn) { submitBtn.disabled=false; submitBtn.textContent='ส่งคำขอ'; }
+        release();
+        return;
+      }
+    }
+    const req = {
+      id: nextId++,
+      staffId: personId,
+      type,
+      dates: [...selectedDates],
+      note,
+      trainingPlace: type==='training'?trainingPlace:'',
+      status: 'pending',
+      submittedAt: Date.now()
+    };
+    requests.push(req);
+    closeModal();
+    showToast('ส่งคำขอวันหยุดแล้ว ✓');
+    renderDashboard();
+    renderCalendar();
+    renderMyRequests();
+    await saveToGSheet('ADD', {
+      id: req.id,
+      staffId: personId,
+      staffName: person.name,
+      roleLabel: person.roleLabel,
+      dates: selectedDates,
+      type,
+      trainingPlace: req.trainingPlace,
+      note,
+      submittedAt: req.submittedAt
+    });
+  } finally {
+    release();
+    if (submitBtn) { submitBtn.disabled=false; submitBtn.textContent='ส่งคำขอ'; }
+  }
+}
+
+// ===== ADMIN TABLE =====
+function renderAdminTable() {
+  const typeFilter = document.getElementById('adminFilterType').value;
+  const statusFilter = document.getElementById('adminFilterStatus').value;
+  const roleFilter = document.getElementById('adminFilterRole').value;
+  let filtered = [...requests];
+  if (typeFilter) filtered = filtered.filter(r=>r.type===typeFilter);
+  if (statusFilter) filtered = filtered.filter(r=>r.status===statusFilter);
+  if (roleFilter) filtered = filtered.filter(r=>{
+    const s = getStaff(r.staffId);
+    return s?s.role===roleFilter:(r.fromSheet&&r.roleLabel);
+  });
+  // เรียงลำดับ: pending ขึ้นก่อน (เก่าสุดก่อน = ขอมาก่อนได้รับสิทธิ์ก่อน), ที่เหลือล่าสุดก่อน
+  filtered.sort((a,b) => {
+    if (a.status==='pending' && b.status!=='pending') return -1;
+    if (a.status!=='pending' && b.status==='pending') return 1;
+    if (a.status==='pending' && b.status==='pending') {
+      return (a.submittedAt||a.id) - (b.submittedAt||b.id); // เก่าสุดก่อน
+    }
+    return (b.submittedAt||b.id) - (a.submittedAt||a.id); // ล่าสุดก่อน
+  });
+  const tbody = document.getElementById('adminTable');
+  if (filtered.length===0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-light);padding:30px;">ไม่พบรายการ</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((r,idx) => {
+    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const displayName  = s ? s.name : (r.staffName||'?');
+    const displayAbbr  = s ? s.abbr : (r.staffName||'??').substring(0,2);
+    const displayColor = s ? s.color : '#A855F7';
+    const displayRole  = s ? s.roleLabel : (r.roleLabel||'');
+    const dateStr = r.dates && r.dates.length ? r.dates.map(d=>formatDate(d)).join(', ') : '-';
+    // วันที่ขอ — แสดงชัดเจน
+    const submittedStr = r.submittedAt
+      ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : r.submittedAtStr || r.createdAt ? String(r.submittedAtStr||r.createdAt) : '-';
+    // ไฮไลท์ pending ที่ขอก่อนสุด
+    const isPendingFirst = r.status==='pending' && idx===0;
+    const actions = r.status==='pending' ? `
+      <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved')">✓ อนุมัติ</button>
+      <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected')">✕ ปฏิเสธ</button>
+      <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
+      <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
+    ` : r.status==='approved' ? `
+      <span class="badge badge-approved">อนุมัติแล้ว</span>
+      <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
+      <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
+    ` : `<span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>`;
+    return `<tr style="${r.status==='pending'?'background:rgba(251,191,36,0.04);':''}">
+      <td style="text-align:center;font-weight:700;font-size:13px;color:var(--text-light);">${idx+1}</td>
+      <td><div class="person-cell">
+        <div class="mini-avatar" style="background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>
+        <div style="font-size:14px;font-weight:600;">${displayName}</div>
+      </div></td>
+      <td style="font-size:12px;color:var(--text-mid);">${displayRole}</td>
+      <td><span class="badge ${TYPE_BADGE[r.type]||''}">${TYPE_LABELS[r.type]||r.type}</span></td>
+      <td>
+        <div style="font-size:12px;font-weight:600;color:${r.status==='pending'?'#92400E':'var(--text-mid)'};">${submittedStr}</div>
+        ${r.note?`<div style="font-size:11px;color:var(--text-light);margin-top:2px;">💬 ${r.note}</div>`:''}
+      </td>
+      <td style="font-size:12px;color:var(--text-mid);">${dateStr}</td>
+      <td><span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span></td>
+      <td style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">${actions}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStatus(id, status) {
+  const req = requests.find(r=>String(r.id)===String(id));
+  if (req) {
+    req.status = status;
+    showToast(status==='approved'?'✅ อนุมัติแล้ว':'❌ ปฏิเสธแล้ว', status==='approved'?'success':'error');
+    renderAdminTable(); renderMyRequests(); renderCalendar();
+    saveToGSheet('UPDATE_STATUS',{id:req.id,status});
+  }
+}
+
+// ===== TRAINING =====
+function renderTraining() {
+  const trainings = requests.filter(r=>r.type==='training'&&r.status==='approved');
+  const list = document.getElementById('trainingList');
+  if (trainings.length===0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎓</div>ไม่มีรายการอบรม</div>';
+    return;
+  }
+  list.innerHTML = trainings.map(r => {
+    // รองรับทั้ง local (staffId) และ fromSheet (staffName)
+    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const displayName  = s ? s.name  : (r.staffName || '?');
+    const displayRole  = s ? s.roleLabel : (r.roleLabel || '-');
+    const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
+    const displayColor = s ? s.color : '#A855F7';
+    const dates = r.dates||[];
+    const dateStr = dates.length>1
+      ? `${formatDate(dates[0])} ถึง ${formatDate(dates[dates.length-1])}`
+      : dates.length===1 ? formatDate(dates[0]) : '-';
+    // วันที่ขอ (submittedAt หรือ createdAt)
+    const submittedStr = r.submittedAt
+      ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : r.submittedAtStr || r.createdAt ? String(r.submittedAtStr||r.createdAt) : '';
+    return `<div class="training-card">
+      <div class="training-icon" style="background:var(--purple-pale);">🎓</div>
+      <div class="training-info" style="flex:1;">
+        <h4>${r.trainingPlace||'การอบรม'}</h4>
+        <div class="training-meta">
+          <span>👤 ${displayName}</span>
+          <span>💼 ${displayRole}</span>
+          <span>📅 ${dateStr}</span>
+          <span>📌 ${dates.length} วัน</span>
+          ${submittedStr?`<span>🕐 ขอเมื่อ ${submittedStr}</span>`:''}
+        </div>
+      </div>
+      <span class="badge badge-approved">อนุมัติแล้ว</span>
+    </div>`;
+  }).join('');
+}
+
+// ===== MY REQUESTS =====
+function renderMyRequests() {
+  if (!currentUser) return;
+  const list = document.getElementById('myRequestsList');
+
+  // match ชื่อ: รองรับชื่อสั้น, ชื่อเต็ม, staffId (ทั้ง local และ fromSheet)
+  function nameMatch(r) {
+    // ตรงด้วย staffId (ทั้ง local และ sheet ที่ resolve แล้ว)
+    if (r.staffId && currentUser.staffId && r.staffId === currentUser.staffId) return true;
+    if (!r.fromSheet) return false;
+    const sn = (r.staffName || '').trim();
+    const un = (currentUser.name || '').trim();
+    return sn === un || sn.includes(un) || un.includes(sn);
+  }
+
+  const myReqs = currentUser.isAdmin
+    ? [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id))
+    : requests.filter(nameMatch).sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id));
+
+  if (myReqs.length===0) {
+    // แสดง debug เล็กน้อยเพื่อช่วย diagnose
+    const totalFromSheet = requests.filter(r=>r.fromSheet).length;
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div>ยังไม่มีคำขอ</div>
+      ${totalFromSheet>0?`<div style="font-size:12px;color:var(--text-light);margin-top:8px;">📊 มีข้อมูลจาก Sheets ${totalFromSheet} รายการ<br>ตรวจสอบ: ชื่อใน Sheets ต้องตรงกับ "${currentUser.name}"</div>`:''}
+    </div>`;
+    return;
+  }
+
+  // แยก type สำหรับ summary bar
+  const typeCount = {};
+  myReqs.forEach(r => { typeCount[r.type] = (typeCount[r.type]||0)+1; });
+
+  const summaryBar = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+    ${Object.entries(typeCount).map(([t,c])=>`<span class="badge ${TYPE_BADGE[t]}">${TYPE_LABELS[t]} ${c} รายการ</span>`).join('')}
+    <span style="font-size:13px;color:var(--text-light);align-self:center;">รวม ${myReqs.length} รายการ</span>
+  </div>`;
+
+  list.innerHTML = summaryBar + myReqs.map(r => {
+    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const displayName  = s ? s.name  : (r.staffName||'?');
+    const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
+    const displayColor = s ? s.color : '#1855a0';
+    const dates = r.dates || [];
+    const dateStr = dates.length ? dates.map(d=>formatDate(d)).join(', ') : '-';
+
+    const submittedStr = r.submittedAt
+      ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : (r.submittedAtStr || '');
+
+    // canManage: ใช้ nameMatch เดียวกัน
+    const canManage = currentUser.isAdmin || nameMatch(r);
+    const canCancel = canManage && r.status!=='cancelled' && r.status!=='rejected';
+    const canReschedule = canManage && (r.status==='pending'||r.status==='approved');
+
+    const borderColor = r.status==='cancelled'?'var(--primary)'
+                      : r.status==='approved'?'var(--green)'
+                      : r.status==='rejected'?'#EF4444'
+                      : 'var(--border)';
+
+    // icon ตาม type
+    const typeIcon = {leave:'🏖️', vacation:'🌴', training:'🎓', birthday:'🎂'}[r.type]||'📋';
+
+    return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};padding:16px 18px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0;">
+          <div style="font-size:22px;">${typeIcon}</div>
+          <div style="min-width:0;">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px;">
+              <span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span>
+              <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
+            </div>
+            <div style="font-size:14px;color:var(--text-mid);">📅 ${dateStr}</div>
+            ${submittedStr?`<div style="font-size:12px;color:var(--text-light);margin-top:2px;">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
+            ${r.trainingPlace?`<div style="font-size:13px;color:var(--purple);margin-top:3px;">📍 ${r.trainingPlace}</div>`:''}
+            ${r.note?`<div style="font-size:12px;color:var(--text-light);margin-top:2px;">💬 ${r.note}</div>`:''}
+            ${r.cancelNote?`<div style="font-size:12px;color:var(--primary);margin-top:2px;">🗑️ ${r.cancelNote}</div>`:''}
+            ${r.rescheduledFrom?`<div style="font-size:11px;color:var(--text-light);margin-top:2px;">📌 เลื่อนจาก ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          ${canReschedule?`<button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')">📅 เลื่อน</button>`:''}
+          ${canCancel?`<button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')">❌ ยกเลิก</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== STATS =====
+function renderStats() {
+  const tbody = document.getElementById('statsTable');
+  tbody.innerHTML = STAFF.map(s => {
+    const reqs = requests.filter(r=>r.staffId===s.id&&r.status==='approved');
+    const leave = reqs.filter(r=>r.type==='leave').reduce((a,r)=>a+r.dates.length,0);
+    const vacation = reqs.filter(r=>r.type==='vacation').reduce((a,r)=>a+r.dates.length,0);
+    const training = reqs.filter(r=>r.type==='training').reduce((a,r)=>a+r.dates.length,0);
+    const birthday = reqs.filter(r=>r.type==='birthday').reduce((a,r)=>a+r.dates.length,0);
+    const total = leave+vacation+training+birthday;
+    return `<tr>
+      <td><div class="person-cell">
+        <div class="mini-avatar" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
+        <span style="font-size:13px;">${s.name}</span>
+      </div></td>
+      <td style="font-size:12px;color:var(--text-mid);">${s.roleLabel}</td>
+      <td style="text-align:center;"><span style="font-weight:700;color:var(--blue);">${leave}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:var(--purple);">${vacation}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:#EC4899;">${training}</span></td>
+      <td style="text-align:center;"><span style="font-weight:700;color:var(--primary);">${birthday}</span></td>
+      <td style="text-align:center;"><span style="font-family:'Prompt',sans-serif;font-weight:700;font-size:15px;">${total}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== CONCURRENCY LOCK =====
+const submitLock = {
+  _locked: false,
+  async acquire(key) {
+    let waited = 0;
+    while (this._locked && waited<5000) { await new Promise(r=>setTimeout(r,100)); waited+=100; }
+    this._locked = true;
+    return () => { this._locked = false; };
+  },
+  checkAndReserve(dates, personRole) {
+    const violations = [];
+    dates.forEach(d => {
+      const dayReqs = requests.filter(r=>r.dates&&r.dates.includes(d)&&r.status!=='rejected'&&r.status!=='cancelled');
+      if (personRole==='nurse') {
+        const count = dayReqs.filter(r=>isNurseRole(r)).length;
+        if (count>=3) violations.push({date:d,count,limit:3,group:'พยาบาล'});
+      } else {
+        const count = dayReqs.filter(r=>!isNurseRole(r)).length;
+        if (count>=3) violations.push({date:d,count,limit:3,group:'ผู้ช่วยพยาบาล/พนักงาน'});
+      }
+    });
+    return violations;
+  }
+};
+
+// ===== REFRESH =====
+let isRefreshing = false;
+function refreshCalendar() {
+  if (isRefreshing) return;
+  isRefreshing = true;
+  const btn = document.getElementById('refreshBtn');
+  if (btn) { btn.style.opacity='0.5'; btn.disabled=true; }
+  const syncPromise = GAS_URL ? fetchRequestsFromSheet() : Promise.resolve();
+  syncPromise.finally(() => {
+    renderCalendar(); renderDashboard();
+    if (btn) { btn.style.opacity='1'; btn.disabled=false; }
+    isRefreshing = false;
+    showToast(GAS_URL?'🔄 ซิงค์จาก Sheets แล้ว ✓':'รีเฟรชปฏิทินแล้ว ✓');
+  });
+}
+
+// ===== CANCEL / RESCHEDULE =====
+let cancelTargetId = null;
+let cancelMode = 'cancel';
+let rescheduleDates = [];
+let rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+function openCancelModal(reqId, mode) {
+  const req = requests.find(r=>String(r.id)===String(reqId));
+  if (!req) return;
+  const isOwner = (!req.fromSheet&&currentUser?.staffId===req.staffId)||(req.fromSheet&&req.staffName===currentUser?.name);
+  const isAdmin = currentUser?.isAdmin;
+  if (!isOwner&&!isAdmin) { showToast('คุณไม่มีสิทธิ์จัดการคำขอนี้','error'); return; }
+  if (req.status==='cancelled') { showToast('คำขอนี้ถูกยกเลิกแล้ว','error'); return; }
+  cancelTargetId = reqId;
+  cancelMode = mode;
+  rescheduleDates = [];
+  const s = getStaff(req.staffId);
+  const dateStr = req.dates.map(d=>formatDate(d)).join(', ');
+  document.getElementById('cancelReqInfo').innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+      <div class="mini-avatar" style="width:34px;height:34px;font-size:13px;background:${s?s.color+'22':'#A855F722'};color:${s?s.color:'#A855F7'};">${s?s.abbr:(req.staffName||'?').substring(0,2)}</div>
+      <div>
+        <div style="font-weight:600;font-size:14px;">${s?s.name:(req.staffName||'?')}</div>
+        <div style="font-size:12px;color:var(--text-light);">${s?s.roleLabel:(req.roleLabel||'')}</div>
+      </div>
+      <span class="badge ${TYPE_BADGE[req.type]}" style="margin-left:auto;">${TYPE_LABELS[req.type]}</span>
+      <span class="badge ${STATUS_BADGE[req.status]}">${STATUS_LABEL[req.status]}</span>
+    </div>
+    <div style="font-size:13px;color:var(--text-mid);">📅 ${dateStr}</div>
+    ${req.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${req.trainingPlace}</div>`:''}
+  `;
+  if (mode==='reschedule') {
+    document.getElementById('cancelModalTitle').textContent = '📅 เลื่อนวันหยุด';
+    document.getElementById('rescheduleSection').style.display='block';
+    document.getElementById('cancelSection').style.display='none';
+    document.getElementById('confirmCancelBtn').style.display='none';
+    document.getElementById('confirmRescheduleBtn').style.display='inline-flex';
+    rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderRescheduleCal();
+    renderRescheduleDates();
+  } else {
+    document.getElementById('cancelModalTitle').textContent = '❌ ยกเลิกคำขอ';
+    document.getElementById('rescheduleSection').style.display='none';
+    document.getElementById('cancelSection').style.display='block';
+    document.getElementById('confirmCancelBtn').style.display='inline-flex';
+    document.getElementById('confirmRescheduleBtn').style.display='none';
+    document.getElementById('cancelNote').value='';
+  }
+  document.getElementById('cancelModal').classList.add('open');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancelModal').classList.remove('open');
+  cancelTargetId = null; rescheduleDates = [];
+}
+
+function confirmCancel() {
+  const req = requests.find(r=>String(r.id)===String(cancelTargetId));
+  if (!req) return;
+  req.status='cancelled';
+  req.cancelNote = document.getElementById('cancelNote').value||'ไม่ระบุ';
+  req.cancelledBy = currentUser?.name;
+  req.cancelledAt = Date.now();
+  closeCancelModal();
+  showToast('ยกเลิกคำขอเรียบร้อย');
+  renderDashboard(); renderMyRequests(); renderAdminTable();
+  saveToGSheet('UPDATE_STATUS',{id:req.id,status:'cancelled',statusLabel:'ยกเลิกแล้ว'});
+}
+
+function confirmReschedule() {
+  if (rescheduleDates.length===0) { showToast('กรุณาเลือกวันที่ใหม่','error'); return; }
+  const req = requests.find(r=>String(r.id)===String(cancelTargetId));
+  if (!req) return;
+  const person = getStaff(req.staffId);
+  const violations = submitLock.checkAndReserve(rescheduleDates, person?person.role:'nurse');
+  const realViolations = violations.filter(v => {
+    const dayReqs = requests.filter(r2=>r2.id!==req.id&&r2.dates&&r2.dates.includes(v.date)&&r2.status!=='rejected'&&r2.status!=='cancelled');
+    const count = person?.role==='nurse'
+      ? dayReqs.filter(r2=>getStaff(r2.staffId)?.role==='nurse').length
+      : dayReqs.filter(r2=>getStaff(r2.staffId)?.role!=='nurse').length;
+    const limit = person?.role==='nurse'?4:3;
+    return count>=limit;
+  });
+  if (realViolations.length>0) { showToast('วันที่เลือกโควต้าเต็ม','error'); return; }
+  req.rescheduledFrom = [...req.dates];
+  req.dates = [...rescheduleDates];
+  req.rescheduleNote = document.getElementById('rescheduleNote').value;
+  req.rescheduledBy = currentUser?.name;
+  req.rescheduledAt = Date.now();
+  if (req.status==='approved') req.status='pending';
+  closeCancelModal();
+  showToast('เลื่อนวันหยุดเรียบร้อย รอการอนุมัติใหม่');
+  renderDashboard(); renderCalendar(); renderMyRequests(); renderAdminTable();
+  saveToGSheet('UPDATE_STATUS',{id:req.id,status:'rescheduled',statusLabel:'เลื่อนวันแล้ว'});
+}
+
+function changeRescheduleMonth(dir) {
+  rescheduleCalDate.setMonth(rescheduleCalDate.getMonth()+dir);
+  renderRescheduleCal();
+}
+
+function renderRescheduleCal() {
+  const y=rescheduleCalDate.getFullYear(), m=rescheduleCalDate.getMonth();
+  document.getElementById('rescheduleMonthLabel').textContent=`${MONTHS_TH[m]} ${y+543}`;
+  const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+  const today=new Date();
+  let html='<div class="mini-cal-day-name">อา</div><div class="mini-cal-day-name">จ</div><div class="mini-cal-day-name">อ</div><div class="mini-cal-day-name">พ</div><div class="mini-cal-day-name">พฤ</div><div class="mini-cal-day-name">ศ</div><div class="mini-cal-day-name">ส</div>';
+  for(let i=0;i<first;i++) html+='<div class="mini-cal-cell empty"></div>';
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
+    const isSel=rescheduleDates.includes(ds);
+    let cls='mini-cal-cell';
+    if(isToday)cls+=' today-mini';
+    if(isSel)cls+=' selected';
+    html+=`<div class="${cls}" onclick="toggleRescheduleDate('${ds}')">${d}</div>`;
+  }
+  document.getElementById('rescheduleCalGrid').innerHTML=html;
+}
+
+function toggleRescheduleDate(ds){
+  const idx=rescheduleDates.indexOf(ds);
+  if(idx>=0)rescheduleDates.splice(idx,1); else rescheduleDates.push(ds);
+  rescheduleDates.sort();
+  renderRescheduleCal();
+  renderRescheduleDates();
+}
+
+function renderRescheduleDates(){
+  const el=document.getElementById('rescheduleDatesDisplay');
+  if(rescheduleDates.length===0){el.innerHTML='<span style="font-size:12px;color:var(--text-light);">ยังไม่ได้เลือกวัน</span>';return;}
+  el.innerHTML=rescheduleDates.map(d=>`<div class="date-chip">${formatDate(d)}<button onclick="toggleRescheduleDate('${d}')">×</button></div>`).join('');
+}
+
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ===== REAL-TIME CLOCK =====
+const DAY_TH=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+function updateRealTimeClock(){
+  const el=document.getElementById('calRealTimeClock');
+  if(!el)return;
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const ss=String(now.getSeconds()).padStart(2,'0');
+  el.textContent=`วัน${DAY_TH[now.getDay()]}ที่ ${now.getDate()} ${MONTHS_TH[now.getMonth()]} ${now.getFullYear()+543}  |  ${hh}:${mm}:${ss}`;
+}
+setInterval(updateRealTimeClock,1000);
+
+// ===== GOOGLE SHEETS =====
+const APPS_SCRIPT_CODE = `// ============================================================
+//  Google Apps Script — ระบบขอวันหยุด หน่วยการพยาบาล
+//  Structure: A=ID | B=ชื่อ | C=ตำแหน่ง | D=ประเภทการลา
+//             E=วันที่หยุด | F=สถานที่อบรม | G=หมายเหตุ
+//             H=วันที่ขอ | I=สถานะ | J=วันที่บันทึก
+// ============================================================
+
+function doPost(e) {
+  try {
+    const ss = SpreadsheetApp.openById(
+      PropertiesService.getScriptProperties().getProperty('SHEET_ID')
+    );
+    const data = JSON.parse(e.postData.contents);
+
+    if (data.action === 'ADD') {
+      const sheet = getOrCreateSheet(ss, 'คำขอหยุด');
+      ensureHeader(sheet);
+      const staff = data.staff;
+      const now = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss');
+      data.dates.forEach(date => {
+        sheet.appendRow([
+          data.id,                    // A: ID
+          staff.name,                 // B: ชื่อ
+          staff.roleLabel,            // C: ตำแหน่ง
+          data.typeLabel,             // D: ประเภทการลา
+          date,                       // E: วันที่หยุด
+          data.trainingPlace || '',   // F: สถานที่อบรม
+          data.note || '',            // G: หมายเหตุ
+          data.submittedAt || now,    // H: วันที่ขอ (เวลาที่กดส่งจริง)
+          'รออนุมัติ',               // I: สถานะ
+          now                         // J: วันที่บันทึกลง Sheets
+        ]);
+      });
+      updateSummarySheet(ss, data);
+    }
+
+    if (data.action === 'UPDATE_STATUS') {
+      const sheet = ss.getSheetByName('คำขอหยุด');
+      if (!sheet) return jsonResponse({ ok: false, msg: 'ไม่พบ sheet' });
+      const lastRow = sheet.getLastRow();
+      const bgColor = data.status === 'approved' ? '#d4efdf'
+                    : data.status === 'rejected'  ? '#fadbd8'
+                    : data.status === 'cancelled' ? '#f5f5f5' : '#fff9e6';
+      for (let i = 2; i <= lastRow; i++) {
+        if (sheet.getRange(i, 1).getValue() == data.id) {
+          sheet.getRange(i, 9).setValue(data.statusLabel || data.status); // I=สถานะ
+          sheet.getRange(i, 1, 1, 10).setBackground(bgColor);
+        }
+      }
+    }
+
+    return jsonResponse({ ok: true });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.toString() });
+  }
+}
+
+function doGet(e) {
+  try {
+    if (!e.parameter.action) return jsonResponse({ ok: true, msg: 'พร้อมใช้งาน' });
+
+    if (e.parameter.action === 'GET_REQUESTS') {
+      const ss = SpreadsheetApp.openById(
+        PropertiesService.getScriptProperties().getProperty('SHEET_ID')
+      );
+      const sheet = ss.getSheetByName('คำขอหยุด');
+      if (!sheet || sheet.getLastRow() < 2) return jsonResponse({ ok: true, data: [] });
+      const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues();
+      const data = rows.filter(r => r[0] !== '').map(r => ({
+        id:          String(r[0]),  // A
+        name:        r[1],          // B
+        roleLabel:   r[2],          // C
+        typeLabel:   r[3],          // D
+        date:        r[4],          // E
+        place:       r[5],          // F
+        note:        r[6],          // G
+        submittedAt: r[7],          // H: วันที่ขอ ← สำคัญ
+        status:      r[8],          // I: สถานะ
+        createdAt:   r[9]           // J: วันที่บันทึก
+      }));
+      return jsonResponse({ ok: true, data });
+    }
+
+    return jsonResponse({ ok: false, msg: 'unknown action' });
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.toString() });
+  }
+}
+
+function getOrCreateSheet(ss, name) {
+  return ss.getSheetByName(name) || ss.insertSheet(name);
+}
+
+function ensureHeader(sheet) {
+  if (sheet.getLastRow() === 0) {
+    const h = ['ID','ชื่อ','ตำแหน่ง','ประเภทการลา','วันที่หยุด',
+               'สถานที่อบรม','หมายเหตุ','วันที่ขอ','สถานะ','วันที่บันทึก'];
+    sheet.appendRow(h);
+    const hr = sheet.getRange(1, 1, 1, h.length);
+    hr.setFontWeight('bold')
+      .setBackground('#FF6B6B')
+      .setFontColor('#ffffff')
+      .setHorizontalAlignment('center');
+    [50,120,130,110,110,200,150,160,110,160].forEach((w,i) =>
+      sheet.setColumnWidth(i+1, w)
+    );
+    sheet.setFrozenRows(1);
+  }
+}
+
+function updateSummarySheet(ss, data) {
+  const sheet = getOrCreateSheet(ss, 'สรุปรายเดือน');
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['เดือน','ลาหยุด','พักร้อน','อบรม','วันเกิด','รวม']);
+    sheet.getRange(1,1,1,6)
+      .setFontWeight('bold').setBackground('#4ECDC4')
+      .setFontColor('#ffffff').setHorizontalAlignment('center');
+    sheet.setFrozenRows(1);
+  }
+  const monthKey = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'MM/yyyy');
+  let targetRow = -1;
+  for (let i = 2; i <= sheet.getLastRow(); i++) {
+    if (sheet.getRange(i, 1).getValue() === monthKey) { targetRow = i; break; }
+  }
+  if (targetRow === -1) {
+    sheet.appendRow([monthKey,0,0,0,0,0]);
+    targetRow = sheet.getLastRow();
+  }
+  const colMap = { 'ลาหยุด':2, 'พักร้อน':3, 'อบรม':4, 'วันเกิด':5 };
+  const col = colMap[data.typeLabel];
+  if (col) {
+    const cell = sheet.getRange(targetRow, col);
+    cell.setValue((cell.getValue()||0) + data.dates.length);
+    const row = sheet.getRange(targetRow, 2, 1, 4).getValues()[0];
+    sheet.getRange(targetRow, 6).setValue(row.reduce((a,b)=>a+b,0));
+  }
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+// ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwvfzp6-O0vkKYxikc9P0CaHaAefkwZKzv0Ik6lFT5mkMLm-7CKdRMJ9niSvuY78lmX/exec';
+const gsConfig = { url: GAS_URL };
+let sheetRequests = [];
+let syncInterval = null;
+
+function typeLabelToKey(l){return{'ลาหยุด':'leave','พักร้อน':'vacation','อบรม':'training','วันเกิด':'birthday','leave':'leave','vacation':'vacation','training':'training','birthday':'birthday'}[l]||'leave';}
+function statusLabelToKey(l){return{'อนุมัติแล้ว':'approved','ปฏิเสธ':'rejected','รออนุมัติ':'pending','ยกเลิกแล้ว':'cancelled','เลื่อนวันแล้ว':'pending','approved':'approved','rejected':'rejected','pending':'pending','cancelled':'cancelled'}[l]||'pending';}
+
+function normalizeDate(raw){
+  if(!raw)return null;
+  const s=String(raw).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  const m1=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m1){const[,d,mo,y]=m1;const year=parseInt(y)>2500?parseInt(y)-543:parseInt(y);return`${year}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  try{const dt=new Date(s);if(!isNaN(dt))return dt.toISOString().substring(0,10);}catch(e){}
+  return null;
+}
+
+async function fetchRequestsFromSheet(){
+  if(!GAS_URL)return;
+  try{
+    const res=await fetch(GAS_URL+'?action=GET_REQUESTS',{method:'GET',redirect:'follow'});
+    const json=await res.json();
+    if(!json.ok||!json.data)return;
+
+    // แปลง string วันที่ขอ → timestamp (ms) เพื่อเรียงลำดับได้
+    function parseSubmittedAt(str) {
+      if (!str) return 0;
+      try {
+        // รูปแบบ dd/MM/yyyy HH:mm:ss หรือ dd/MM/yyyy HH:mm
+        const m = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+        if (m) {
+          const [,d,mo,y,h,mi,s] = m;
+          const year = parseInt(y) > 2500 ? parseInt(y)-543 : parseInt(y);
+          return new Date(year, parseInt(mo)-1, parseInt(d), parseInt(h), parseInt(mi), parseInt(s||0)).getTime();
+        }
+        const dt = new Date(str);
+        return isNaN(dt) ? 0 : dt.getTime();
+      } catch(e) { return 0; }
+    }
+
+    const grouped={};
+    json.data.forEach(row=>{
+      const id=String(row.id);
+      // หา staffId จากชื่อใน sheet — รองรับทั้งชื่อสั้นและชื่อเต็ม
+      const sheetName = (row.name||'').trim();
+      const matchedStaff = STAFF.find(s =>
+        s.name === sheetName ||
+        sheetName.includes(s.name) ||
+        s.name.includes(sheetName)
+      );
+      const submittedRaw = row.submittedAt || row.createdAt || '';
+      if(!grouped[id]) grouped[id]={
+        id,
+        staffId:        matchedStaff ? matchedStaff.id : null,  // ← resolve staffId
+        staffName:      matchedStaff ? matchedStaff.name : sheetName,
+        roleLabel:      matchedStaff ? matchedStaff.roleLabel : (row.roleLabel||''),
+        type:           typeLabelToKey(row.typeLabel),
+        dates:          [],
+        trainingPlace:  row.place||'',
+        note:           row.note||'',
+        status:         statusLabelToKey(row.status),
+        submittedAt:    parseSubmittedAt(submittedRaw),
+        submittedAtStr: submittedRaw,
+        fromSheet:      true
+      };
+      if(row.date){const nd=normalizeDate(row.date);if(nd)grouped[id].dates.push(nd);}
+    });
+    sheetRequests=Object.values(grouped);
+    const localIds=new Set(requests.filter(r=>!r.fromSheet).map(r=>String(r.id)));
+    requests=requests.filter(r=>!r.fromSheet);
+    sheetRequests.forEach(sr=>{if(!localIds.has(sr.id))requests.push(sr);});
+    renderCalendar();renderDashboard();
+    updateSyncStatus('ok');
+  }catch(err){console.warn('fetchRequestsFromSheet error:',err);updateSyncStatus('err');}
+}
+
+function updateSyncStatus(state){
+  const dot=document.getElementById('gsheetDot');
+  const label=document.getElementById('gsheetBtnLabel');
+  if(state==='ok'){dot.style.background='#10B981';label.textContent='Sheets sync ✓';}
+  else if(state==='err'){dot.style.background='#F97316';label.textContent='Sync error ⚠';}
+  else{dot.style.background='var(--primary)';label.textContent='ตั้งค่า Google Sheets';}
+}
+
+function updateGSheetIndicator(){
+  updateSyncStatus(GAS_URL?'ok':'none');
+}
+
+function startAutoSync(){
+  if(syncInterval)clearInterval(syncInterval);
+  fetchRequestsFromSheet();
+  syncInterval=setInterval(fetchRequestsFromSheet,30000);
+}
+
+function showGSheetModal(){
+  document.getElementById('gsUrl').value=GAS_URL||'';
+  document.getElementById('gsSheetId').value='12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'||'';
+  document.getElementById('appsScriptCode').textContent=APPS_SCRIPT_CODE;
+  document.getElementById('gsheetModal').classList.add('open');
+}
+
+function closeGSheetModal(){
+  document.getElementById('gsheetModal').classList.remove('open');
+  document.getElementById('gsTestResult').style.display='none';
+}
+
+function copyScript(){navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>showToast('คัดลอกโค้ดแล้ว ✓'));}
+
+function saveGSheetSettings(){
+  const url = document.getElementById('gsUrl').value.trim();
+  const sheetId = document.getElementById('gsSheetId').value.trim();
+  if (!url) { showToast('กรุณากรอก URL','error'); return; }
+  if (!url.startsWith('https://script.google.com/macros/s/')) {
+    showToast('URL ไม่ถูกต้อง ต้องขึ้นต้นด้วย https://script.google.com/macros/s/','error');
+    return;
+  }
+  closeGSheetModal();
+  showToast('✅ บันทึกการตั้งค่าแล้ว กำลังซิงค์...');
+  startAutoSync();
+}
+
+async function testGSheet(){
+  const url=document.getElementById('gsUrl').value.trim();
+  const res=document.getElementById('gsTestResult');
+  if(!url){showToast('กรุณากรอก URL ก่อน','error');return;}
+  res.style.display='block';res.style.background='var(--accent-pale)';res.style.color='var(--text-mid)';res.textContent='⏳ กำลังทดสอบ...';
+  try{
+    const r=await fetch(url,{method:'GET',redirect:'follow'});
+    const json=await r.json();
+    if(json.ok){res.style.background='var(--green-pale)';res.style.color='#065F46';res.textContent='✅ เชื่อมต่อสำเร็จ!';}
+    else throw new Error(json.msg||'error');
+  }catch(e){res.style.background='var(--primary-pale)';res.style.color='#991B1B';res.textContent='❌ เชื่อมต่อไม่ได้: '+e.message;}
+}
+
+async function saveToGSheet(action, data){
+  if(!GAS_URL) return;
+  const TYPE_LABELS_MAP={leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
+  const STATUS_LABELS_MAP={approved:'อนุมัติแล้ว',rejected:'ปฏิเสธ',cancelled:'ยกเลิกแล้ว',rescheduled:'เลื่อนวันแล้ว'};
+  try {
+    const fmtSubmitted = (ts) => {
+      if (!ts) return '';
+      return new Date(ts).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    };
+
+    let payload;
+    if (action === 'ADD') {
+      const staffObj = getStaff(data.staffId);
+      payload = {
+        action,
+        id: String(data.id),
+        staffName:     staffObj ? staffObj.name      : (data.staffName || 'ไม่ทราบ'),
+        staffRole:     staffObj ? staffObj.roleLabel : (data.roleLabel  || 'พยาบาล'),
+        dates:         JSON.stringify(data.dates),
+        typeLabel:     TYPE_LABELS_MAP[data.type] || data.type,
+        trainingPlace: data.trainingPlace || '',
+        note:          data.note || '',
+        submittedAt:   fmtSubmitted(data.submittedAt)
+      };
+    } else {
+      payload = {
+        action,
+        id:          String(data.id),
+        status:      data.status,
+        statusLabel: STATUS_LABELS_MAP[data.status] || data.status
+      };
+    }
+
+    // ส่งเป็น text/plain + JSON — เหมือนระบบสอนน้องใหม่ (หลบ CORS ได้ + อ่าน response ได้)
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const text = await r.text();
+    const result = JSON.parse(text);
+    if (result.error) throw new Error(result.error);
+
+    showToast(action==='ADD' ? '📊 บันทึก Sheets สำเร็จ ✓' : '📊 อัพเดท Sheets แล้ว ✓');
+    setTimeout(fetchRequestsFromSheet, 2500);
+  } catch(e) {
+    console.warn('GSheet save error:', e);
+    showToast('⚠️ ส่งข้อมูลไม่ได้', 'error');
+  }
+}
+
+function addLogoutBtn(){
+  const gsheetDiv=document.querySelector('#gsheetBtn')?.parentElement;
+  if(gsheetDiv&&!document.getElementById('logoutBtn')){
+    const btn=document.createElement('button');
+    btn.id='logoutBtn';
+    btn.innerHTML='🚪 ออกจากระบบ';
+    btn.style.cssText='width:100%;padding:8px;margin-top:6px;border-radius:50px;border:1px solid rgba(255,107,107,0.25);background:rgba(255,107,107,0.06);color:var(--primary);font-family:Sarabun,sans-serif;font-size:12px;font-weight:600;cursor:pointer;';
+    btn.onclick=logout;
+    gsheetDiv.appendChild(btn);
+  }
+}
+
+// ===== INIT =====
+updateGSheetIndicator();
+initLoginDropdown();
+addLogoutBtn();
+startAutoSync();
+</script>
+</body>
+</html>
