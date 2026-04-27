@@ -2880,8 +2880,9 @@ function renderMyRequests() {
     return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};padding:16px 18px;">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0;">
-          <div style="font-size:22px;">${typeIcon}</div>
+          ${currentUser.isAdmin ? `<div class="mini-avatar" style="width:38px;height:38px;font-size:13px;flex-shrink:0;background:${displayColor}22;color:${displayColor};">${displayAbbr}</div>` : `<div style="font-size:22px;">${typeIcon}</div>`}
           <div style="min-width:0;">
+            ${currentUser.isAdmin ? `<div style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:4px;">${displayName}</div>` : ''}
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px;">
               <span class="badge ${TYPE_BADGE[r.type]}">${TYPE_LABELS[r.type]}</span>
               <span class="badge ${r.status==='cancelled'?'badge-rejected':STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
