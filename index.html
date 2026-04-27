@@ -2529,11 +2529,12 @@ function renderMyRequests() {
 
   // match ชื่อ: รองรับชื่อสั้น, ชื่อเต็ม, staffId (ทั้ง local และ fromSheet)
   function nameMatch(r) {
-    // ตรงด้วย staffId (ทั้ง local และ sheet ที่ resolve แล้ว)
+    // ตรงด้วย staffId
     if (r.staffId && currentUser.staffId && r.staffId === currentUser.staffId) return true;
-    if (!r.fromSheet) return false;
+    // ตรงด้วยชื่อ (รองรับชื่อสั้น ชื่อเต็ม)
     const sn = (r.staffName || '').trim();
     const un = (currentUser.name || '').trim();
+    if (!sn || !un) return false;
     return sn === un || sn.includes(un) || un.includes(sn);
   }
 
@@ -2562,7 +2563,7 @@ function renderMyRequests() {
   </div>`;
 
   list.innerHTML = summaryBar + myReqs.map(r => {
-    const s = r.fromSheet ? null : getStaff(r.staffId);
+    const s = getStaff(r.staffId) || null;
     const displayName  = s ? s.name  : (r.staffName||'?');
     const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
     const displayColor = s ? s.color : '#1855a0';
