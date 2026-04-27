@@ -2725,29 +2725,23 @@ function updateStatusForDate(id, status, dateStr) {
   showToast(status==='approved' ? '✅ อนุมัติวันนั้นแล้ว' : '❌ ปฏิเสธวันนั้นแล้ว', status==='approved'?'success':'error');
   renderCalendar(); renderMyRequests(); renderDashboard();
 
-  // บันทึกลง Sheet: อัปเดตของเดิม (ลบวันออก) + เพิ่มอันใหม่
-  saveToGSheet('RESCHEDULE', {
-    id: req.id,
-    staffName:     req.staffName || (staffObj ? staffObj.name : ''),
-    staffRole:     req.roleLabel || (staffObj ? staffObj.roleLabel : ''),
-    dates:         JSON.stringify(req.dates),
-    typeLabel:     {leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'}[req.type]||req.type,
+  // บันทึกลง Sheet ด้วย action APPROVE_DATE — atomic operation
+  const TYPE_MAP = {leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
+  saveToGSheet('APPROVE_DATE', {
+    // request เดิม — ลบวันที่อนุมัติออก
+    origId:        req.id,
+    origDates:     JSON.stringify(req.dates),
+    // request ใหม่ — วันที่อนุมัติ
+    newId:         newReq.id,
+    staffName:     newReq.staffName,
+    staffRole:     newReq.roleLabel,
+    typeLabel:     TYPE_MAP[req.type]||req.type,
     trainingPlace: req.trainingPlace||'',
     note:          req.note||'',
-    submittedAt:   req.submittedAt
+    submittedAt:   req.submittedAt,
+    approvedDate:  dateStr,
+    status:        status
   });
-  saveToGSheet('ADD', {
-    id: newReq.id,
-    staffId:      newReq.staffId,
-    staffName:    newReq.staffName,
-    roleLabel:    newReq.roleLabel,
-    dates:        [dateStr],
-    type:         newReq.type,
-    trainingPlace:newReq.trainingPlace,
-    note:         newReq.note,
-    submittedAt:  newReq.submittedAt
-  });
-  saveToGSheet('UPDATE_STATUS', {id: newReq.id, status});
 }
 
 function updateStatus(id, status) {
@@ -3321,7 +3315,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxcrqR_eHLkpAXnjc0gH_QA7c3pcASBgNFT6IzS1ujat6qRvdlW289QF2how-0wvpPU/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwgIA0xWitwKhaKJKIH8wbsXv3E9H8-r3DVGm4EPJIOGlf5txAdiXjFjKypbfAevHlK/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3499,6 +3493,21 @@ async function saveToGSheet(action, data){
       };
     } else if (action === 'DELETE') {
       payload = { action, id: String(data.id) };
+    } else if (action === 'APPROVE_DATE') {
+      payload = {
+        action,
+        origId:        String(data.origId),
+        origDates:     data.origDates,
+        newId:         String(data.newId),
+        staffName:     data.staffName || '',
+        staffRole:     data.staffRole || '',
+        typeLabel:     data.typeLabel || '',
+        trainingPlace: data.trainingPlace || '',
+        note:          data.note || '',
+        submittedAt:   typeof data.submittedAt === 'number' ? fmtSubmitted(data.submittedAt) : (data.submittedAt||''),
+        approvedDate:  data.approvedDate,
+        status:        data.status
+      };
     } else {
       payload = {
         action,
