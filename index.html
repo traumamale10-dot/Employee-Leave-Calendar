@@ -1763,7 +1763,7 @@ function doLogin() {
   document.getElementById('appWrapper').style.display = 'flex';
   updateSidebarUser();
   updateNavForRole();
-  if (gsConfig.url) startAutoSync();
+  if (GAS_URL) startAutoSync();
   renderDashboard();
 }
 
@@ -2644,12 +2644,12 @@ function refreshCalendar() {
   isRefreshing = true;
   const btn = document.getElementById('refreshBtn');
   if (btn) { btn.style.opacity='0.5'; btn.disabled=true; }
-  const syncPromise = gsConfig.url ? fetchRequestsFromSheet() : Promise.resolve();
+  const syncPromise = GAS_URL ? fetchRequestsFromSheet() : Promise.resolve();
   syncPromise.finally(() => {
     renderCalendar(); renderDashboard();
     if (btn) { btn.style.opacity='1'; btn.disabled=false; }
     isRefreshing = false;
-    showToast(gsConfig.url?'🔄 ซิงค์จาก Sheets แล้ว ✓':'รีเฟรชปฏิทินแล้ว ✓');
+    showToast(GAS_URL?'🔄 ซิงค์จาก Sheets แล้ว ✓':'รีเฟรชปฏิทินแล้ว ✓');
   });
 }
 
@@ -2954,21 +2954,9 @@ function jsonResponse(obj) {
     .setMimeType(ContentService.MimeType.JSON);
 }`;
 
-const DEFAULT_GS_CONFIG = {
-  url: 'https://script.google.com/macros/s/AKfycbw6V2T5Bt6zaAiV4esDr2OBiP_W4_7w-76eRyIjGfuj5Lc5bf3eN_1hddn9TYWJp0x0/exec',
-  sheetId: '12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'
-};
-// อ่านจาก localStorage ก่อน ถ้าไม่มีหรือ URL ว่างค่อยใช้ default
-// *** ไม่ทับ localStorage ถ้ามีค่าที่ถูกต้องอยู่แล้ว ***
-let gsConfig = (()=>{
-  try {
-    const saved = JSON.parse(localStorage.getItem('gsConfig')||'null');
-    if (saved && saved.url && saved.url.startsWith('https://script.google.com/macros/s/')) return saved;
-  } catch(e) {}
-  // ถ้าไม่มี หรือ URL ผิดรูปแบบ ให้ใช้ default แล้วบันทึก
-  localStorage.setItem('gsConfig', JSON.stringify(DEFAULT_GS_CONFIG));
-  return Object.assign({}, DEFAULT_GS_CONFIG);
-})();
+// ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw6V2T5Bt6zaAiV4esDr2OBiP_W4_7w-76eRyIjGfuj5Lc5bf3eN_1hddn9TYWJp0x0/exec';
+const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
 
@@ -2986,9 +2974,9 @@ function normalizeDate(raw){
 }
 
 async function fetchRequestsFromSheet(){
-  if(!gsConfig.url)return;
+  if(!GAS_URL)return;
   try{
-    const res=await fetch(gsConfig.url+'?action=GET_REQUESTS',{method:'GET',redirect:'follow'});
+    const res=await fetch(GAS_URL+'?action=GET_REQUESTS',{method:'GET',redirect:'follow'});
     const json=await res.json();
     if(!json.ok||!json.data)return;
 
@@ -3053,7 +3041,7 @@ function updateSyncStatus(state){
 }
 
 function updateGSheetIndicator(){
-  updateSyncStatus(gsConfig.url?'ok':'none');
+  updateSyncStatus(GAS_URL?'ok':'none');
 }
 
 function startAutoSync(){
@@ -3063,8 +3051,8 @@ function startAutoSync(){
 }
 
 function showGSheetModal(){
-  document.getElementById('gsUrl').value=gsConfig.url||'';
-  document.getElementById('gsSheetId').value=gsConfig.sheetId||'';
+  document.getElementById('gsUrl').value=GAS_URL||'';
+  document.getElementById('gsSheetId').value='12mmoOztk9I9XQkJ4icnwp74VnONc4JgJoWfErp1CgbM'||'';
   document.getElementById('appsScriptCode').textContent=APPS_SCRIPT_CODE;
   document.getElementById('gsheetModal').classList.add('open');
 }
@@ -3084,11 +3072,6 @@ function saveGSheetSettings(){
     showToast('URL ไม่ถูกต้อง ต้องขึ้นต้นด้วย https://script.google.com/macros/s/','error');
     return;
   }
-  // ล้าง localStorage เก่า แล้วบันทึกใหม่
-  localStorage.removeItem('gsConfig');
-  gsConfig = { url, sheetId };
-  localStorage.setItem('gsConfig', JSON.stringify(gsConfig));
-  updateGSheetIndicator();
   closeGSheetModal();
   showToast('✅ บันทึกการตั้งค่าแล้ว กำลังซิงค์...');
   startAutoSync();
@@ -3108,7 +3091,7 @@ async function testGSheet(){
 }
 
 async function saveToGSheet(action, data){
-  if(!gsConfig.url) return;
+  if(!GAS_URL) return;
   const TYPE_LABELS_MAP={leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
   const STATUS_LABELS_MAP={approved:'อนุมัติแล้ว',rejected:'ปฏิเสธ',cancelled:'ยกเลิกแล้ว',rescheduled:'เลื่อนวันแล้ว'};
   try {
@@ -3141,7 +3124,7 @@ async function saveToGSheet(action, data){
     }
 
     // ส่งเป็น text/plain + JSON — เหมือนระบบสอนน้องใหม่ (หลบ CORS ได้ + อ่าน response ได้)
-    const r = await fetch(gsConfig.url, {
+    const r = await fetch(GAS_URL, {
       method: 'POST',
       redirect: 'follow',
       headers: { 'Content-Type': 'text/plain' },
@@ -3172,21 +3155,10 @@ function addLogoutBtn(){
 }
 
 // ===== INIT =====
-// ถ้า localStorage มี URL เก่า ให้ reset เป็น default ใหม่อัตโนมัติ
-(function clearStaleUrl(){
-  try {
-    const saved = JSON.parse(localStorage.getItem('gsConfig')||'null');
-    const OLD_URL = 'AKfycbwoplvKFA_SPaF_7-bQw4XpXaGSJyq4bdoPGBxSlkpC20laW8Y6H0wjv9sCo9eT1ww1';
-    if (saved && saved.url && saved.url.includes(OLD_URL)) {
-      localStorage.setItem('gsConfig', JSON.stringify(DEFAULT_GS_CONFIG));
-      gsConfig = Object.assign({}, DEFAULT_GS_CONFIG);
-    }
-  } catch(e) {}
-})();
 updateGSheetIndicator();
 initLoginDropdown();
 addLogoutBtn();
-if(gsConfig.url)startAutoSync();
+startAutoSync();
 </script>
 </body>
 </html>
