@@ -2326,6 +2326,7 @@ document.getElementById('req-person').addEventListener('change', checkQuota);
 
 async function submitRequest() {
   const personId = parseInt(document.getElementById('req-person').value);
+  alert('DEBUG: personId=' + personId + ' dates=' + JSON.stringify(selectedDates) + ' user=' + (currentUser?currentUser.name:'null'));
   const type = document.getElementById('req-type').value;
   const note = document.getElementById('req-note').value;
   const trainingPlace = document.getElementById('req-training-place').value;
