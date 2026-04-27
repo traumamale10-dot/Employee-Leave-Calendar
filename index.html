@@ -1540,8 +1540,8 @@
           <option value="">ทั้งหมด</option>
         </select>
         <select id="statsStatusFilter" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="" selected>ทุกสถานะ</option>
           <option value="approved">อนุมัติแล้ว</option>
-          <option value="">ทุกสถานะ</option>
           <option value="pending">รออนุมัติ</option>
         </select>
       </div>
@@ -2668,7 +2668,7 @@ function populateStatsMonthFilter() {
 function renderStats() {
   populateStatsMonthFilter();
   const monthFilter = document.getElementById('statsMonthFilter')?.value || '';
-  const statusFilter = document.getElementById('statsStatusFilter')?.value ?? 'approved';
+  const statusFilter = document.getElementById('statsStatusFilter')?.value ?? '';
   const tbody = document.getElementById('statsTable');
   tbody.innerHTML = STAFF.map(s => {
     let reqs = requests.filter(r=>(
@@ -2689,6 +2689,7 @@ function renderStats() {
     const training = reqs.filter(r=>r.type==='training').reduce((a,r)=>a+r.dates.length,0);
     const birthday = reqs.filter(r=>r.type==='birthday').reduce((a,r)=>a+r.dates.length,0);
     const total = leave+vacation+training+birthday;
+    if (total === 0) return '';
     return `<tr>
       <td><div class="person-cell">
         <div class="mini-avatar" style="background:${s.color}22;color:${s.color};">${s.abbr}</div>
