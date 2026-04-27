@@ -1355,7 +1355,21 @@
         </div>
       </div>
 
-      <div class="stat-cards">
+      <!-- Month filter -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:600;color:var(--text-mid);">เดือน:</span>
+        <select id="dashMonthFilter" onchange="renderDashboard()" style="padding:8px 16px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <!-- Stat cards -->
+      <div class="stat-cards" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));">
+        <div class="stat-card" id="dash-overquota-card" style="display:none;border:2px solid #EF4444;">
+          <div class="stat-icon" style="background:#FEE2E2;">⚠️</div>
+          <div class="stat-label" style="color:#EF4444;">เกินกำหนด</div>
+          <div class="stat-number" id="stat-overquota" style="color:#EF4444;">0</div>
+          <div class="stat-sub">วันที่เต็มโควต้า</div>
+        </div>
         <div class="stat-card">
           <div class="stat-icon icon-red">📋</div>
           <div class="stat-label">คำขอทั้งหมด</div>
@@ -1363,24 +1377,44 @@
           <div class="stat-sub">ทุกประเภท</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon icon-yellow">⏳</div>
-          <div class="stat-label">รออนุมัติ</div>
-          <div class="stat-number" id="stat-pending">0</div>
-          <div class="stat-sub">รอดำเนินการ</div>
+          <div class="stat-icon" style="background:#EFF6FF;">🏖️</div>
+          <div class="stat-label">ลาหยุด</div>
+          <div class="stat-number" id="stat-leave" style="color:var(--blue);">0</div>
+          <div class="stat-sub">วัน</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#F5F0FF;">🌴</div>
+          <div class="stat-label">พักร้อน</div>
+          <div class="stat-number" id="stat-vacation" style="color:var(--purple);">0</div>
+          <div class="stat-sub">วัน</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-teal">🎓</div>
+          <div class="stat-label">อบรม</div>
+          <div class="stat-number" id="stat-training">0</div>
+          <div class="stat-sub">วัน</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#FDF4FF;">🎂</div>
+          <div class="stat-label">วันเกิด</div>
+          <div class="stat-number" id="stat-birthday" style="color:#EC4899;">0</div>
+          <div class="stat-sub">วัน</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon icon-green">✅</div>
           <div class="stat-label">อนุมัติแล้ว</div>
           <div class="stat-number" id="stat-approved">0</div>
-          <div class="stat-sub">เดือนนี้</div>
+          <div class="stat-sub">รายการ</div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon icon-teal">🎓</div>
-          <div class="stat-label">การอบรม</div>
-          <div class="stat-number" id="stat-training">0</div>
-          <div class="stat-sub">ที่อนุมัติแล้ว</div>
+          <div class="stat-icon icon-yellow">⏳</div>
+          <div class="stat-label">รออนุมัติ</div>
+          <div class="stat-number" id="stat-pending">0</div>
+          <div class="stat-sub">รายการ</div>
         </div>
       </div>
+      <!-- Birthday banner -->
+      <div id="birthdayBanner" style="display:none;"></div>
 
       <div class="dashboard-grid">
         <div class="card">
@@ -1453,7 +1487,7 @@
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <button id="refreshBtn" onclick="refreshCalendar()" style="padding:6px 12px;border-radius:50px;border:none;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:13px;font-weight:600;" title="รีเฟรช">🔄 รีเฟรช</button>
-            <button class="btn btn-primary" style="padding:8px 16px;font-size:13px;border-radius:50px;" onclick="openRequestModal()">+ ขอวันหยุด</button>
+
           </div>
         </div>
         <div class="cal-grid-header">
@@ -1930,12 +1964,70 @@ function switchRole(role) {
 }
 
 // ===== DASHBOARD =====
+function populateDashMonthFilter() {
+  const sel = document.getElementById('dashMonthFilter');
+  if (!sel) return;
+  const months = new Set();
+  requests.forEach(r => (r.dates||[]).forEach(d => { if(d) months.add(d.substring(0,7)); }));
+  const current = sel.value;
+  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+    [...months].sort().reverse().map(m => {
+      const [y,mo] = m.split('-');
+      return `<option value="${m}" ${m===current?'selected':''}>${MONTHS_TH[parseInt(mo)-1]} ${parseInt(y)+543}</option>`;
+    }).join('');
+}
+
 function renderDashboard() {
-  const active = requests.filter(r=>r.status!=='cancelled');
+  populateDashMonthFilter();
+  const mf = document.getElementById('dashMonthFilter')?.value || '';
+  const active = requests.filter(r => {
+    if (r.status==='cancelled') return false;
+    if (!mf) return true;
+    return (r.dates||[]).some(d=>d.startsWith(mf));
+  });
+  // นับวัน (dates.length) ไม่ใช่จำนวน request
+  const countDays = (type) => active.filter(r=>r.type===type)
+    .reduce((sum,r) => sum + (mf
+      ? (r.dates||[]).filter(d=>d.startsWith(mf)).length
+      : (r.dates||[]).length), 0);
   document.getElementById('stat-total').textContent = active.length;
   document.getElementById('stat-pending').textContent = active.filter(r=>r.status==='pending').length;
   document.getElementById('stat-approved').textContent = active.filter(r=>r.status==='approved').length;
-  document.getElementById('stat-training').textContent = active.filter(r=>r.type==='training'&&r.status==='approved').length;
+  document.getElementById('stat-training').textContent = countDays('training');
+  document.getElementById('stat-leave').textContent = countDays('leave');
+  document.getElementById('stat-vacation').textContent = countDays('vacation');
+  document.getElementById('stat-birthday').textContent = countDays('birthday');
+
+  // เกินกำหนด — วันที่มีคนขอเกิน 3 คนพยาบาล หรือ 3 คน staff
+  const dateMap = {};
+  active.filter(r=>r.status!=='rejected').forEach(r=>{
+    (r.dates||[]).forEach(d=>{
+      if(mf && !d.startsWith(mf)) return;
+      if(!dateMap[d]) dateMap[d]={nurse:0,other:0};
+      const s = getStaff(r.staffId);
+      const role = s ? s.role : (r.roleLabel||'').includes('พยาบาล')?'nurse':'other';
+      if(role==='nurse') dateMap[d].nurse++; else dateMap[d].other++;
+    });
+  });
+  const overDates = Object.entries(dateMap).filter(([d,v])=>v.nurse>3||v.other>3);
+  const overCard = document.getElementById('dash-overquota-card');
+  const overEl = document.getElementById('stat-overquota');
+  if(overDates.length>0){overCard.style.display='flex';overEl.textContent=overDates.length;}
+  else{overCard.style.display='none';}
+
+  // Birthday banner
+  const checkMonth = mf || `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+  const birthdays = active.filter(r=>r.type==='birthday'&&(r.dates||[]).some(d=>d.startsWith(checkMonth)));
+  const banner = document.getElementById('birthdayBanner');
+  if(birthdays.length>0){
+    const names = [...new Set(birthdays.map(r=>r.staffName||''))].filter(Boolean);
+    banner.style.display='block';
+    banner.innerHTML=`<div class="card" style="background:linear-gradient(135deg,#FDF4FF,#FFF0F9);border:1px solid #FBCFE8;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:18px;margin-bottom:6px;">🎂 Happy Birthday!</div>
+      <div style="font-size:14px;color:#9D174D;font-weight:600;">${names.join(', ')}</div>
+      <div style="font-size:12px;color:#BE185D;margin-top:4px;">ขอให้มีความสุขมากๆ นะคะ 🎉</div>
+    </div>`;
+  } else { banner.style.display='none'; }
 
   // Recent requests
   const recent = [...requests].sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id)).slice(0,6);
