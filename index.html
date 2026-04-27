@@ -2955,7 +2955,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwvfzp6-O0vkKYxikc9P0CaHaAefkwZKzv0Ik6lFT5mkMLm-7CKdRMJ9niSvuY78lmX/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw6V2T5Bt6zaAiV4esDr2OBiP_W4_7w-76eRyIjGfuj5Lc5bf3eN_1hddn9TYWJp0x0/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3138,7 +3138,8 @@ async function saveToGSheet(action, data){
     setTimeout(fetchRequestsFromSheet, 2500);
   } catch(e) {
     console.warn('GSheet save error:', e);
-    showToast('⚠️ ส่งข้อมูลไม่ได้', 'error');
+    alert('ERROR: ' + e.message + ' | ' + e.toString());
+    showToast('⚠️ ส่งข้อมูลไม่ได้: ' + e.message, 'error');
   }
 }
 
