@@ -2993,7 +2993,7 @@ function jsonResponse(obj) {
 }`;
 
 // ══ CONFIG — URL ตรงๆ เหมือนระบบสอนน้องใหม่ ══
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxtIa7Ohcrs9aMdmiFdyE7WhdSkIOafIRqzWQagOS-iczM0GSxZxa4GwZlmN5lrI22C/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwBtT9HkCCzZ3BH9GnCRhFcgMJf616j-usJ4oDaiVnY7i4zzwJWmRswieoWwuZPGHEP/exec';
 const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
@@ -3045,7 +3045,9 @@ async function fetchRequestsFromSheet(){
         s.name.includes(sheetName)
       );
       const submittedRaw = row.submittedAt || row.createdAt || '';
-      if(!grouped[id]) grouped[id]={
+      // ใช้ id+ชื่อ+ประเภท เป็น key เพื่อป้องกัน ID ซ้ำกันข้ามคน
+      const groupKey = id + '|' + sheetName + '|' + (row.typeLabel||'');
+      if(!grouped[groupKey]) grouped[groupKey]={
         id,
         staffId:        matchedStaff ? matchedStaff.id : null,  // ← resolve staffId
         staffName:      matchedStaff ? matchedStaff.name : sheetName,
@@ -3059,7 +3061,7 @@ async function fetchRequestsFromSheet(){
         submittedAtStr: submittedRaw,
         fromSheet:      true
       };
-      if(row.date){const nd=normalizeDate(row.date);if(nd)grouped[id].dates.push(nd);}
+      if(row.date){const nd=normalizeDate(row.date);if(nd)grouped[groupKey].dates.push(nd);}
     });
     sheetRequests=Object.values(grouped);
     const localIds=new Set(requests.filter(r=>!r.fromSheet).map(r=>String(r.id)));
