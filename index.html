@@ -1766,6 +1766,9 @@ function doLogin() {
   document.getElementById('appWrapper').style.display = 'flex';
   updateSidebarUser();
   updateNavForRole();
+  // ล้าง local requests เก่าทุกครั้งที่ login ใหม่ แล้ว sync จาก Sheet
+  requests = [];
+  sheetRequests = [];
   if (GAS_URL) startAutoSync();
   renderDashboard();
 }
