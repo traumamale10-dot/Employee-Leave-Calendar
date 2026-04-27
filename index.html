@@ -2218,6 +2218,8 @@ function renderCalendar() {
   const today = new Date();
   const eventMap = {};
   requests.forEach(r => {
+    // ไม่แสดง rejected และ cancelled ในปฏิทิน
+    if (r.status === 'rejected' || r.status === 'cancelled') return;
     r.dates && r.dates.forEach(d => {
       if (!d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)) return;
       if (!eventMap[d]) eventMap[d] = [];
