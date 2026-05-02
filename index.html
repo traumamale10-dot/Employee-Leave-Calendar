@@ -2888,6 +2888,12 @@ function renderMyRequests() {
   const summaryBar = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
     ${Object.entries(typeCount).map(([t,c])=>`<span class="badge ${TYPE_BADGE[t]}">${TYPE_LABELS[t]} ${c} รายการ</span>`).join('')}
     <span style="font-size:13px;color:var(--text-light);align-self:center;">รวม ${myReqs.length} รายการ</span>
+    ${currentUser.isAdmin ? (() => {
+      const pendingCount = myReqs.filter(r=>r.status==='pending').length;
+      return pendingCount > 0
+        ? `<span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:#FEF3C7;color:#92400E;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid #FDE68A;">⏳ รออนุมัติ ${pendingCount} รายการ</span>`
+        : `<span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);color:#065F46;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;">✅ อนุมัติครบแล้ว</span>`;
+    })() : ''}
   </div>`;
 
   list.innerHTML = summaryBar + myReqs.map(r => {
@@ -2915,7 +2921,9 @@ function renderMyRequests() {
     // icon ตาม type
     const typeIcon = {leave:'🏖️', vacation:'🌴', training:'🎓', birthday:'🎂'}[r.type]||'📋';
 
-    return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};padding:16px 18px;">
+    const isPending = r.status === 'pending';
+    const cardBg = (currentUser.isAdmin && isPending) ? 'background:rgba(251,191,36,0.05);' : '';
+    return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};padding:16px 18px;${cardBg}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div style="display:flex;gap:10px;align-items:center;flex:1;min-width:0;">
           <div style="font-size:22px;flex-shrink:0;">${typeIcon}</div>
@@ -2933,7 +2941,11 @@ function renderMyRequests() {
             ${r.rescheduledFrom?`<div style="font-size:11px;color:var(--text-light);margin-top:2px;">📌 เลื่อนจาก ${r.rescheduledFrom.map(d=>formatDate(d)).join(', ')}</div>`:''}
           </div>
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;">
+        <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          ${currentUser.isAdmin && r.status==='pending' ? `
+            <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved');renderMyRequests();" style="font-size:13px;padding:7px 14px;display:flex;align-items:center;gap:4px;">✓ อนุมัติ</button>
+            <button class="action-btn btn-reject"  onclick="updateStatus('${r.id}','rejected');renderMyRequests();" style="font-size:13px;padding:7px 14px;display:flex;align-items:center;gap:4px;">✕ ปฏิเสธ</button>
+          ` : ''}
           ${canReschedule?`<button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')">📅 เลื่อน</button>`:''}
           ${canCancel?`<button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')">❌ ยกเลิก</button>`:''}
         </div>
