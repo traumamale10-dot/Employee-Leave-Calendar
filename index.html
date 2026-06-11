@@ -2068,6 +2068,7 @@ function updateNavForRole() {
 
 // ===== DATA =====
 const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const MONTHS_TH_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const DAYS_TH = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
 
 const STAFF = [
@@ -2121,7 +2122,7 @@ function getStaff(id) { return STAFF.find(s=>s.id===id); }
 
 function formatDate(d) {
   const [y,m,day] = d.split('-');
-  return `${parseInt(day)} ${MONTHS_TH[parseInt(m)-1].substring(0,3)} ${parseInt(y)+543}`;
+  return `${parseInt(day)} ${MONTHS_TH_SHORT[parseInt(m)-1]} ${parseInt(y)+543}`;
 }
 
 // แสดงวันที่แบบย่อ: ต่อเนื่อง → "1-30 มิถ 2569", ต่างเดือน → "1 มิถ - 15 ก.ค 2569", หลายช่วง → "1-5, 10-12 มิถ 2569"
@@ -2146,10 +2147,10 @@ function smartDateRange(dates) {
     if (s === e) return formatDate(s);
     const [sy,sm,sd] = s.split('-').map(Number);
     const [ey,em,ed] = e.split('-').map(Number);
-    const sLabel = `${sd} ${MONTHS_TH[sm-1].substring(0,3)}`;
-    const eLabel = `${ed} ${MONTHS_TH[em-1].substring(0,3)}`;
+    const sLabel = `${sd} ${MONTHS_TH_SHORT[sm-1]}`;
+    const eLabel = `${ed} ${MONTHS_TH_SHORT[em-1]}`;
     const yearLabel = ` ${ey+543}`;
-    if (sy===ey && sm===em) return `${sd}-${ed} ${MONTHS_TH[sm-1].substring(0,3)}${yearLabel}`;
+    if (sy===ey && sm===em) return `${sd}-${ed} ${MONTHS_TH_SHORT[sm-1]}${yearLabel}`;
     return `${sLabel}-${eLabel}${yearLabel}`;
   };
   const rangeStrs = ranges.map(fmtRange);
@@ -2297,7 +2298,7 @@ function renderDashboard() {
   const months = [];
   for (let i=5;i>=0;i--) {
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push({ y:d.getFullYear(), m:d.getMonth(), label:MONTHS_TH[d.getMonth()].substring(0,3) });
+    months.push({ y:d.getFullYear(), m:d.getMonth(), label:MONTHS_TH_SHORT[d.getMonth()] });
   }
   // กรองเฉพาะเดือนที่มีข้อมูล
   const monthsWithData = months.filter(({y,m}) => {
