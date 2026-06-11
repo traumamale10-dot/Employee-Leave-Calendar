@@ -579,6 +579,8 @@
   .evt-leave { background: var(--blue-pale); color: #1E40AF; }
   .evt-vacation { background: var(--purple-pale); color: #6D28D9; }
   .evt-training { background: #FDF4FF; color: #7E22CE; }
+  .evt-training_internal { background: #FDF4FF; color: #7E22CE; }
+  .evt-training_external { background: #FFF7ED; color: #C2410C; }
   .evt-birthday { background: #FFF1F2; color: #9F1239; }
 
   .cal-count-bar {
@@ -1144,6 +1146,26 @@
 
   .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+  /* Stats mobile card layout */
+  .stats-card-mobile { display: none; }
+  @media (max-width: 768px) {
+    .stats-table-desktop { display: none; }
+    .stats-card-mobile { display: block; }
+  }
+  .stats-person-card {
+    border-bottom: 1px solid var(--border);
+    padding: 12px 4px;
+  }
+  .stats-person-card:last-child { border-bottom: none; }
+  .stats-person-name { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+  .stats-person-role { font-size: 12px; color: var(--text-light); margin-bottom: 8px; }
+  .stats-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .stats-chip {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg); border-radius: 50px;
+    padding: 4px 10px; font-size: 12px; font-weight: 600;
+  }
+
   @media (max-width: 768px) {
     body { overflow: auto; height: auto; }
     .app-wrapper { height: auto; min-height: 100vh; flex-direction: column; }
@@ -1523,7 +1545,8 @@
             <option value="">ทุกประเภท</option>
             <option value="leave">ลาหยุด</option>
             <option value="vacation">พักร้อน</option>
-            <option value="training">อบรม</option>
+            <option value="training_internal">อบรมภายใน</option>
+            <option value="training_external">อบรมภายนอก</option>
             <option value="birthday">วันเกิด</option>
           </select>
           <select id="reqMonthFilter" onchange="renderMyRequests()"
@@ -1543,7 +1566,8 @@
           <option value="">ทุกประเภท</option>
           <option value="leave">ลาหยุด</option>
           <option value="vacation">พักร้อน</option>
-          <option value="training">อบรม</option>
+          <option value="training_internal">อบรมภายใน</option>
+          <option value="training_external">อบรมภายนอก</option>
           <option value="birthday">วันเกิด</option>
         </select>
         <select class="filter-select" id="adminFilterStatus" onchange="renderAdminTable()">
@@ -1599,32 +1623,78 @@
     <!-- STATS PAGE -->
     <div class="page" id="page-stats">
       <div class="section-title">📈 สถิติรายบุคคล</div>
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-        <label style="font-size:13px;color:var(--text-mid);font-weight:600;">เลือกเดือน:</label>
-        <select id="statsMonthFilter" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
-          <option value="">ทั้งหมด</option>
-        </select>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
         <select id="statsStatusFilter" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
           <option value="" selected>ทุกสถานะ</option>
           <option value="approved">อนุมัติแล้ว</option>
           <option value="pending">รออนุมัติ</option>
         </select>
+        <select id="statsTypeFilter" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="">ทุกประเภท</option>
+          <option value="leave">ลาหยุด</option>
+          <option value="vacation">พักร้อน</option>
+          <option value="training_internal">อบรมภายใน</option>
+          <option value="training_external">อบรมภายนอก</option>
+          <option value="birthday">วันเกิด</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--text-mid);font-weight:600;">ช่วงเดือน:</label>
+        <select id="statsMonthFrom" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="">ตั้งแต่ต้น</option>
+        </select>
+        <span style="font-size:13px;color:var(--text-light);">ถึง</span>
+        <select id="statsMonthTo" onchange="renderStats()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="">จนถึงปัจจุบัน</option>
+        </select>
+        <div style="position:relative;flex:1;min-width:160px;max-width:280px;">
+          <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;">🔍</span>
+          <input id="statsSearchInput" type="text" placeholder="ค้นหาชื่อ..." oninput="renderStats()"
+            style="width:100%;padding:8px 14px 8px 34px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;box-sizing:border-box;">
+        </div>
+        <button onclick="clearStatsFilters()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);background:white;font-family:Sarabun,sans-serif;font-size:13px;cursor:pointer;color:var(--text-mid);">✕ ล้าง</button>
       </div>
       <div class="card">
+        <div class="stats-table-desktop">
         <table class="data-table">
           <thead>
             <tr>
               <th>ชื่อ-สกุล</th>
               <th>ตำแหน่ง</th>
-              <th>ลาหยุด</th>
-              <th>พักร้อน</th>
-              <th>อบรม</th>
-              <th>วันเกิด</th>
+              <th id="statsColLeave">ลาหยุด</th>
+              <th id="statsColVacation">พักร้อน</th>
+              <th id="statsColInternal">อบรมภายใน</th>
+              <th id="statsColExternal">อบรมภายนอก</th>
+              <th id="statsColBirthday">วันเกิด</th>
               <th>รวม</th>
             </tr>
           </thead>
           <tbody id="statsTable"></tbody>
         </table>
+        </div>
+        <div class="stats-card-mobile" id="statsCardsMobile"></div>
+      </div>
+
+      <!-- หัวข้อการอบรม -->
+      <div id="statsTrainingSection" style="margin-top:20px;display:none;">
+        <div class="section-title" style="margin-bottom:12px;">📋 หัวข้อการอบรม</div>
+        <div class="card">
+          <div class="stats-table-desktop">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>หัวข้อ/สถานที่อบรม</th>
+                  <th>ประเภท</th>
+                  <th style="text-align:center;">จำนวนคน</th>
+                  <th style="text-align:center;">จำนวนวัน</th>
+                  <th>รายชื่อผู้เข้าอบรม</th>
+                </tr>
+              </thead>
+              <tbody id="statsTrainingTable"></tbody>
+            </table>
+          </div>
+          <div class="stats-card-mobile" id="statsTrainingMobile"></div>
+        </div>
       </div>
     </div>
 
@@ -1738,7 +1808,8 @@
       <select class="form-select" id="req-type">
         <option value="leave">ลาหยุด</option>
         <option value="vacation">พักร้อน</option>
-        <option value="training">อบรม</option>
+        <option value="training_internal">อบรมภายใน</option>
+        <option value="training_external">อบรมภายนอก</option>
         <option value="birthday">วันเกิด</option>
       </select>
     </div>
@@ -1827,7 +1898,8 @@
         <select class="form-input" id="editType" onchange="toggleEditTrainingPlace()">
           <option value="leave">ลาหยุด</option>
           <option value="vacation">พักร้อน</option>
-          <option value="training">อบรม</option>
+          <option value="training_internal">อบรมภายใน</option>
+          <option value="training_external">อบรมภายนอก</option>
           <option value="birthday">วันเกิด</option>
         </select>
       </div>
@@ -2090,8 +2162,8 @@ function todayStr() {
   return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
 }
 
-const TYPE_LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
-const TYPE_BADGE = { leave:'badge-leave', vacation:'badge-vacation', training:'badge-training', birthday:'badge-birthday' };
+const TYPE_LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training_internal:'อบรมภายใน', training_external:'อบรมภายนอก', birthday:'วันเกิด' };
+const TYPE_BADGE  = { leave:'badge-leave', vacation:'badge-vacation', training_internal:'badge-training', training_external:'badge-training', birthday:'badge-birthday' };
 const STATUS_LABEL = { pending:'รออนุมัติ', approved:'อนุมัติแล้ว', rejected:'ปฏิเสธ' };
 const STATUS_BADGE = { pending:'badge-pending', approved:'badge-approved', rejected:'badge-rejected' };
 const ROLE_CLASS = { nurse:'nurse', assistant:'assistant', helper:'helper', 'nursing-aide':'helper' };
@@ -2159,7 +2231,7 @@ function renderDashboard() {
   document.getElementById('stat-total').textContent = active.length;
   document.getElementById('stat-pending').textContent = active.filter(r=>r.status==='pending').length;
   document.getElementById('stat-approved').textContent = active.filter(r=>r.status==='approved').length;
-  document.getElementById('stat-training').textContent = countDays('training');
+  document.getElementById('stat-training').textContent = countDays('training_internal') + countDays('training_external');
   document.getElementById('stat-leave').textContent = countDays('leave');
   document.getElementById('stat-vacation').textContent = countDays('vacation');
   document.getElementById('stat-birthday').textContent = countDays('birthday');
@@ -2260,9 +2332,9 @@ function renderDashboard() {
 
   // Donut
   const approvedReqs = requests.filter(r=>r.status==='approved');
-  const COLORS = { leave:'#3B82F6', vacation:'#A855F7', training:'#EC4899', birthday:'#EF4444' };
-  const LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training:'อบรม', birthday:'วันเกิด' };
-  const typeOrder = ['leave','vacation','training','birthday'];
+  const COLORS = { leave:'#3B82F6', vacation:'#A855F7', training_internal:'#EC4899', training_external:'#F97316', birthday:'#EF4444' };
+  const LABELS = { leave:'ลาหยุด', vacation:'พักร้อน', training_internal:'อบรมภายใน', training_external:'อบรมภายนอก', birthday:'วันเกิด' };
+  const typeOrder = ['leave','vacation','training_internal','training_external','birthday'];
   const typeDays = {};
   approvedReqs.forEach(r => { typeDays[r.type] = (typeDays[r.type]||0) + (r.dates?.length||0); });
   const totalDays = Object.values(typeDays).reduce((a,b)=>a+b,0);
@@ -2688,7 +2760,7 @@ function closeModal() {
 }
 
 document.getElementById('req-type').addEventListener('change', function() {
-  document.getElementById('training-extra').style.display = this.value==='training'?'block':'none';
+  document.getElementById('training-extra').style.display = (this.value==='training_internal'||this.value==='training_external')?'block':'none';
 });
 document.getElementById('req-person').addEventListener('change', checkQuota);
 
@@ -2699,7 +2771,8 @@ async function submitRequest() {
   const trainingPlace = document.getElementById('req-training-place').value;
   if (!personId) { showToast('กรุณาเลือกชื่อผู้ขอ','error'); return; }
   if (selectedDates.length===0) { showToast('กรุณาเลือกวันที่','error'); return; }
-  if (type==='training'&&!trainingPlace) { showToast('กรุณาระบุสถานที่อบรม','error'); return; }
+  const isTraining = type==='training_internal'||type==='training_external';
+  if (isTraining&&!trainingPlace) { showToast('กรุณาระบุสถานที่อบรม','error'); return; }
   const person = getStaff(personId);
   const submitBtn = document.querySelector('#requestModal .btn-teal');
   if (submitBtn) { submitBtn.disabled=true; submitBtn.textContent='⏳ กำลังส่ง...'; }
@@ -2720,7 +2793,7 @@ async function submitRequest() {
       type,
       dates: [...selectedDates],
       note,
-      trainingPlace: type==='training'?trainingPlace:'',
+      trainingPlace: isTraining?trainingPlace:'',
       status: 'pending',
       submittedAt: Date.now()
     };
@@ -2926,7 +2999,7 @@ function populateTrainingMonthFilter() {
   const sel = document.getElementById('trainingMonthFilter');
   if (!sel) return;
   const months = new Set();
-  requests.filter(r=>r.type==='training').forEach(r => {
+  requests.filter(r=>r.type==='training_internal'||r.type==='training_external').forEach(r => {
     (r.dates||[]).forEach(d => { if (d) months.add(d.substring(0,7)); });
   });
   const current = sel.value;
@@ -2943,7 +3016,7 @@ function renderTraining() {
   const monthFilter = document.getElementById('trainingMonthFilter')?.value || '';
   // แสดงทุกสถานะ เรียง pending ก่อน
   const trainings = requests
-    .filter(r=>r.type==='training' && (monthFilter==='' || (r.dates||[]).some(d=>d&&d.startsWith(monthFilter))))
+    .filter(r=>(r.type==='training_internal'||r.type==='training_external') && (monthFilter==='' || (r.dates||[]).some(d=>d&&d.startsWith(monthFilter))))
     .sort((a,b)=>{
       if(a.status==='pending'&&b.status!=='pending') return -1;
       if(a.status!=='pending'&&b.status==='pending') return 1;
@@ -3102,7 +3175,7 @@ function renderMyRequests() {
                       : 'var(--border)';
 
     // icon ตาม type
-    const typeIcon = {leave:'🏖️', vacation:'🌴', training:'🎓', birthday:'🎂'}[r.type]||'📋';
+    const typeIcon = {leave:'🏖️', vacation:'🌴', training_internal:'🏫', training_external:'🎓', birthday:'🎂'}[r.type]||'📋';
 
     const isPending = r.status === 'pending';
     const cardBg = (currentUser.isAdmin && isPending) ? 'background:rgba(251,191,36,0.05);' : '';
@@ -3140,61 +3213,183 @@ function renderMyRequests() {
 
 // ===== STATS =====
 function populateStatsMonthFilter() {
-  const sel = document.getElementById('statsMonthFilter');
-  if (!sel) return;
   const months = new Set();
-  requests.forEach(r => {
-    (r.dates||[]).forEach(d => {
-      if (d) months.add(d.substring(0,7)); // yyyy-MM
-    });
+  requests.forEach(r => (r.dates||[]).forEach(d => { if(d) months.add(d.substring(0,7)); }));
+  const sorted = [...months].sort();
+  const mkOptions = (selId, defaultLabel) => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = `<option value="">${defaultLabel}</option>` +
+      sorted.map(m => {
+        const [y,mo] = m.split('-');
+        const label = MONTHS_TH[parseInt(mo)-1] + ' ' + (parseInt(y)+543);
+        return `<option value="${m}" ${m===cur?'selected':''}>${label}</option>`;
+      }).join('');
+  };
+  mkOptions('statsMonthFrom', 'ตั้งแต่ต้น');
+  mkOptions('statsMonthTo',   'จนถึงปัจจุบัน');
+}
+
+function clearStatsFilters() {
+  ['statsMonthFrom','statsMonthTo','statsSearchInput','statsStatusFilter','statsTypeFilter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
   });
-  const current = sel.value;
-  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
-    [...months].sort().reverse().map(m => {
-      const [y,mo] = m.split('-');
-      const label = MONTHS_TH[parseInt(mo)-1] + ' ' + (parseInt(y)+543);
-      return `<option value="${m}" ${m===current?'selected':''}>${label}</option>`;
-    }).join('');
+  renderStats();
 }
 
 function renderStats() {
   populateStatsMonthFilter();
-  const monthFilter = document.getElementById('statsMonthFilter')?.value || '';
+  const monthFrom    = document.getElementById('statsMonthFrom')?.value || '';
+  const monthTo      = document.getElementById('statsMonthTo')?.value || '';
   const statusFilter = document.getElementById('statsStatusFilter')?.value ?? '';
-  const tbody = document.getElementById('statsTable');
-  tbody.innerHTML = STAFF.map(s => {
+  const typeFilter   = document.getElementById('statsTypeFilter')?.value || '';
+  const searchVal    = (document.getElementById('statsSearchInput')?.value || '').trim().toLowerCase();
+
+  // แสดง/ซ่อน column ตาม typeFilter
+  const showCol = (id, show) => { const el = document.getElementById(id); if(el) el.style.display = show?'':'none'; };
+  const allTypes = !typeFilter;
+  showCol('statsColLeave',    allTypes || typeFilter==='leave');
+  showCol('statsColVacation', allTypes || typeFilter==='vacation');
+  showCol('statsColInternal', allTypes || typeFilter==='training_internal');
+  showCol('statsColExternal', allTypes || typeFilter==='training_external');
+  showCol('statsColBirthday', allTypes || typeFilter==='birthday');
+
+  // helper กรองวันในช่วงเดือน
+  const inRange = (d) => {
+    if (!d) return false;
+    const m = d.substring(0,7);
+    if (monthFrom && m < monthFrom) return false;
+    if (monthTo   && m > monthTo)   return false;
+    return true;
+  };
+
+  const rows = STAFF.filter(s =>
+    !searchVal || s.name.toLowerCase().includes(searchVal)
+  ).map(s => {
     let reqs = requests.filter(r=>(
-      (statusFilter===''||r.status===statusFilter) && (
+      (statusFilter===''||r.status===statusFilter) &&
+      (typeFilter===''||r.type===typeFilter) && (
         r.staffId===s.id ||
         (r.staffName && (r.staffName===s.name || r.staffName.includes(s.name) || s.name.includes(r.staffName)))
       )
     ));
-    // กรองเดือน
-    if (monthFilter) {
+    // กรองช่วงเดือน
+    if (monthFrom || monthTo) {
       reqs = reqs.map(r => ({
-        ...r,
-        dates: (r.dates||[]).filter(d => d && d.startsWith(monthFilter))
+        ...r, dates: (r.dates||[]).filter(inRange)
       })).filter(r => r.dates.length > 0);
     }
-    const leave = reqs.filter(r=>r.type==='leave').reduce((a,r)=>a+r.dates.length,0);
+    const leave    = reqs.filter(r=>r.type==='leave').reduce((a,r)=>a+r.dates.length,0);
     const vacation = reqs.filter(r=>r.type==='vacation').reduce((a,r)=>a+r.dates.length,0);
-    const training = reqs.filter(r=>r.type==='training').reduce((a,r)=>a+r.dates.length,0);
+    const t_int    = reqs.filter(r=>r.type==='training_internal').reduce((a,r)=>a+r.dates.length,0);
+    const t_ext    = reqs.filter(r=>r.type==='training_external').reduce((a,r)=>a+r.dates.length,0);
     const birthday = reqs.filter(r=>r.type==='birthday').reduce((a,r)=>a+r.dates.length,0);
-    const total = leave+vacation+training+birthday;
-    if (total === 0) return '';
-    return `<tr>
-      <td><div class="person-cell">
+    const total    = leave+vacation+t_int+t_ext+birthday;
+    return total > 0 ? { s, leave, vacation, t_int, t_ext, birthday, total } : null;
+  }).filter(Boolean);
 
-        <span style="font-size:13px;">${s.name}</span>
-      </div></td>
-      <td style="font-size:12px;color:var(--text-mid);">${s.roleLabel}</td>
-      <td style="text-align:center;"><span style="font-weight:700;color:var(--blue);">${leave}</span></td>
-      <td style="text-align:center;"><span style="font-weight:700;color:var(--purple);">${vacation}</span></td>
-      <td style="text-align:center;"><span style="font-weight:700;color:#EC4899;">${training}</span></td>
-      <td style="text-align:center;"><span style="font-weight:700;color:var(--primary);">${birthday}</span></td>
-      <td style="text-align:center;"><span style="font-family:'Prompt',sans-serif;font-weight:700;font-size:15px;">${total}</span></td>
-    </tr>`;
+  // Desktop table
+  const td = (val, color, colId) => {
+    const colEl = document.getElementById(colId);
+    const hidden = colEl && colEl.style.display === 'none';
+    return hidden ? '' : `<td style="text-align:center;"><span style="font-weight:700;color:${color};">${val}</span></td>`;
+  };
+  document.getElementById('statsTable').innerHTML = rows.map(({s,leave,vacation,t_int,t_ext,birthday,total}) => `<tr>
+    <td><div class="person-cell"><span style="font-size:13px;">${s.name}</span></div></td>
+    <td style="font-size:12px;color:var(--text-mid);">${s.roleLabel}</td>
+    ${td(leave,   'var(--blue)',    'statsColLeave')}
+    ${td(vacation,'var(--purple)',  'statsColVacation')}
+    ${td(t_int,   '#7E22CE',        'statsColInternal')}
+    ${td(t_ext,   '#C2410C',        'statsColExternal')}
+    ${td(birthday,'var(--primary)', 'statsColBirthday')}
+    <td style="text-align:center;"><span style="font-family:'Prompt',sans-serif;font-weight:700;font-size:15px;">${total}</span></td>
+  </tr>`).join('');
+
+  // Mobile cards
+  const typeChipDefs = [
+    { key:'leave',             val: r=>r.leave,    color:'var(--blue)',    label:'ลาหยุด' },
+    { key:'vacation',          val: r=>r.vacation, color:'var(--purple)',  label:'พักร้อน' },
+    { key:'training_internal', val: r=>r.t_int,    color:'#7E22CE',        label:'อบรมภายใน' },
+    { key:'training_external', val: r=>r.t_ext,    color:'#C2410C',        label:'อบรมภายนอก' },
+    { key:'birthday',          val: r=>r.birthday, color:'var(--primary)', label:'วันเกิด' },
+  ].filter(d => allTypes || d.key === typeFilter);
+
+  document.getElementById('statsCardsMobile').innerHTML = rows.map(row => {
+    const chips = typeChipDefs
+      .filter(d => d.val(row) > 0)
+      .map(d => `<div class="stats-chip"><span style="color:${d.color};font-size:13px;">●</span><span style="color:var(--text-mid);">${d.label}</span><span style="color:${d.color};">${d.val(row)} วัน</span></div>`)
+      .join('');
+    return `<div class="stats-person-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="stats-person-name">${row.s.name}</div>
+          <div class="stats-person-role">${row.s.roleLabel}</div>
+        </div>
+        <div style="font-family:'Prompt',sans-serif;font-size:20px;font-weight:700;color:var(--text-dark);">${row.total} <span style="font-size:11px;font-weight:400;color:var(--text-light);">วัน</span></div>
+      </div>
+      <div class="stats-chips">${chips}</div>
+    </div>`;
   }).join('');
+
+  // ===== หัวข้อการอบรม =====
+  const showTraining = allTypes || typeFilter==='training_internal' || typeFilter==='training_external';
+  const trainingSection = document.getElementById('statsTrainingSection');
+
+  let trainingReqs = requests.filter(r =>
+    (r.type==='training_internal' || r.type==='training_external') &&
+    (typeFilter==='' || r.type===typeFilter) &&
+    (statusFilter==='' || r.status===statusFilter)
+  );
+  if (monthFrom || monthTo) {
+    trainingReqs = trainingReqs.map(r => ({
+      ...r, dates: (r.dates||[]).filter(inRange)
+    })).filter(r => r.dates.length > 0);
+  }
+
+  // group ตาม trainingPlace
+  const topicMap = {};
+  trainingReqs.forEach(r => {
+    const topic = r.trainingPlace || '(ไม่ระบุ)';
+    if (!topicMap[topic]) topicMap[topic] = { topic, type: r.type, people: [], totalDays: 0 };
+    const name = r.staffName || (STAFF.find(s=>s.id===r.staffId)?.name) || '?';
+    if (!topicMap[topic].people.includes(name)) topicMap[topic].people.push(name);
+    topicMap[topic].totalDays += r.dates.length;
+  });
+  const topics = Object.values(topicMap).sort((a,b) => b.people.length - a.people.length);
+
+  // แสดง section เฉพาะเมื่อ filter เป็นอบรม และมีข้อมูล
+  trainingSection.style.display = (showTraining && topics.length > 0) ? 'block' : 'none';
+  if (!showTraining || topics.length === 0) return;
+
+  // Desktop table
+  document.getElementById('statsTrainingTable').innerHTML = topics.length === 0
+    ? `<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:20px;">ไม่มีข้อมูลการอบรม</td></tr>`
+    : topics.map(t => `<tr>
+        <td style="font-weight:600;">${t.topic}</td>
+        <td><span class="badge badge-training">${TYPE_LABELS[t.type]||t.type}</span></td>
+        <td style="text-align:center;"><span style="font-weight:700;color:#7E22CE;">${t.people.length} คน</span></td>
+        <td style="text-align:center;"><span style="font-weight:700;color:#C2410C;">${t.totalDays} วัน</span></td>
+        <td style="font-size:12px;color:var(--text-mid);">${t.people.join(', ')}</td>
+      </tr>`).join('');
+
+  // Mobile cards
+  document.getElementById('statsTrainingMobile').innerHTML = topics.length === 0
+    ? `<div style="text-align:center;color:var(--text-light);padding:20px;">ไม่มีข้อมูลการอบรม</div>`
+    : topics.map(t => `<div class="stats-person-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="flex:1;">
+            <div class="stats-person-name">${t.topic}</div>
+            <div style="margin-top:4px;"><span class="badge badge-training">${TYPE_LABELS[t.type]||t.type}</span></div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-family:'Prompt',sans-serif;font-size:18px;font-weight:700;color:#7E22CE;">${t.people.length} <span style="font-size:11px;font-weight:400;color:var(--text-light);">คน</span></div>
+            <div style="font-size:12px;color:#C2410C;font-weight:600;">${t.totalDays} วัน</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-mid);">👥 ${t.people.join(', ')}</div>
+      </div>`).join('');
 }
 
 // ===== CONCURRENCY LOCK =====
@@ -3320,7 +3515,7 @@ let editCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
 function toggleEditTrainingPlace() {
   const type = document.getElementById('editType').value;
-  document.getElementById('editTrainingPlaceGroup').style.display = type==='training'?'block':'none';
+  document.getElementById('editTrainingPlaceGroup').style.display = (type==='training_internal'||type==='training_external')?'block':'none';
 }
 
 function changeEditMonth(dir) {
@@ -3363,7 +3558,7 @@ function confirmEdit() {
   const req = requests.find(r=>String(r.id)===String(cancelTargetId));
   if (!req) return;
   req.type = document.getElementById('editType').value;
-  req.trainingPlace = req.type==='training' ? document.getElementById('editTrainingPlace').value : '';
+  req.trainingPlace = (req.type==='training_internal'||req.type==='training_external') ? document.getElementById('editTrainingPlace').value : '';
   req.note = document.getElementById('editNote').value;
   if (editDates.length > 0) req.dates = [...editDates];
   req.submittedAt = Date.now(); // อัพเดทเวลาบันทึกใหม่
@@ -3637,7 +3832,7 @@ const gsConfig = { url: GAS_URL };
 let sheetRequests = [];
 let syncInterval = null;
 
-function typeLabelToKey(l){return{'ลาหยุด':'leave','พักร้อน':'vacation','อบรม':'training','วันเกิด':'birthday','leave':'leave','vacation':'vacation','training':'training','birthday':'birthday'}[l]||'leave';}
+function typeLabelToKey(l){return{'ลาหยุด':'leave','พักร้อน':'vacation','อบรม':'training_internal','อบรมภายใน':'training_internal','อบรมภายนอก':'training_external','วันเกิด':'birthday','leave':'leave','vacation':'vacation','training':'training_internal','training_internal':'training_internal','training_external':'training_external','birthday':'birthday'}[l]||'leave';}
 function statusLabelToKey(l){return{'อนุมัติแล้ว':'approved','ปฏิเสธ':'rejected','รออนุมัติ':'pending','ยกเลิกแล้ว':'cancelled','เลื่อนวันแล้ว':'pending','approved':'approved','rejected':'rejected','pending':'pending','cancelled':'cancelled'}[l]||'pending';}
 
 function normalizeDate(raw){
@@ -3790,7 +3985,7 @@ async function testGSheet(){
 
 async function saveToGSheet(action, data){
   if(!GAS_URL) return;
-  const TYPE_LABELS_MAP={leave:'ลาหยุด',vacation:'พักร้อน',training:'อบรม',birthday:'วันเกิด'};
+  const TYPE_LABELS_MAP={leave:'ลาหยุด',vacation:'พักร้อน',training_internal:'อบรมภายใน',training_external:'อบรมภายนอก',birthday:'วันเกิด'};
   const STATUS_LABELS_MAP={approved:'อนุมัติแล้ว',rejected:'ปฏิเสธ',cancelled:'ยกเลิกแล้ว',rescheduled:'เลื่อนวันแล้ว'};
   try {
     const fmtSubmitted = (ts) => {
