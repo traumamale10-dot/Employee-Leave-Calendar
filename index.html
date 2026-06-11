@@ -2509,6 +2509,7 @@ function renderCalendar() {
         <div style="font-size:12px;color:var(--text-light);">${disp.roleLabel}</div>
         ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
         ${e.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
+        ${e.note?`<div style="font-size:12px;color:var(--text-mid);margin-top:3px;background:var(--bg);border-radius:6px;padding:4px 8px;">💬 ${e.note}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
         <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
