@@ -2052,6 +2052,39 @@ function formatDate(d) {
   return `${parseInt(day)} ${MONTHS_TH[parseInt(m)-1].substring(0,3)} ${parseInt(y)+543}`;
 }
 
+// แสดงวันที่แบบย่อ: ต่อเนื่อง → "1-30 มิถ 2569", ต่างเดือน → "1 มิถ - 15 ก.ค 2569", หลายช่วง → "1-5, 10-12 มิถ 2569"
+function smartDateRange(dates) {
+  if (!dates || dates.length === 0) return '-';
+  if (dates.length === 1) return formatDate(dates[0]);
+  const sorted = [...dates].sort();
+  // จัดกลุ่มวันที่ต่อเนื่องกัน
+  const ranges = [];
+  let start = sorted[0], prev = sorted[0];
+  for (let i = 1; i < sorted.length; i++) {
+    const cur = sorted[i];
+    const prevDate = new Date(prev);
+    const curDate = new Date(cur);
+    const diff = (curDate - prevDate) / 86400000;
+    if (diff === 1) { prev = cur; }
+    else { ranges.push([start, prev]); start = cur; prev = cur; }
+  }
+  ranges.push([start, prev]);
+  // format แต่ละ range
+  const fmtRange = ([s, e]) => {
+    if (s === e) return formatDate(s);
+    const [sy,sm,sd] = s.split('-').map(Number);
+    const [ey,em,ed] = e.split('-').map(Number);
+    const sLabel = `${sd} ${MONTHS_TH[sm-1].substring(0,3)}`;
+    const eLabel = `${ed} ${MONTHS_TH[em-1].substring(0,3)}`;
+    const yearLabel = ` ${ey+543}`;
+    if (sy===ey && sm===em) return `${sd}-${ed} ${MONTHS_TH[sm-1].substring(0,3)}${yearLabel}`;
+    return `${sLabel}-${eLabel}${yearLabel}`;
+  };
+  const rangeStrs = ranges.map(fmtRange);
+  const totalDays = dates.length;
+  return rangeStrs.join(', ') + ` (${totalDays} วัน)`;
+}
+
 function todayStr() {
   const t = new Date();
   return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
@@ -2357,11 +2390,16 @@ function renderCalendar() {
   }
   document.getElementById('calGrid').innerHTML = html;
 
-  // กิจกรรมในเดือน — เรียง pending ก่อน แล้วเรียง submittedAt
+  // กิจกรรมในเดือน — group ตาม request (ไม่ expand ทีละวัน)
+  const seenIds = new Set();
   const allEvts = [];
-  Object.entries(eventMap).forEach(([date,evts]) => evts.forEach(e=>allEvts.push({date,...e})));
+  Object.values(eventMap).forEach(evts => evts.forEach(e => {
+    if (!seenIds.has(e.id)) { seenIds.add(e.id); allEvts.push(e); }
+  }));
   allEvts.sort((a,b) => {
-    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    const aMin = (a.dates||[]).filter(d=>d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)).sort()[0] || '';
+    const bMin = (b.dates||[]).filter(d=>d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)).sort()[0] || '';
+    if (aMin !== bMin) return aMin.localeCompare(bMin);
     if (a.status==='pending'&&b.status!=='pending') return -1;
     if (a.status!=='pending'&&b.status==='pending') return 1;
     return (a.submittedAt||0)-(b.submittedAt||0);
@@ -2388,16 +2426,22 @@ function renderCalendar() {
     const submittedStr = e.submittedAt
       ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
       : e.submittedAtStr || '';
+    // แสดงเฉพาะวันในเดือนนี้
+    const monthDates = (e.dates||[]).filter(d=>d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`));
+    const dateLabel = smartDateRange(monthDates.length ? monthDates : (e.dates||[]));
     return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
       <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${startIdx+i+1}</div>
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:600;">${disp.name}</div>
-        <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} · ${disp.roleLabel}</div>
+        <div style="font-size:13px;color:var(--text-mid);margin-top:2px;">📅 ${dateLabel}</div>
+        <div style="font-size:12px;color:var(--text-light);">${disp.roleLabel}</div>
         ${submittedStr?`<div style="font-size:11px;color:var(--text-light);">⏱️ ขอเมื่อ ${submittedStr}</div>`:''}
         ${e.trainingPlace?`<div style="font-size:12px;color:var(--purple);margin-top:2px;">📍 ${e.trainingPlace}</div>`:''}
       </div>
-      <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
-      <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+        <span class="badge ${TYPE_BADGE[e.type]}">${TYPE_LABELS[e.type]}</span>
+        <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
+      </div>
     </div>`;
   }).join('');
 
@@ -2917,7 +2961,7 @@ function renderTraining() {
     const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
     const displayColor = s ? s.color : '#A855F7';
     const dates = r.dates||[];
-    const dateStr = dates.map(d=>formatDate(d)).join(', ') || '-';
+    const dateStr = smartDateRange(dates);
     const submittedStr = r.submittedAt
       ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
       : r.submittedAtStr || '';
@@ -3041,7 +3085,7 @@ function renderMyRequests() {
     const displayAbbr  = s ? s.abbr  : (r.staffName||'??').substring(0,2);
     const displayColor = s ? s.color : '#1855a0';
     const dates = r.dates || [];
-    const dateStr = dates.length ? dates.map(d=>formatDate(d)).join(', ') : '-';
+    const dateStr = smartDateRange(dates);
 
     const submittedStr = r.submittedAt
       ? new Date(r.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
