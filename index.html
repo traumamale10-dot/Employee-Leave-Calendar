@@ -1526,6 +1526,10 @@
             <option value="training">อบรม</option>
             <option value="birthday">วันเกิด</option>
           </select>
+          <select id="reqMonthFilter" onchange="renderMyRequests()"
+            style="padding:8px 14px;border-radius:50px;border:1.5px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+            <option value="">ทุกเดือน</option>
+          </select>
         </div>
       </div>
       <div id="myRequestsList"></div>
@@ -1555,6 +1559,9 @@
           <option value="helper">พนักงานช่วยเหลือ</option>
           <option value="nursing-aide">พนักงานช่วยการพยาบาล</option>
         </select>
+        <select class="filter-select" id="adminFilterMonth" onchange="renderAdminTable()">
+          <option value="">ทุกเดือน</option>
+        </select>
       </div>
       <div class="card">
         <div class="table-scroll">
@@ -1580,6 +1587,12 @@
     <!-- TRAINING PAGE -->
     <div class="page" id="page-training">
       <div class="section-title">🎓 รายการอบรม</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+        <label style="font-size:13px;color:var(--text-mid);font-weight:600;">เลือกเดือน:</label>
+        <select id="trainingMonthFilter" onchange="renderTraining()" style="padding:8px 14px;border-radius:50px;border:1px solid var(--border);font-family:Sarabun,sans-serif;font-size:13px;background:white;">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
       <div id="trainingList"></div>
     </div>
 
@@ -1808,10 +1821,48 @@
       </div>
     </div>
 
+    <div id="editSection" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">ประเภทการลา</label>
+        <select class="form-input" id="editType" onchange="toggleEditTrainingPlace()">
+          <option value="leave">ลาหยุด</option>
+          <option value="vacation">พักร้อน</option>
+          <option value="training">อบรม</option>
+          <option value="birthday">วันเกิด</option>
+        </select>
+      </div>
+      <div class="form-group" id="editTrainingPlaceGroup" style="display:none;">
+        <label class="form-label">สถานที่/ชื่อการอบรม</label>
+        <input class="form-input" type="text" id="editTrainingPlace" placeholder="ชื่อหลักสูตร และสถานที่อบรม">
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันที่ (เลือกใหม่ได้ หรือคงเดิมถ้าไม่เลือก)</label>
+        <div class="mini-cal">
+          <div class="mini-cal-header">
+            <button class="cal-nav-btn" onclick="changeEditMonth(-1)">‹</button>
+            <span id="editMonthLabel"></span>
+            <button class="cal-nav-btn" onclick="changeEditMonth(1)">›</button>
+          </div>
+          <div class="mini-cal-grid" id="editCalGrid"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันที่เลือก</label>
+        <div class="selected-dates" id="editDatesDisplay">
+          <span style="font-size:12px;color:var(--text-light);">ใช้วันที่เดิม</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมายเหตุ</label>
+        <textarea class="form-textarea" id="editNote" placeholder="หมายเหตุ..." style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button class="btn btn-outline" onclick="closeCancelModal()">ปิด</button>
       <button class="btn btn-primary" id="confirmCancelBtn" onclick="confirmCancel()">ยืนยันยกเลิก</button>
       <button class="btn btn-teal" id="confirmRescheduleBtn" onclick="confirmReschedule()" style="display:none;">ยืนยันเลื่อนวัน</button>
+      <button class="btn btn-teal" id="confirmEditBtn" onclick="confirmEdit()" style="display:none;background:var(--blue);box-shadow:0 4px 12px rgba(59,130,246,0.35);">💾 บันทึก</button>
     </div>
   </div>
 </div>
@@ -2228,6 +2279,7 @@ function renderDashboard() {
 // ===== CALENDAR =====
 function changeMonth(dir) {
   calendarDate.setMonth(calendarDate.getMonth()+dir);
+  window.calEventPage = 0;
   renderCalendar();
 }
 
@@ -2319,14 +2371,25 @@ function renderCalendar() {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div>ไม่มีกิจกรรมในเดือนนี้</div>';
     return;
   }
-  list.innerHTML = allEvts.map((e,idx) => {
+
+  const PAGE_SIZE = 10;
+  if (typeof calEventPage === 'undefined' || window._calEventTotalForPage !== allEvts.length) {
+    window.calEventPage = 0;
+  }
+  window._calEventTotalForPage = allEvts.length;
+  const totalPages = Math.ceil(allEvts.length / PAGE_SIZE);
+  const page = Math.min(window.calEventPage, totalPages - 1);
+  window.calEventPage = page;
+  const pageEvts = allEvts.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const startIdx = page * PAGE_SIZE;
+
+  const cardsHtml = pageEvts.map((e, i) => {
     const disp = getReqDisplay(e);
     const submittedStr = e.submittedAt
       ? new Date(e.submittedAt).toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
       : e.submittedAtStr || '';
     return `<div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:14px 18px;">
-      <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${idx+1}</div>
-
+      <div style="font-size:13px;font-weight:700;color:var(--text-light);min-width:20px;text-align:center;">${startIdx+i+1}</div>
       <div style="flex:1;">
         <div style="font-size:14px;font-weight:600;">${disp.name}</div>
         <div style="font-size:12px;color:var(--text-light);">${formatDate(e.date)} · ${disp.roleLabel}</div>
@@ -2337,6 +2400,21 @@ function renderCalendar() {
       <span class="badge ${STATUS_BADGE[e.status]||'badge-pending'}">${STATUS_LABEL[e.status]||e.status}</span>
     </div>`;
   }).join('');
+
+  const paginationHtml = totalPages > 1 ? `
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;">
+      <button onclick="calEventGoPage(${page-1})" ${page===0?'disabled':''} class="btn btn-outline" style="padding:6px 16px;font-size:13px;border-radius:50px;${page===0?'opacity:0.4;cursor:default;':''}">‹ ก่อนหน้า</button>
+      <span style="font-size:13px;color:var(--text-mid);font-weight:600;">หน้า ${page+1} / ${totalPages} <span style="font-weight:400;color:var(--text-light);">(${allEvts.length} รายการ)</span></span>
+      <button onclick="calEventGoPage(${page+1})" ${page===totalPages-1?'disabled':''} class="btn btn-outline" style="padding:6px 16px;font-size:13px;border-radius:50px;${page===totalPages-1?'opacity:0.4;cursor:default;':''}">ถัดไป ›</button>
+    </div>` : `<div style="text-align:center;font-size:12px;color:var(--text-light);margin-top:8px;">${allEvts.length} รายการ</div>`;
+
+  list.innerHTML = cardsHtml + paginationHtml;
+}
+
+function calEventGoPage(p) {
+  window.calEventPage = p;
+  renderCalendar();
+  document.getElementById('calEventList').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function calDayClick(dateStr) {
@@ -2627,10 +2705,28 @@ async function submitRequest() {
 }
 
 // ===== ADMIN TABLE =====
+function populateAdminMonthFilter() {
+  const sel = document.getElementById('adminFilterMonth');
+  if (!sel) return;
+  const months = new Set();
+  requests.forEach(r => {
+    (r.dates||[]).forEach(d => { if (d) months.add(d.substring(0,7)); });
+  });
+  const current = sel.value;
+  sel.innerHTML = '<option value="">ทุกเดือน</option>' +
+    [...months].sort().reverse().map(m => {
+      const [y,mo] = m.split('-');
+      const label = MONTHS_TH[parseInt(mo)-1] + ' ' + (parseInt(y)+543);
+      return `<option value="${m}" ${m===current?'selected':''}>${label}</option>`;
+    }).join('');
+}
+
 function renderAdminTable() {
+  populateAdminMonthFilter();
   const typeFilter = document.getElementById('adminFilterType').value;
   const statusFilter = document.getElementById('adminFilterStatus').value;
   const roleFilter = document.getElementById('adminFilterRole').value;
+  const monthFilter = document.getElementById('adminFilterMonth')?.value || '';
   let filtered = [...requests];
   if (typeFilter) filtered = filtered.filter(r=>r.type===typeFilter);
   if (statusFilter) filtered = filtered.filter(r=>r.status===statusFilter);
@@ -2638,6 +2734,7 @@ function renderAdminTable() {
     const s = getStaff(r.staffId);
     return s?s.role===roleFilter:(r.fromSheet&&r.roleLabel);
   });
+  if (monthFilter) filtered = filtered.filter(r=>(r.dates||[]).some(d=>d&&d.startsWith(monthFilter)));
   // เรียงลำดับ: pending ขึ้นก่อน (เก่าสุดก่อน = ขอมาก่อนได้รับสิทธิ์ก่อน), ที่เหลือล่าสุดก่อน
   filtered.sort((a,b) => {
     if (a.status==='pending' && b.status!=='pending') return -1;
@@ -2669,11 +2766,13 @@ function renderAdminTable() {
       <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved')">✓ อนุมัติ</button>
       <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected')">✕ ปฏิเสธ</button>
       <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
+      <button class="action-btn" onclick="openCancelModal('${r.id}','edit')" style="background:var(--blue-pale);color:var(--blue);font-size:11px;padding:4px 8px;">✏️</button>
       <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
       ${currentUser&&currentUser.isAdmin?`<button class="action-btn btn-delete" onclick="deleteRequest('${r.id}')" style="font-size:11px;padding:4px 8px;">🗑 ลบ</button>`:''}
     ` : r.status==='approved' ? `
       <span class="badge badge-approved">อนุมัติแล้ว</span>
       <button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')" style="font-size:11px;">📅</button>
+      <button class="action-btn" onclick="openCancelModal('${r.id}','edit')" style="background:var(--blue-pale);color:var(--blue);font-size:11px;padding:4px 8px;">✏️</button>
       <button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')" style="font-size:11px;">🗑</button>
       ${currentUser&&currentUser.isAdmin?`<button class="action-btn btn-delete" onclick="deleteRequest('${r.id}')" style="font-size:11px;padding:4px 8px;">🗑 ลบ</button>`:''}
     ` : `<span class="badge ${STATUS_BADGE[r.status]||'badge-pending'}">${r.status==='cancelled'?'ยกเลิกแล้ว':STATUS_LABEL[r.status]||r.status}</span>
@@ -2779,10 +2878,28 @@ function updateStatus(id, status) {
 }
 
 // ===== TRAINING =====
+function populateTrainingMonthFilter() {
+  const sel = document.getElementById('trainingMonthFilter');
+  if (!sel) return;
+  const months = new Set();
+  requests.filter(r=>r.type==='training').forEach(r => {
+    (r.dates||[]).forEach(d => { if (d) months.add(d.substring(0,7)); });
+  });
+  const current = sel.value;
+  sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+    [...months].sort().reverse().map(m => {
+      const [y,mo] = m.split('-');
+      const label = MONTHS_TH[parseInt(mo)-1] + ' ' + (parseInt(y)+543);
+      return `<option value="${m}" ${m===current?'selected':''}>${label}</option>`;
+    }).join('');
+}
+
 function renderTraining() {
+  populateTrainingMonthFilter();
+  const monthFilter = document.getElementById('trainingMonthFilter')?.value || '';
   // แสดงทุกสถานะ เรียง pending ก่อน
   const trainings = requests
-    .filter(r=>r.type==='training')
+    .filter(r=>r.type==='training' && (monthFilter==='' || (r.dates||[]).some(d=>d&&d.startsWith(monthFilter))))
     .sort((a,b)=>{
       if(a.status==='pending'&&b.status!=='pending') return -1;
       if(a.status!=='pending'&&b.status==='pending') return 1;
@@ -2814,6 +2931,9 @@ function renderTraining() {
     const actionBtns = currentUser?.isAdmin && r.status==='pending' ? `
       <button class="action-btn btn-approve" onclick="updateStatus('${r.id}','approved');renderTraining();" style="font-size:12px;padding:6px 12px;">✓ อนุมัติ</button>
       <button class="action-btn btn-reject" onclick="updateStatus('${r.id}','rejected');renderTraining();" style="font-size:12px;padding:6px 12px;">✕ ปฏิเสธ</button>
+      <button class="action-btn" onclick="openCancelModal('${r.id}','edit')" style="background:var(--blue-pale);color:var(--blue);font-size:12px;padding:6px 12px;">✏️ แก้ไข</button>
+    ` : currentUser?.isAdmin ? `
+      <button class="action-btn" onclick="openCancelModal('${r.id}','edit')" style="background:var(--blue-pale);color:var(--blue);font-size:12px;padding:6px 12px;">✏️ แก้ไข</button>
     ` : '';
     const borderColor = r.status==='approved'?'var(--green)':r.status==='rejected'?'#EF4444':r.status==='cancelled'?'var(--primary)':'var(--border)';
     return `<div class="card" style="margin-bottom:10px;border-left:4px solid ${borderColor};padding:14px 18px;">
@@ -2835,8 +2955,25 @@ function renderTraining() {
 }
 
 // ===== MY REQUESTS =====
+function populateReqMonthFilter() {
+  const sel = document.getElementById('reqMonthFilter');
+  if (!sel) return;
+  const months = new Set();
+  requests.forEach(r => {
+    (r.dates||[]).forEach(d => { if (d) months.add(d.substring(0,7)); });
+  });
+  const current = sel.value;
+  sel.innerHTML = '<option value="">ทุกเดือน</option>' +
+    [...months].sort().reverse().map(m => {
+      const [y,mo] = m.split('-');
+      const label = MONTHS_TH[parseInt(mo)-1] + ' ' + (parseInt(y)+543);
+      return `<option value="${m}" ${m===current?'selected':''}>${label}</option>`;
+    }).join('');
+}
+
 function renderMyRequests() {
   if (!currentUser) return;
+  populateReqMonthFilter();
   const list = document.getElementById('myRequestsList');
 
   // match ชื่อ: รองรับชื่อสั้น, ชื่อเต็ม, staffId (ทั้ง local และ fromSheet)
@@ -2857,6 +2994,7 @@ function renderMyRequests() {
   const searchVal = (document.getElementById('reqSearchInput')?.value||'').trim().toLowerCase();
   const statusVal = document.getElementById('reqStatusFilter')?.value || '';
   const typeVal   = document.getElementById('reqTypeFilter')?.value || '';
+  const monthVal  = document.getElementById('reqMonthFilter')?.value || '';
 
   let myReqs = currentUser.isAdmin
     ? [...requests]
@@ -2867,6 +3005,7 @@ function renderMyRequests() {
     if (searchVal) myReqs = myReqs.filter(r => (r.staffName||'').toLowerCase().includes(searchVal));
     if (statusVal) myReqs = myReqs.filter(r => r.status === statusVal);
     if (typeVal)   myReqs = myReqs.filter(r => r.type === typeVal);
+    if (monthVal)  myReqs = myReqs.filter(r => (r.dates||[]).some(d=>d&&d.startsWith(monthVal)));
   }
   myReqs.sort((a,b)=>(b.submittedAt||b.id)-(a.submittedAt||a.id));
 
@@ -2947,6 +3086,7 @@ function renderMyRequests() {
             <button class="action-btn btn-reject"  onclick="updateStatus('${r.id}','rejected');renderMyRequests();" style="font-size:13px;padding:7px 14px;display:flex;align-items:center;gap:4px;">✕ ปฏิเสธ</button>
           ` : ''}
           ${canReschedule?`<button class="danger-btn btn-reschedule" onclick="openCancelModal('${r.id}','reschedule')">📅 เลื่อน</button>`:''}
+          ${canManage?`<button class="action-btn" onclick="openCancelModal('${r.id}','edit')" style="background:var(--blue-pale);color:var(--blue);font-size:12px;padding:5px 12px;">✏️ แก้ไข</button>`:''}
           ${canCancel?`<button class="danger-btn btn-cancel-req" onclick="openCancelModal('${r.id}','cancel')">❌ ยกเลิก</button>`:''}
         </div>
       </div>
@@ -3089,17 +3229,38 @@ function openCancelModal(reqId, mode) {
     document.getElementById('cancelModalTitle').textContent = '📅 เลื่อนวันหยุด';
     document.getElementById('rescheduleSection').style.display='block';
     document.getElementById('cancelSection').style.display='none';
+    document.getElementById('editSection').style.display='none';
     document.getElementById('confirmCancelBtn').style.display='none';
     document.getElementById('confirmRescheduleBtn').style.display='inline-flex';
+    document.getElementById('confirmEditBtn').style.display='none';
     rescheduleCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     renderRescheduleCal();
     renderRescheduleDates();
+  } else if (mode==='edit') {
+    document.getElementById('cancelModalTitle').textContent = '✏️ แก้ไขคำขอ';
+    document.getElementById('rescheduleSection').style.display='none';
+    document.getElementById('cancelSection').style.display='none';
+    document.getElementById('editSection').style.display='block';
+    document.getElementById('confirmCancelBtn').style.display='none';
+    document.getElementById('confirmRescheduleBtn').style.display='none';
+    document.getElementById('confirmEditBtn').style.display='inline-flex';
+    // โหลดค่าเดิม
+    document.getElementById('editType').value = req.type || 'leave';
+    document.getElementById('editTrainingPlace').value = req.trainingPlace || '';
+    document.getElementById('editNote').value = req.note || '';
+    toggleEditTrainingPlace();
+    editDates = [...(req.dates||[])];
+    editCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderEditCal();
+    renderEditDates();
   } else {
     document.getElementById('cancelModalTitle').textContent = '❌ ยกเลิกคำขอ';
     document.getElementById('rescheduleSection').style.display='none';
     document.getElementById('cancelSection').style.display='block';
+    document.getElementById('editSection').style.display='none';
     document.getElementById('confirmCancelBtn').style.display='inline-flex';
     document.getElementById('confirmRescheduleBtn').style.display='none';
+    document.getElementById('confirmEditBtn').style.display='none';
     document.getElementById('cancelNote').value='';
   }
   document.getElementById('cancelModal').classList.add('open');
@@ -3107,7 +3268,66 @@ function openCancelModal(reqId, mode) {
 
 function closeCancelModal() {
   document.getElementById('cancelModal').classList.remove('open');
-  cancelTargetId = null; rescheduleDates = [];
+  cancelTargetId = null; rescheduleDates = []; editDates = [];
+}
+
+let editDates = [];
+let editCalDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+function toggleEditTrainingPlace() {
+  const type = document.getElementById('editType').value;
+  document.getElementById('editTrainingPlaceGroup').style.display = type==='training'?'block':'none';
+}
+
+function changeEditMonth(dir) {
+  editCalDate.setMonth(editCalDate.getMonth()+dir);
+  renderEditCal();
+}
+
+function renderEditCal() {
+  const y=editCalDate.getFullYear(), m=editCalDate.getMonth();
+  document.getElementById('editMonthLabel').textContent=`${MONTHS_TH[m]} ${y+543}`;
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  let html='';
+  const dayNames=['อา','จ','อ','พ','พฤ','ศ','ส'];
+  dayNames.forEach(d=>{html+=`<div style="text-align:center;font-size:11px;font-weight:700;color:var(--primary);padding:4px 0;">${d}</div>`;});
+  for(let i=0;i<first;i++) html+='<div></div>';
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const sel=editDates.includes(ds);
+    html+=`<div onclick="toggleEditDate('${ds}')" style="text-align:center;padding:6px 2px;border-radius:6px;cursor:pointer;font-size:13px;${sel?'background:var(--blue);color:#fff;font-weight:700;':'hover:background:var(--bg);'}">${d}</div>`;
+  }
+  document.getElementById('editCalGrid').innerHTML=html;
+}
+
+function toggleEditDate(ds) {
+  const idx=editDates.indexOf(ds);
+  if(idx>=0) editDates.splice(idx,1); else editDates.push(ds);
+  editDates.sort();
+  renderEditCal();
+  renderEditDates();
+}
+
+function renderEditDates() {
+  const el=document.getElementById('editDatesDisplay');
+  if(!editDates.length){el.innerHTML='<span style="font-size:12px;color:var(--text-light);">ใช้วันที่เดิม</span>';return;}
+  el.innerHTML=editDates.map(d=>`<span class="date-chip" style="background:var(--blue-pale);color:var(--blue);">${formatDate(d)} <span onclick="toggleEditDate('${d}')" style="cursor:pointer;margin-left:4px;">✕</span></span>`).join('');
+}
+
+function confirmEdit() {
+  const req = requests.find(r=>String(r.id)===String(cancelTargetId));
+  if (!req) return;
+  req.type = document.getElementById('editType').value;
+  req.trainingPlace = req.type==='training' ? document.getElementById('editTrainingPlace').value : '';
+  req.note = document.getElementById('editNote').value;
+  if (editDates.length > 0) req.dates = [...editDates];
+  req.submittedAt = Date.now(); // อัพเดทเวลาบันทึกใหม่
+  closeCancelModal();
+  showToast('✅ แก้ไขคำขอเรียบร้อย');
+  renderDashboard(); renderCalendar(); renderMyRequests(); renderAdminTable(); renderTraining();
+  // บันทึกเพิ่มแถวใหม่ใน Sheet (เก็บประวัติการแก้ไข)
+  saveToGSheet('ADD', req);
 }
 
 function confirmCancel() {
@@ -3410,7 +3630,11 @@ async function fetchRequestsFromSheet(){
     }
 
     const grouped={};
-    json.data.forEach(row=>{
+    // เรียงแถวจากเก่าไปใหม่ก่อน group → แถวล่าสุดจะ overwrite ข้อมูลหลักเสมอ
+    const sortedRows = [...json.data].sort((a,b)=>
+      parseSubmittedAt(a.submittedAt||a.createdAt||'') - parseSubmittedAt(b.submittedAt||b.createdAt||'')
+    );
+    sortedRows.forEach(row=>{
       const id=String(row.id);
       // หา staffId จากชื่อใน sheet — รองรับทั้งชื่อสั้นและชื่อเต็ม
       const sheetName = (row.name||'').trim();
@@ -3420,23 +3644,35 @@ async function fetchRequestsFromSheet(){
         s.name.includes(sheetName)
       );
       const submittedRaw = row.submittedAt || row.createdAt || '';
-      // ใช้ ชื่อ+ประเภท+วันที่ขอ(นาที) เป็น key — unique ต่อ 1 คำขอ
-      // ใช้ id จาก Sheet เป็น key โดยตรง เพราะตอนนี้ id เป็น unique string แล้ว
+      const submittedTs = parseSubmittedAt(submittedRaw);
       const groupKey = id;
-      if(!grouped[groupKey]) grouped[groupKey]={
-        id,
-        staffId:        matchedStaff ? matchedStaff.id : null,
-        staffName:      sheetName,  // ← ใช้ชื่อจาก Sheet เสมอ เพื่อให้ nameMatch ทำงานได้
-        roleLabel:      matchedStaff ? matchedStaff.roleLabel : (row.roleLabel||''),
-        type:           typeLabelToKey(row.typeLabel),
-        dates:          [],
-        trainingPlace:  row.place||'',
-        note:           row.note||'',
-        status:         statusLabelToKey(row.status),
-        submittedAt:    parseSubmittedAt(submittedRaw),
-        submittedAtStr: submittedRaw,
-        fromSheet:      true
-      };
+      if(!grouped[groupKey]) {
+        grouped[groupKey]={
+          id,
+          staffId:        matchedStaff ? matchedStaff.id : null,
+          staffName:      sheetName,
+          roleLabel:      matchedStaff ? matchedStaff.roleLabel : (row.roleLabel||''),
+          type:           typeLabelToKey(row.typeLabel),
+          dates:          [],
+          trainingPlace:  row.place||'',
+          note:           row.note||'',
+          status:         statusLabelToKey(row.status),
+          submittedAt:    submittedTs,
+          submittedAtStr: submittedRaw,
+          fromSheet:      true,
+          _latestTs:      submittedTs
+        };
+      } else if (submittedTs > grouped[groupKey]._latestTs) {
+        // แถวใหม่กว่า → อัพเดทข้อมูลหลัก และ reset dates ใหม่
+        grouped[groupKey].type          = typeLabelToKey(row.typeLabel);
+        grouped[groupKey].trainingPlace = row.place||'';
+        grouped[groupKey].note          = row.note||'';
+        grouped[groupKey].status        = statusLabelToKey(row.status);
+        grouped[groupKey].submittedAt   = submittedTs;
+        grouped[groupKey].submittedAtStr= submittedRaw;
+        grouped[groupKey]._latestTs     = submittedTs;
+        grouped[groupKey].dates         = []; // reset วันที่ ใช้ชุดใหม่
+      }
       if(row.date){const nd=normalizeDate(row.date);if(nd&&!grouped[groupKey].dates.includes(nd))grouped[groupKey].dates.push(nd);}
     });
     sheetRequests=Object.values(grouped);
@@ -3444,7 +3680,7 @@ async function fetchRequestsFromSheet(){
     const sheetIds = new Set(sheetRequests.map(r=>String(r.id)));
     const localOnly = requests.filter(r=>!r.fromSheet && !sheetIds.has(String(r.id)));
     requests = [...sheetRequests, ...localOnly];
-    renderCalendar();renderDashboard();populateStatsMonthFilter();
+    renderCalendar();renderDashboard();populateStatsMonthFilter();populateTrainingMonthFilter();populateAdminMonthFilter();populateReqMonthFilter();
     updateSyncStatus('ok');
     hideLoadingPopup();
   }catch(err){console.warn('fetchRequestsFromSheet error:',err);updateSyncStatus('err');hideLoadingPopup();}
