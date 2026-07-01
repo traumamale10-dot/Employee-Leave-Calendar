@@ -3296,6 +3296,7 @@ function renderStats() {
     !searchVal || s.name.toLowerCase().includes(searchVal)
   ).map(s => {
     let reqs = requests.filter(r=>(
+      r.status!=='cancelled' &&
       (statusFilter===''||r.status===statusFilter) &&
       (typeFilter===''||r.type===typeFilter) && (
         r.staffId===s.id ||
@@ -3365,6 +3366,7 @@ function renderStats() {
   const trainingSection = document.getElementById('statsTrainingSection');
 
   let trainingReqs = requests.filter(r =>
+    r.status!=='cancelled' &&
     (r.type==='training_internal' || r.type==='training_external') &&
     (typeFilter==='' || r.type===typeFilter) &&
     (statusFilter==='' || r.status===statusFilter)
