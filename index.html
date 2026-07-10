@@ -2734,8 +2734,9 @@ async function exportCalendarImage() {
         }
         const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         const evts = (eventMap[ds]||[]).slice().sort((a,b)=>{
-          if(a.status==='pending'&&b.status!=='pending') return -1;
-          if(a.status!=='pending'&&b.status==='pending') return 1;
+          // พยาบาลขึ้นก่อน ผช./พนง. ตามหลัง แล้วเรียงตามเวลาที่ส่งคำขอ
+          const aN = isNurseRole(a), bN = isNurseRole(b);
+          if (aN !== bN) return aN ? -1 : 1;
           return (a.submittedAt||0)-(b.submittedAt||0);
         });
         const nurseCount = evts.filter(e=>isNurseRole(e)).length;
@@ -2823,19 +2824,32 @@ async function exportCalendarImage() {
     const footTxt = `สร้างเมื่อ ${now.getDate()} ${MONTHS_TH[now.getMonth()]} ${now.getFullYear()+543} เวลา ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น. · แถบล่างในช่องวัน: น้ำเงิน = พยาบาล (สูงสุด 3) · ทอง = ผช./พนง. (สูงสุด 3)`;
     ctx.fillText(footTxt, PAD, top + 30);
 
-    // ===== ดาวน์โหลด =====
+    // ===== บันทึกรูป: มือถือใช้ Share Sheet (บันทึกลงรูปภาพได้) / คอมพิวเตอร์ดาวน์โหลด =====
     const fileName = `ปฏิทินวันหยุด_${MONTHS_TH[m]}_${y+543}.png`;
-    canvas.toBlob(blob => {
-      if (!blob) { showToast('สร้างรูปไม่สำเร็จ', 'error'); return; }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
-      showToast('บันทึกรูปปฏิทินเรียบร้อย 📷');
-    }, 'image/png');
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    if (!blob) { showToast('สร้างรูปไม่สำเร็จ', 'error'); return; }
+
+    const file = new File([blob], fileName, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: fileName });
+        showToast('เลือก "บันทึกรูปภาพ" เพื่อเก็บลงเครื่อง 📷');
+        return;
+      } catch (shareErr) {
+        // ผู้ใช้กดยกเลิก share ไม่ต้องทำอะไรต่อ
+        if (shareErr && shareErr.name === 'AbortError') return;
+        // ถ้า share ล้มเหลวด้วยเหตุอื่น ให้ไปใช้วิธีดาวน์โหลดแทน
+      }
+    }
+    // Fallback: ดาวน์โหลดไฟล์ (เดสก์ท็อป / เบราว์เซอร์ที่ไม่รองรับ share)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showToast('บันทึกรูปปฏิทินเรียบร้อย 📷');
   } catch (err) {
     console.error(err);
     showToast('เกิดข้อผิดพลาดในการสร้างรูป', 'error');
