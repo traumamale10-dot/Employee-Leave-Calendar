@@ -505,7 +505,7 @@
 
   .cal-grid-header {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     background: #FFF5F5;
     border-bottom: 1px solid var(--border);
   }
@@ -521,19 +521,21 @@
 
   .cal-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     padding: 8px;
     gap: 3px;
   }
 
   .cal-cell {
     position: relative;
+    min-width: 0;
     min-height: 76px;
     border-radius: 10px;
     padding: 6px;
     cursor: pointer;
     transition: background 0.15s;
     border: 1.5px solid transparent;
+    overflow: hidden;
   }
 
   .cal-cell:hover { background: var(--bg); }
@@ -1194,9 +1196,18 @@
     .two-col, .three-col { grid-template-columns: 1fr; }
     .card { padding: 14px; overflow: hidden; }
     .data-table { min-width: 540px; }
-    .cal-cell { min-height: 48px; padding: 4px; }
-    .cal-date { font-size: 12px; }
-    .cal-event-dot { font-size: 9px; padding: 1px 3px; }
+    .cal-grid { padding: 4px; gap: 2px; }
+    .cal-cell { min-height: 58px; padding: 3px; border-radius: 7px; }
+    .cal-date { font-size: 12px; margin-bottom: 2px; }
+    .cal-cell.today .cal-date { width: 18px; height: 18px; font-size: 11px; }
+    .cal-event-dot { font-size: 9px; padding: 1px 3px; border-radius: 3px; }
+    .cal-events { gap: 1px; }
+    .cal-count-bar { bottom: 2px; left: 3px; right: 3px; gap: 1px; }
+    .count-pill { height: 2px; }
+    .cal-day-name { padding: 8px 2px; font-size: 11px; }
+    .cal-header { padding: 12px 14px; }
+    .cal-header h3 { font-size: 15px; }
+    .cal-quota-warn { top: 2px; right: 2px; font-size: 9px; }
     .modal-overlay { align-items: flex-end; padding: 0; }
     .modal { width: 100% !important; max-width: 100%; border-radius: 20px 20px 0 0; max-height: 92vh; padding: 20px 20px 30px; }
     .login-box { width: calc(100% - 32px); padding: 28px 20px; }
@@ -1208,8 +1219,8 @@
   @media (max-width: 480px) {
     .stat-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .stat-number { font-size: 22px; }
-    .cal-cell { min-height: 38px; }
-    .content { padding: 12px; padding-bottom: 80px; }
+    .cal-cell { min-height: 52px; }
+    .content { padding: 10px; padding-bottom: 80px; }
   }
 
   /* Promo banner style (like -50% off in Eatland) */
@@ -1510,9 +1521,9 @@
             <h3 id="calMonthLabel"></h3>
             <div id="calRealTimeClock" style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:2px;font-family:'Prompt',sans-serif;"></div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
             <button id="refreshBtn" onclick="refreshCalendar()" style="padding:6px 12px;border-radius:50px;border:none;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;font-size:13px;font-weight:600;" title="รีเฟรช">🔄 รีเฟรช</button>
-
+            <button id="exportCalBtn" onclick="exportCalendarImage()" style="padding:6px 12px;border-radius:50px;border:none;background:var(--accent);color:#1A1A2E;cursor:pointer;font-size:13px;font-weight:700;" title="บันทึกเป็นรูปภาพ">📷 บันทึกรูป</button>
           </div>
         </div>
         <div class="cal-grid-header">
@@ -2558,6 +2569,279 @@ function calEventGoPage(p) {
   window.calEventPage = p;
   renderCalendar();
   document.getElementById('calEventList').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ===== EXPORT CALENDAR AS IMAGE (แนวนอน 1 หน้า รายละเอียดครบ) =====
+const EXPORT_TYPE_COLORS = {
+  leave:             { bg:'#EAF0FB', fg:'#1E40AF' },
+  vacation:          { bg:'#EEF1FA', fg:'#6D28D9' },
+  training_internal: { bg:'#FDF4FF', fg:'#7E22CE' },
+  training_external: { bg:'#FFF7ED', fg:'#C2410C' },
+  birthday:          { bg:'#FFF1F2', fg:'#9F1239' }
+};
+
+function _rr(ctx, x, y, w, h, r) {
+  r = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y,   x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x,   y+h, r);
+  ctx.arcTo(x,   y+h, x,   y,   r);
+  ctx.arcTo(x,   y,   x+w, y,   r);
+  ctx.closePath();
+}
+
+function _fitText(ctx, text, maxW) {
+  if (ctx.measureText(text).width <= maxW) return text;
+  let t = text;
+  while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+  return t + '…';
+}
+
+async function exportCalendarImage() {
+  const btn = document.getElementById('exportCalBtn');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังสร้างรูป...'; }
+    try { await document.fonts.ready; } catch(e) {}
+
+    const y = calendarDate.getFullYear();
+    const m = calendarDate.getMonth();
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m+1, 0).getDate();
+    const today = new Date();
+
+    // รวมเหตุการณ์ต่อวัน (ตรรกะเดียวกับ renderCalendar)
+    const eventMap = {};
+    requests.forEach(r => {
+      if (r.status === 'rejected' || r.status === 'cancelled') return;
+      r.dates && r.dates.forEach(d => {
+        if (!d.startsWith(`${y}-${String(m+1).padStart(2,'0')}`)) return;
+        (eventMap[d] = eventMap[d] || []).push(r);
+      });
+    });
+
+    function dispName(r) {
+      if (r.fromSheet) return r.staffName || '?';
+      const s = getStaff(r.staffId);
+      return s ? s.name : 'ไม่ทราบ';
+    }
+
+    // จัดสัปดาห์
+    const weeks = [];
+    let week = new Array(first).fill(null);
+    for (let d = 1; d <= days; d++) {
+      week.push(d);
+      if (week.length === 7) { weeks.push(week); week = []; }
+    }
+    if (week.length) { while (week.length < 7) week.push(null); weeks.push(week); }
+
+    // ขนาดหน้าแนวนอน
+    const W = 2480, PAD = 56;
+    const headerH = 170, dayNameH = 64, footerH = 64;
+    const dateRowH = 52, evH = 46, evGap = 6, cellPadY = 10, quotaBarH = 18;
+    const contentW = W - PAD*2;
+    const colW = contentW / 7;
+    const gap = 8;
+
+    const weekHeights = weeks.map(wk => {
+      let maxEv = 0;
+      wk.forEach(d => {
+        if (!d) return;
+        const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        maxEv = Math.max(maxEv, (eventMap[ds]||[]).length);
+      });
+      return Math.max(150, dateRowH + maxEv*(evH+evGap) + quotaBarH + cellPadY*2);
+    });
+
+    const H = PAD + headerH + 16 + dayNameH + weekHeights.reduce((a,b)=>a+b+gap, 0) + footerH + PAD;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    const F = "'Sarabun','Prompt',sans-serif";
+    const FP = "'Prompt','Sarabun',sans-serif";
+
+    // พื้นหลัง
+    ctx.fillStyle = '#F4F6FB';
+    ctx.fillRect(0, 0, W, H);
+
+    // ===== ส่วนหัว =====
+    _rr(ctx, PAD, PAD, contentW, headerH, 24);
+    const grad = ctx.createLinearGradient(PAD, PAD, PAD+contentW, PAD+headerH);
+    grad.addColorStop(0, '#1E3A8A'); grad.addColorStop(1, '#2C4FA8');
+    ctx.fillStyle = grad; ctx.fill();
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `700 52px ${FP}`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`📅 ปฏิทินวันหยุด · ${MONTHS_TH[m]} ${y+543}`, PAD+44, PAD+62);
+    ctx.font = `400 30px ${F}`;
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText('ระบบจัดการวันหยุด หอผู้ป่วย ศอช. ชั้น 10', PAD+44, PAD+118);
+
+    // คำอธิบายสัญลักษณ์ (มุมขวาของหัว)
+    const legend = [
+      ...Object.keys(TYPE_LABELS).map(t => ({ label:TYPE_LABELS[t], c:EXPORT_TYPE_COLORS[t] })),
+    ];
+    ctx.font = `600 26px ${F}`;
+    let lx = PAD + contentW - 44;
+    // วาดจากขวาไปซ้าย แถวบน
+    const chipH = 44;
+    let items = legend.map(l => ({...l, w: ctx.measureText(l.label).width + 66}));
+    let totalW = items.reduce((a,b)=>a+b.w+14, 0);
+    lx = PAD + contentW - 44 - totalW;
+    let ly = PAD + 36;
+    items.forEach(it => {
+      _rr(ctx, lx, ly, it.w, chipH, 22);
+      ctx.fillStyle = it.c.bg; ctx.fill();
+      ctx.strokeStyle = it.c.fg; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = it.c.fg;
+      ctx.beginPath(); ctx.arc(lx+26, ly+chipH/2, 8, 0, Math.PI*2); ctx.fill();
+      ctx.fillText(it.label, lx+44, ly+chipH/2+1);
+      lx += it.w + 14;
+    });
+    // แถวล่าง: สถานะ
+    ctx.font = `500 26px ${F}`;
+    const statusNote = '🟩 อนุมัติแล้ว   🟨 รออนุมัติ   🟥 กรอบแดง = เกินโควตา (พยาบาล >3 หรือ ผช./พนง. >3)';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    const snW = ctx.measureText(statusNote).width;
+    ctx.fillText(statusNote, PAD + contentW - 44 - snW, PAD + 122);
+
+    // ===== หัวคอลัมน์วัน =====
+    const dayNames = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+    let top = PAD + headerH + 16;
+    _rr(ctx, PAD, top, contentW, dayNameH, 16);
+    ctx.fillStyle = '#FFF5F5'; ctx.fill();
+    ctx.strokeStyle = '#DDE3F0'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.font = `700 30px ${FP}`;
+    ctx.textAlign = 'center';
+    dayNames.forEach((dn, i) => {
+      ctx.fillStyle = (i===0 || i===6) ? '#B5651D' : '#1E3A8A';
+      ctx.fillText(dn, PAD + colW*i + colW/2, top + dayNameH/2 + 1);
+    });
+    ctx.textAlign = 'left';
+    top += dayNameH + gap;
+
+    // ===== ตารางสัปดาห์ =====
+    weeks.forEach((wk, wi) => {
+      const rowH = weekHeights[wi];
+      wk.forEach((d, ci) => {
+        const cx = PAD + colW*ci + 3, cw = colW - 6;
+        if (!d) {
+          _rr(ctx, cx, top, cw, rowH, 14);
+          ctx.fillStyle = '#EFF2F9'; ctx.fill();
+          return;
+        }
+        const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const evts = (eventMap[ds]||[]).slice().sort((a,b)=>{
+          if(a.status==='pending'&&b.status!=='pending') return -1;
+          if(a.status!=='pending'&&b.status==='pending') return 1;
+          return (a.submittedAt||0)-(b.submittedAt||0);
+        });
+        const nurseCount = evts.filter(e=>isNurseRole(e)).length;
+        const otherCount = evts.length - nurseCount;
+        const isOverQuota = nurseCount>3 || otherCount>3;
+        const isQuotaFull = !isOverQuota && (nurseCount===3 || otherCount===3);
+        const isToday = today.getDate()===d && today.getMonth()===m && today.getFullYear()===y;
+
+        // กล่องวัน
+        _rr(ctx, cx, top, cw, rowH, 14);
+        ctx.fillStyle = isOverQuota ? '#FDF0F0' : (isToday ? '#EAF0FB' : '#FFFFFF');
+        ctx.fill();
+        ctx.strokeStyle = isOverQuota ? '#DC2626' : (isQuotaFull||isToday ? '#1E3A8A' : '#DDE3F0');
+        ctx.lineWidth = (isOverQuota || isQuotaFull || isToday) ? 3 : 1.5;
+        ctx.stroke();
+
+        // เลขวันที่
+        ctx.font = `700 34px ${FP}`;
+        if (isToday) {
+          ctx.fillStyle = '#1E3A8A';
+          ctx.beginPath(); ctx.arc(cx+34, top+30, 24, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#FFFFFF';
+          ctx.textAlign = 'center';
+          ctx.fillText(String(d), cx+34, top+32);
+          ctx.textAlign = 'left';
+        } else {
+          ctx.fillStyle = isOverQuota ? '#DC2626' : '#0F1B33';
+          ctx.fillText(String(d), cx+16, top+32);
+        }
+        // จำนวนคน + เตือนโควตา
+        if (evts.length) {
+          ctx.font = `600 24px ${F}`;
+          ctx.fillStyle = isOverQuota ? '#DC2626' : '#8190AE';
+          const cntTxt = (isOverQuota ? '⚠️ ' : '') + `${evts.length} คน`;
+          ctx.textAlign = 'right';
+          ctx.fillText(cntTxt, cx+cw-14, top+30);
+          ctx.textAlign = 'left';
+        }
+
+        // รายการขอหยุด (ครบทุกคน ไม่ตัด)
+        let ey = top + dateRowH + cellPadY;
+        evts.forEach(e => {
+          const c = EXPORT_TYPE_COLORS[e.type] || EXPORT_TYPE_COLORS.leave;
+          _rr(ctx, cx+10, ey, cw-20, evH, 10);
+          ctx.fillStyle = c.bg; ctx.fill();
+          if (e.status === 'pending') {
+            ctx.save();
+            ctx.setLineDash([8,5]);
+            ctx.strokeStyle = '#C9A227'; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.restore();
+          }
+          // แถบสถานะซ้าย
+          ctx.fillStyle = e.status==='pending' ? '#C9A227' : '#1F7A5C';
+          _rr(ctx, cx+10, ey, 8, evH, 4); ctx.fill();
+          // ข้อความ: ชื่อ · ประเภท
+          ctx.font = `600 26px ${F}`;
+          ctx.fillStyle = c.fg;
+          const label = `${dispName(e)} · ${TYPE_LABELS[e.type]||e.type}${e.status==='pending'?' (รอ)':''}`;
+          ctx.fillText(_fitText(ctx, label, cw-46), cx+28, ey+evH/2+1);
+          ey += evH + evGap;
+        });
+
+        // แถบโควตา (พยาบาล 4 ช่อง / อื่นๆ 3 ช่อง)
+        if (evts.length) {
+          const pillTotal = 7, pillGap = 4;
+          const pw = (cw - 28 - pillGap*(pillTotal-1)) / pillTotal;
+          let px = cx + 14, py = top + rowH - quotaBarH;
+          for (let i = 0; i < 4; i++) {
+            ctx.fillStyle = i < nurseCount ? '#1E3A8A' : '#DDE3F0';
+            _rr(ctx, px, py, pw, 8, 4); ctx.fill(); px += pw + pillGap;
+          }
+          for (let i = 0; i < 3; i++) {
+            ctx.fillStyle = i < otherCount ? '#C9A227' : '#DDE3F0';
+            _rr(ctx, px, py, pw, 8, 4); ctx.fill(); px += pw + pillGap;
+          }
+        }
+      });
+      top += rowH + gap;
+    });
+
+    // ===== ท้ายหน้า =====
+    ctx.font = `400 26px ${F}`;
+    ctx.fillStyle = '#8190AE';
+    const now = new Date();
+    const footTxt = `สร้างเมื่อ ${now.getDate()} ${MONTHS_TH[now.getMonth()]} ${now.getFullYear()+543} เวลา ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น. · แถบล่างในช่องวัน: น้ำเงิน = พยาบาล (สูงสุด 3) · ทอง = ผช./พนง. (สูงสุด 3)`;
+    ctx.fillText(footTxt, PAD, top + 30);
+
+    // ===== ดาวน์โหลด =====
+    const fileName = `ปฏิทินวันหยุด_${MONTHS_TH[m]}_${y+543}.png`;
+    canvas.toBlob(blob => {
+      if (!blob) { showToast('สร้างรูปไม่สำเร็จ', 'error'); return; }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      showToast('บันทึกรูปปฏิทินเรียบร้อย 📷');
+    }, 'image/png');
+  } catch (err) {
+    console.error(err);
+    showToast('เกิดข้อผิดพลาดในการสร้างรูป', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📷 บันทึกรูป'; }
+  }
 }
 
 function calDayClick(dateStr) {
