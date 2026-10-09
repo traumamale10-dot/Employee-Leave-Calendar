@@ -2636,7 +2636,9 @@ async function buildLeaveSheetCanvas() {
       if (!cur || (cur.status==='pending' && r.status==='approved')) row.cells[day] = { type:r.type, status:r.status };
     });
   });
-  const nurses = rows.filter(r => r.isNurse), others = rows.filter(r => !r.isNurse);
+  // แสดงเฉพาะคนที่มีคำขอในเดือนนี้
+  const activeRows = rows.filter(r => Object.keys(r.cells).length > 0);
+  const nurses = activeRows.filter(r => r.isNurse), others = activeRows.filter(r => !r.isNurse);
   const ordered = [...nurses, ...others];
   const nurseCnt = [], otherCnt = [];
   for (let d=1; d<=days; d++) {
@@ -2691,7 +2693,8 @@ async function buildLeaveSheetCanvas() {
   // ---- ตาราง ----
   const tX = PAD, tY = PAD + headerH + legendH + gapY;
   const dX = tX + nameW + roleW, totX = dX + dayW*days, tR = totX + totalW;
-  const bodyY = tY + dayHeadH, sumY = bodyY + rowH*ordered.length, tEnd = sumY + sumH*2;
+  const emptyH = ordered.length ? 0 : 80;
+  const bodyY = tY + dayHeadH, sumY = bodyY + rowH*ordered.length + emptyH, tEnd = sumY + sumH*2;
   const isWeekend = d => { const w = new Date(y, m, d).getDay(); return w===0 || w===6; };
 
   ordered.forEach((_, i) => { if (i % 2) { ctx.fillStyle = '#F7F9FD'; ctx.fillRect(tX, bodyY+i*rowH, tR-tX, rowH); } });
@@ -2717,7 +2720,7 @@ async function buildLeaveSheetCanvas() {
     const ry = bodyY + i*rowH, my = ry + rowH/2 + 1;
     ctx.textAlign = 'left'; ctx.fillStyle = '#0F1B33'; ctx.font = `600 ${fs}px ${F}`;
     ctx.fillText(_fitText(ctx, `${i+1}. ${row.name}`, nameW-24), tX+14, my);
-    ctx.fillStyle = '#44546E'; ctx.font = `400 ${Math.round(fs*0.85)}px ${F}`;
+    ctx.fillStyle = '#44546E'; ctx.font = `400 ${Math.min(22, Math.round(fs*0.85))}px ${F}`;
     ctx.fillText(_fitText(ctx, row.role, roleW-20), tX+nameW+10, my);
     let total = 0;
     for (let d=1; d<=days; d++) {
@@ -2737,6 +2740,11 @@ async function buildLeaveSheetCanvas() {
     ctx.textAlign = 'center'; ctx.fillStyle = total ? '#0F1B33' : '#B6C0D6'; ctx.font = `700 ${fs}px ${FP}`;
     ctx.fillText(total ? String(total) : '-', totX+totalW/2, my);
   });
+
+  if (!ordered.length) {
+    ctx.textAlign = 'center'; ctx.fillStyle = '#8190AE'; ctx.font = `500 30px ${F}`;
+    ctx.fillText('ไม่มีผู้ขอวันหยุดในเดือนนี้', (tX+tR)/2, bodyY + emptyH/2);
+  }
 
   // แถวสรุปรายวัน
   [['รวมพยาบาลหยุด', nurseCnt], ['รวม ผช./พนง. หยุด', otherCnt]].forEach(([label, arr], k) => {
